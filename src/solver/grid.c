@@ -29,8 +29,7 @@ Grid load_grid(char *file_name) {
             char *ptr = realloc(array, array_length);
             if (ptr == NULL) {
                 free(array);
-                errx(1, "Failed to reallocate memory for the grid array while "
-                        "building the first line.");
+                errx(1, "Failed to reallocate memory for the grid array.");
             }
             array = ptr;
         }
@@ -42,8 +41,8 @@ Grid load_grid(char *file_name) {
                 width++;
             }
             *(array + offset) = c;
+            offset++;
         }
-        offset++;
     }
 
     fclose(fp);
@@ -106,3 +105,12 @@ char get_char(Grid *grid, long height, long width) {
 /// free the pointer to the grid itselft!
 /// @param grid The grid to clear the data of.
 void free_grid(Grid *grid) { free(grid->array); }
+
+void print_grid(Grid *grid) {
+    for (size_t h = 0; h < grid->height; h++) {
+        for (size_t w = 0; w < grid->width; w++) {
+            printf("%c ", *(grid->array + h * grid->width + w));
+        }
+        printf("\n");
+    }
+}

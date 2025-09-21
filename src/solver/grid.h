@@ -22,4 +22,6 @@ char get_char(Grid *grid, long height, long width);
 
 void free_grid(Grid *grid);
 
+void print_grid(Grid *grid);
+
 #endif
