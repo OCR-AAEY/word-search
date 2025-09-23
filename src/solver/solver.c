@@ -1,6 +1,6 @@
 #include <err.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "grid.h"
 #include "solver.h"
@@ -21,6 +21,15 @@ int main(int argc, char **argv) {
     // Extract arguments.
     char *file_name = *(argv + 1);
     char *word = *(argv + 2);
+
+    // Making the word uppercase.
+    size_t i = 0;
+    while (*(word + i) != '\0') {
+        if ('a' <= *(word + i) && *(word + i) <= 'z') {
+            *(word + i) = *(word + i) - 'a' + 'A';
+        }
+        i++;
+    }
 
     // Loading the grid.
     Grid grid = load_grid(file_name);
