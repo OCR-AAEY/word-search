@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "../grid.h"
@@ -29,47 +30,31 @@ int naive_solve(Grid *grid, char *word, int *start_height, int *start_width,
         *(reversed_word + i) = *(word + word_length - i - 1);
     }
 
-    // Traversal of the grid.
-    for (size_t h = 0; h < height(grid) - word_length; h++) {
-        for (size_t w = 0; w < width(grid) - word_length; w++) {
-            if (check_horizontal(grid, word, h, w)) {
+    // Check horizontally.
+    for (size_t h = 0; h < height(grid); h++) {
+        for (size_t w = 0; w < width(grid) - word_length + 1; w++) {
+            // Check forward.
+            size_t i = 0;
+            while (*(word + i) != '\0' &&
+                   *(word + i) == get_char(grid, h, w + i)) {
+                i++;
+            }
+            if (*(word + i) == '\0') {
                 *start_height = h;
                 *start_width = w;
                 *end_height = h;
-                *end_width = w + word_length;
+                *end_width = w + word_length - 1;
                 free(reversed_word);
                 return 1;
-            } else if (check_horizontal(grid, reversed_word, h, w)) {
+            }
+            // Check backward.
+            i = 0;
+            while (*(reversed_word + i) != '\0' &&
+                   *(reversed_word + i) == get_char(grid, h, w + i))
+                i++;
+            if (*(reversed_word + i) == '\0') {
                 *start_height = h;
-                *start_width = w + word_length;
-                *end_height = h;
-                *end_width = w;
-                free(reversed_word);
-                return 1;
-            } else if (check_vertical(grid, word, h, w)) {
-                *start_height = h;
-                *start_width = w;
-                *end_height = h + word_length;
-                *end_width = w;
-                free(reversed_word);
-                return 1;
-            } else if (check_vertical(grid, reversed_word, h, w)) {
-                *start_height = h + word_length;
-                *start_width = w;
-                *end_height = h;
-                *end_width = w;
-                free(reversed_word);
-                return 1;
-            } else if (check_diagonal(grid, word, h, w)) {
-                *start_height = h;
-                *start_width = w;
-                *end_height = h + word_length;
-                *end_width = w + word_length;
-                free(reversed_word);
-                return 1;
-            } else if (check_diagonal(grid, reversed_word, h, w)) {
-                *start_height = h + word_length;
-                *start_width = w + word_length;
+                *start_width = w + word_length - 1;
                 *end_height = h;
                 *end_width = w;
                 free(reversed_word);
@@ -78,56 +63,75 @@ int naive_solve(Grid *grid, char *word, int *start_height, int *start_width,
         }
     }
 
+    // Check vertically.
+    for (size_t h = 0; h < height(grid) - word_length + 1; h++) {
+        for (size_t w = 0; w < width(grid); w++) {
+            // Check forward.
+            size_t i = 0;
+            while (*(word + i) != '\0' &&
+                   *(word + i) == get_char(grid, h + i, w))
+                i++;
+            if (*(word + i) == '\0') {
+                *start_height = h;
+                *start_width = w;
+                *end_height = h + word_length - 1;
+                *end_width = w;
+                free(reversed_word);
+                return 1;
+            }
+            // Check backward.
+            i = 0;
+            while (*(reversed_word + i) != '\0' &&
+                   *(reversed_word + i) == get_char(grid, h + i, w))
+                i++;
+            if (*(reversed_word + i) == '\0') {
+                *start_height = h + word_length - 1;
+                *start_width = w;
+                *end_height = h;
+                *end_width = w;
+                free(reversed_word);
+                return 1;
+            }
+        }
+    }
+
+    // Check diagonally.
+    for (size_t h = 0; h < height(grid) - word_length + 1; h++) {
+        for (size_t w = 0; w < width(grid) - word_length + 1; w++) {
+            // Check forward.
+            size_t i = 0;
+            while (*(word + i) != '\0' &&
+                   *(word + i) == get_char(grid, h + i, w))
+                i++;
+            if (*(word + i) == '\0') {
+                *start_height = h;
+                *start_width = w;
+                *end_height = h + word_length - 1;
+                *end_width = w + word_length - 1;
+                free(reversed_word);
+                return 1;
+            }
+            // Check backward.
+            i = 0;
+            while (*(reversed_word + i) != '\0' &&
+                   *(reversed_word + i) == get_char(grid, h + i, w))
+                i++;
+            if (*(reversed_word + i) == '\0') {
+                *start_height = h + word_length - 1;
+                *start_width = w + word_length - 1;
+                *end_height = h;
+                *end_width = w;
+                free(reversed_word);
+                return 1;
+            }
+        }
+    }
+
+    // The word has not been found.
     *start_height = -1;
     *start_width = -1;
     *end_height = -1;
     *end_width = -1;
-
     free(reversed_word);
     return 0;
-}
-
-/// @brief Checks whether the given word is in the given grid at the given
-/// position in the horizonal way.
-/// @param grid The grid to search in.
-/// @param word The word to search.
-/// @param height The height position where to begin the search.
-/// @param width The width position where to begin the search.
-/// @return Returns 1 if the word has been matched, 0 otherwise.
-int check_horizontal(Grid *grid, char *word, int height, int width) {
-    size_t i = 0;
-    while (*(word + i) != '\0' &&
-           *(word + i) == get_char(grid, height, width + i))
-        i++;
-    return *(word + i) == '\0';
-}
-
-/// @brief Checks whether the given word is in the given grid at the given
-/// position in the vertical way.
-/// @param grid The grid to search in.
-/// @param word The word to search.
-/// @param height The height position where to begin the search.
-/// @param width The width position where to begin the search.
-/// @return Returns 1 if the word has been matched, 0 otherwise.
-int check_vertical(Grid *grid, char *word, int height, int width) {
-    size_t i = 0;
-    while (*(word + i) != '\0' &&
-           *(word + i) == get_char(grid, height + i, width))
-        i++;
-    return *(word + i) == '\0';
-}
-
-/// @brief Checks whether the given word is in the given grid at the given
-/// position in the diagonal way.
-/// @param grid The grid to search in.
-/// @param word The word to search.
-/// @param height The height position where to begin the search.
-/// @param width The width position where to begin the search.
-/// @return Returns 1 if the word has been matched, 0 otherwise.
-int check_diagonal(Grid *grid, char *word, int height, int width) {
-    size_t i = 0;
-    while (*(word + i) != '\0' &&
-           *(word + i) == get_char(grid, height + i, width + i))
-        i++;
-    return *(word + i) == '\0';
 }
