@@ -14,9 +14,9 @@ typedef struct {
 
 Grid load_grid(char *file_name);
 
-size_t height(Grid *grid);
+size_t grid_height(Grid *grid);
 
-size_t width(Grid *grid);
+size_t grid_width(Grid *grid);
 
 char get_char(Grid *grid, long height, long width);
 

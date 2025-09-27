@@ -56,12 +56,12 @@ Grid load_grid(char *file_name) {
 /// @brief Returns the height of the given Grid struct.
 /// @param grid The struct of the sought height.
 /// @return The height of the given Grid struct.
-size_t height(Grid *grid) { return grid->height; }
+size_t grid_height(Grid *grid) { return grid->height; }
 
 /// @brief Returns the width of the given Grid struct.
 /// @param grid The struct of the sought width.
 /// @return The width of the given Grid struct.
-size_t width(Grid *grid) { return grid->width; }
+size_t grid_width(Grid *grid) { return grid->width; }
 
 /// @brief Returns the char at the height height and the width width of the
 /// given grid. If an error occurs (due to invalid height and width values for

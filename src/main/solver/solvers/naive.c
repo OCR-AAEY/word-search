@@ -31,8 +31,8 @@ int naive_solve(Grid *grid, char *word, int *start_height, int *start_width,
     }
 
     // Check horizontally.
-    for (size_t h = 0; h < height(grid); h++) {
-        for (size_t w = 0; w < width(grid) - word_length + 1; w++) {
+    for (size_t h = 0; h < grid_height(grid); h++) {
+        for (size_t w = 0; w < grid_width(grid) - word_length + 1; w++) {
             // Check forward.
             size_t i = 0;
             while (*(word + i) != '\0' &&
@@ -64,8 +64,8 @@ int naive_solve(Grid *grid, char *word, int *start_height, int *start_width,
     }
 
     // Check vertically.
-    for (size_t h = 0; h < height(grid) - word_length + 1; h++) {
-        for (size_t w = 0; w < width(grid); w++) {
+    for (size_t h = 0; h < grid_height(grid) - word_length + 1; h++) {
+        for (size_t w = 0; w < grid_width(grid); w++) {
             // Check forward.
             size_t i = 0;
             while (*(word + i) != '\0' &&
@@ -96,8 +96,8 @@ int naive_solve(Grid *grid, char *word, int *start_height, int *start_width,
     }
 
     // Check diagonally.
-    for (size_t h = 0; h < height(grid) - word_length + 1; h++) {
-        for (size_t w = 0; w < width(grid) - word_length + 1; w++) {
+    for (size_t h = 0; h < grid_height(grid) - word_length + 1; h++) {
+        for (size_t w = 0; w < grid_width(grid) - word_length + 1; w++) {
             // Check forward.
             size_t i = 0;
             while (*(word + i) != '\0' &&
