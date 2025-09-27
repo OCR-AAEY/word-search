@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../grid.h"
+#include "grid.h"
 #include "naive.h"
 
 /// @brief Solve a word search problem using a naive algorithm (not optimized).

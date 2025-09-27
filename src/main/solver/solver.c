@@ -4,7 +4,7 @@
 
 #include "grid.h"
 #include "solver.h"
-#include "solvers/naive.h"
+#include "naive_solver.h"
 
 int main(int argc, char **argv) {
     if (argc < 2) {
