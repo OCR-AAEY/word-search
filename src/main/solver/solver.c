@@ -3,8 +3,10 @@
 #include <stdlib.h>
 
 #include "grid.h"
-#include "solver.h"
 #include "naive_solver.h"
+#include "solver.h"
+
+#ifndef UNIT_TEST
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -56,3 +58,5 @@ void print_result(int start_height, int start_width, int end_height,
                end_height);
     }
 }
+
+#endif
