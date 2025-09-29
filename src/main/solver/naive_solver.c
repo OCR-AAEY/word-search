@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "grid.h"
-#include "naive.h"
+#include "naive_solver.h"
 
 /// @brief Solve a word search problem using a naive algorithm (not optimized).
 /// @param grid The grid to solve.
