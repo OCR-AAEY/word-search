@@ -17,10 +17,10 @@ jobs:
       - name: Check format
         shell: bash
         run: |
-          SOURCE_FILES="$(find . -type f \( -name '*.c' -o -name '*.h' \))"
+          SRC_FILES="$(find . -type f \( -name '*.c' -o -name '*.h' \))"
           BAD_FILES=""
 
-          for f in $SOURCE_FILES; do
+          for f in $SRC_FILES; do
             if ! clang-format --dry-run --Werror "$f"; then
               BAD_FILES="$BAD_FILES$f\n"
             fi
