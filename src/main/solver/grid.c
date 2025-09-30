@@ -106,7 +106,7 @@ Grid *load_grid(char *file_name) {
 /// @brief Returns the content of the given Grid struct.
 /// @param[in] grid The struct to get the content of.
 /// @return The content of the given Grid struct as an char array.
-char* grid_content(Grid* grid) { return grid->content; }
+const char* grid_content(Grid* grid) { return (const char *)grid->content; }
 
 /// @brief Returns the height of the given Grid struct.
 /// @param[in] grid The struct of the sought height.
