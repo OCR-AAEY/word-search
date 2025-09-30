@@ -90,13 +90,13 @@ for (int i =0 ; i<total;i++)
 void prerender(const char* filename,char* file,int po )
 {
 SDL_Init(SDL_INIT_VIDEO);
-printf("deb\n");	
+//printf("deb\n");	
 SDL_Surface * surf
  =	IMG_Load(filename);
 
-printf("file\n");
+//printf("file\n");
 float avgpixel[3] = {0.0f, 0.0f, 0.0f};
-printf("loaded\n");
+//printf("loaded\n");
  
 
 int height = surf->h;
@@ -123,7 +123,7 @@ IMG_Quit();
 SDL_Quit();
 }
 
-
+/*
 int main()
 {
 prerender("l2.png","l.bmp",0);
@@ -137,4 +137,4 @@ prerender("pot.png","pot.bmp",0);
 
 
 return 0; 
-}
+}*/
