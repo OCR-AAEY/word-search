@@ -5,15 +5,15 @@
 #include "naive_solver.h"
 
 /// @brief Solve a word search problem using a naive algorithm (not optimized).
-/// @param grid The grid to solve.
-/// @param word The word to search in the grid.
-/// @param start_height The height of the start point of the word if it is
+/// @param[in] grid The grid to solve.
+/// @param[in] word The word to search in the grid.
+/// @param[out] start_height The height of the start point of the word if it is
 /// found. Otherwise set to -1.
-/// @param start_width The width of the start point of the word if it is found.
+/// @param[out] start_width The width of the start point of the word if it is found.
 /// Otherwise set to -1.
-/// @param end_height The height of the end point of the word if it is found.
+/// @param[out] end_height The height of the end point of the word if it is found.
 /// Otherwise set to -1.
-/// @param end_width The width of the end point of the word if it is found.
+/// @param[out] end_width The width of the end point of the word if it is found.
 /// Otherwise set to -1.
 /// @return Returns 1 if the sought word has been found, 0 otherwise.
 int naive_solve(Grid *grid, char *word, int *start_height, int *start_width,

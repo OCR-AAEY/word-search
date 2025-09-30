@@ -104,27 +104,27 @@ Grid *load_grid(char *file_name) {
 }
 
 /// @brief Returns the content of the given Grid struct.
-/// @param grid The struct to get the content of.
+/// @param[in] grid The struct to get the content of.
 /// @return The content of the given Grid struct as an char array.
 char* grid_content(Grid* grid) { return grid->content; }
 
 /// @brief Returns the height of the given Grid struct.
-/// @param grid The struct of the sought height.
+/// @param[in] grid The struct of the sought height.
 /// @return The height of the given Grid struct.
 size_t grid_height(Grid *grid) { return grid->height; }
 
 /// @brief Returns the width of the given Grid struct.
-/// @param grid The struct of the sought width.
+/// @param[in] grid The struct of the sought width.
 /// @return The width of the given Grid struct.
 size_t grid_width(Grid *grid) { return grid->width; }
 
 /// @brief Returns the char at the height `height` and the width `width` of the
 /// given grid. If an error occurs (due to invalid height and width values for
 /// instance), exits the program.
-/// @param grid
-/// @param height The height position (index of the row) from the top. Supports
+/// @param[in] grid
+/// @param[in] height The height position (index of the row) from the top. Supports
 /// negative indexes.
-/// @param width The width position (index of the column) from the left.
+/// @param[in] width The width position (index of the column) from the left.
 /// Supports negative indexes.
 /// @return A char located at the given position.
 /// @throw Throws if at least one of height and width are outside the bounds of the grid.
@@ -151,14 +151,14 @@ char get_char(Grid *grid, size_t height, size_t width) {
 }
 
 /// @brief Frees the data of the given grid as well as the given Grid pointer itselft.
-/// @param grid The grid to free.
+/// @param[in] grid The grid to free.
 void free_grid(Grid *grid) { 
     free(grid->content);
     free(grid);
  }
 
 /// @brief Prints the grid in the standard output.
-/// @param grid The pointer to the grid to print.
+/// @param[in] grid The pointer to the grid to print.
 void print_grid(Grid *grid) {
     for (size_t h = 0; h < grid->height; h++) {
         for (size_t w = 0; w < grid->width; w++) {
