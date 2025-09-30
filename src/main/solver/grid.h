@@ -5,7 +5,7 @@ typedef struct Grid Grid;
 
 Grid* load_grid(char *file_name);
 
-char* grid_content(Grid* grid);
+const char* grid_content(Grid* grid);
 
 size_t grid_height(Grid *grid);
 
