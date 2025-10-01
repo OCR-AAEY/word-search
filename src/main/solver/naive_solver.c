@@ -6,7 +6,8 @@
 
 /// @brief Solve a word search problem using a naive algorithm (not optimized).
 /// @param[in] grid The grid to solve.
-/// @param[in] word The word to search in the grid.
+/// @param[in] word The word to search in the grid. Note that it has to be upper
+/// case.
 /// @param[out] start_height The height of the start point of the word if it is
 /// found. Otherwise set to -1.
 /// @param[out] start_width The width of the start point of the word if it is found.
@@ -29,6 +30,7 @@ int naive_solve(Grid *grid, char *word, int *start_height, int *start_width,
     for (size_t i = 0; i < word_length; i++) {
         *(reversed_word + i) = *(word + word_length - i - 1);
     }
+    *(reversed_word + word_length - 1) = '\0';
 
     // Check horizontally.
     for (size_t h = 0; h < grid_height(grid); h++) {
@@ -50,8 +52,9 @@ int naive_solve(Grid *grid, char *word, int *start_height, int *start_width,
             // Check backward.
             i = 0;
             while (*(reversed_word + i) != '\0' &&
-                   *(reversed_word + i) == get_char(grid, h, w + i))
+                   *(reversed_word + i) == get_char(grid, h, w + i)) {
                 i++;
+            }
             if (*(reversed_word + i) == '\0') {
                 *start_height = h;
                 *start_width = w + word_length - 1;
@@ -69,8 +72,9 @@ int naive_solve(Grid *grid, char *word, int *start_height, int *start_width,
             // Check forward.
             size_t i = 0;
             while (*(word + i) != '\0' &&
-                   *(word + i) == get_char(grid, h + i, w))
+                   *(word + i) == get_char(grid, h + i, w)) {
                 i++;
+            }
             if (*(word + i) == '\0') {
                 *start_height = h;
                 *start_width = w;
@@ -82,8 +86,9 @@ int naive_solve(Grid *grid, char *word, int *start_height, int *start_width,
             // Check backward.
             i = 0;
             while (*(reversed_word + i) != '\0' &&
-                   *(reversed_word + i) == get_char(grid, h + i, w))
+                   *(reversed_word + i) == get_char(grid, h + i, w)) {
                 i++;
+            }
             if (*(reversed_word + i) == '\0') {
                 *start_height = h + word_length - 1;
                 *start_width = w;
@@ -101,8 +106,9 @@ int naive_solve(Grid *grid, char *word, int *start_height, int *start_width,
             // Check forward.
             size_t i = 0;
             while (*(word + i) != '\0' &&
-                   *(word + i) == get_char(grid, h + i, w))
+                   *(word + i) == get_char(grid, h + i, w)) {
                 i++;
+            }
             if (*(word + i) == '\0') {
                 *start_height = h;
                 *start_width = w;
@@ -114,8 +120,9 @@ int naive_solve(Grid *grid, char *word, int *start_height, int *start_width,
             // Check backward.
             i = 0;
             while (*(reversed_word + i) != '\0' &&
-                   *(reversed_word + i) == get_char(grid, h + i, w))
+                   *(reversed_word + i) == get_char(grid, h + i, w)) {
                 i++;
+            }
             if (*(reversed_word + i) == '\0') {
                 *start_height = h + word_length - 1;
                 *start_width = w + word_length - 1;
