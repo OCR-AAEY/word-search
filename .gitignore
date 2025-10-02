@@ -1,3 +1,7 @@
+# Executable files
+solver
+run_tests
+
 # IDEs
 .idea/
 .vscode/
