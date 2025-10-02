@@ -9,10 +9,10 @@ Test(naive_solver, naive_solve_1) {
     naive_solve(grid, "HORIZONTAL", &s_h, &s_w, &e_h, &e_w);
     free_grid(grid);
 
-    cr_assert_eq(s_h, 0);
-    cr_assert_eq(s_w, 0);
-    cr_assert_eq(e_h, 0);
-    cr_assert_eq(e_w, 9);
+    cr_expect_eq(s_h, 0);
+    cr_expect_eq(s_w, 0);
+    cr_expect_eq(e_h, 0);
+    cr_expect_eq(e_w, 9);
 }
 
 Test(naive_solver, naive_solve_2) {
@@ -21,10 +21,10 @@ Test(naive_solver, naive_solve_2) {
     naive_solve(grid, "VERTICAL", &s_h, &s_w, &e_h, &e_w);
     free_grid(grid);
 
-    cr_assert_eq(s_h, 7);
-    cr_assert_eq(s_w, 9);
-    cr_assert_eq(e_h, 0);
-    cr_assert_eq(e_w, 9);
+    cr_expect_eq(s_h, 7);
+    cr_expect_eq(s_w, 9);
+    cr_expect_eq(e_h, 0);
+    cr_expect_eq(e_w, 9);
 }
 
 Test(naive_solver, naive_solve_3) {
@@ -33,10 +33,10 @@ Test(naive_solver, naive_solve_3) {
     naive_solve(grid, "DIAGONAL", &s_h, &s_w, &e_h, &e_w);
     free_grid(grid);
 
-    cr_assert_eq(s_h, 1);
-    cr_assert_eq(s_w, 0);
-    cr_assert_eq(e_h, 8);
-    cr_assert_eq(e_w, 7);
+    cr_expect_eq(s_h, 1);
+    cr_expect_eq(s_w, 0);
+    cr_expect_eq(e_h, 8);
+    cr_expect_eq(e_w, 7);
 }
 
 Test(naive_solver, naive_solve_4) {
@@ -45,10 +45,10 @@ Test(naive_solver, naive_solve_4) {
     naive_solve(grid, "FIND", &s_h, &s_w, &e_h, &e_w);
     free_grid(grid);
 
-    cr_assert_eq(s_h, 8);
-    cr_assert_eq(s_w, 4);
-    cr_assert_eq(e_h, 5);
-    cr_assert_eq(e_w, 1);
+    cr_expect_eq(s_h, 8);
+    cr_expect_eq(s_w, 4);
+    cr_expect_eq(e_h, 5);
+    cr_expect_eq(e_w, 1);
 }
 
 Test(naive_solver, naive_solve_5) {
@@ -57,10 +57,10 @@ Test(naive_solver, naive_solve_5) {
     naive_solve(grid, "HELLO", &s_h, &s_w, &e_h, &e_w);
     free_grid(grid);
 
-    cr_assert_eq(s_h, 8);
-    cr_assert_eq(s_w, 9);
-    cr_assert_eq(e_h, 8);
-    cr_assert_eq(e_w, 5);
+    cr_expect_eq(s_h, 8);
+    cr_expect_eq(s_w, 9);
+    cr_expect_eq(e_h, 8);
+    cr_expect_eq(e_w, 5);
 }
 
 Test(naive_solver, naive_solve_6) {
@@ -69,10 +69,10 @@ Test(naive_solver, naive_solve_6) {
     naive_solve(grid, "WORLD", &s_h, &s_w, &e_h, &e_w);
     free_grid(grid);
 
-    cr_assert_eq(s_h, 5);
-    cr_assert_eq(s_w, 5);
-    cr_assert_eq(e_h, 5);
-    cr_assert_eq(e_w, 1);
+    cr_expect_eq(s_h, 5);
+    cr_expect_eq(s_w, 5);
+    cr_expect_eq(e_h, 5);
+    cr_expect_eq(e_w, 1);
 }
 
 Test(naive_solver, naive_solve_7) {
@@ -81,10 +81,10 @@ Test(naive_solver, naive_solve_7) {
     naive_solve(grid, "GOLDORAK", &s_h, &s_w, &e_h, &e_w);
     free_grid(grid);
 
-    cr_assert_eq(s_h, 1);
-    cr_assert_eq(s_w, 8);
-    cr_assert_eq(e_h, 8);
-    cr_assert_eq(e_w, 1);
+    cr_expect_eq(s_h, 1);
+    cr_expect_eq(s_w, 8);
+    cr_expect_eq(e_h, 8);
+    cr_expect_eq(e_w, 1);
 }
 
 Test(naive_solver, naive_solve_8) {
@@ -93,8 +93,8 @@ Test(naive_solver, naive_solve_8) {
     naive_solve(grid, "EPITA", &s_h, &s_w, &e_h, &e_w);
     free_grid(grid);
 
-    cr_assert_eq(s_h, -1);
-    cr_assert_eq(s_w, -1);
-    cr_assert_eq(e_h, -1);
-    cr_assert_eq(e_w, -1);
+    cr_expect_eq(s_h, -1);
+    cr_expect_eq(s_w, -1);
+    cr_expect_eq(e_h, -1);
+    cr_expect_eq(e_w, -1);
 }

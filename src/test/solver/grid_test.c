@@ -4,7 +4,7 @@
 
 Test(grid, load_grid_1) {
     Grid* grid = load_grid("./src/test/solver/grid_1.txt");
-    cr_assert_arr_eq(grid_content(grid),
+    cr_expect_arr_eq(grid_content(grid),
                      "HORIZONTALDXRAHCLBGADIKCILEOKCIGAJHYLYHIHGFGODTIOTGDLROWK"
                      "BFRPLNRDNERGEJHAIDUAJGVUKGFFOLLEH",
                      grid_height(grid) * grid_width(grid),
