@@ -10,10 +10,10 @@
 /// case.
 /// @param[out] start_height The height of the start point of the word if it is
 /// found. Otherwise set to -1.
-/// @param[out] start_width The width of the start point of the word if it is found.
-/// Otherwise set to -1.
-/// @param[out] end_height The height of the end point of the word if it is found.
-/// Otherwise set to -1.
+/// @param[out] start_width The width of the start point of the word if it is
+/// found. Otherwise set to -1.
+/// @param[out] end_height The height of the end point of the word if it is
+/// found. Otherwise set to -1.
 /// @param[out] end_width The width of the end point of the word if it is found.
 /// Otherwise set to -1.
 /// @return Returns 1 if the sought word has been found, 0 otherwise.
