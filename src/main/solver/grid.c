@@ -15,10 +15,10 @@ struct Grid {
     unsigned int width;
 };
 
-/// @brief Indicates whether the given char is a lower case letter.
+/// @brief Indicates whether the given char is a upper case letter.
 /// @param[in] c The character to test.
-/// @return Returns 1 if the `c` is a lower case letter and 0 otherwise.
-int is_alpha(char c) { return 'A' <= c && c <= 'Z'; }
+/// @return Returns 1 if the `c` is an upper case letter and 0 otherwise.
+int is_upper_letter(char c) { return 'A' <= c && c <= 'Z'; }
 
 /// @brief Loads a grid from a given file and returns a pointer to the created
 /// Grid struct. The returned Grid must be freed using `free_grid`.
@@ -62,7 +62,7 @@ Grid *load_grid(char *file_name) {
 
             height++;
             row_length = 0;
-        } else if (!is_alpha(c)) {
+        } else if (!is_upper_letter(c)) {
             errx(1, "Invalid character found at line %i: '%c'.", height + 1, c);
         } else {
             // Resize `array` if needed.
@@ -150,7 +150,7 @@ char get_char(Grid *grid, size_t height, size_t width) {
     return *(grid->content + offset);
 }
 
-/// @brief Frees the data of the given grid as well as the given Grid pointer itselft.
+/// @brief Frees the data of the given grid as well as the given Grid pointer itself.
 /// @param[in] grid The grid to free.
 void free_grid(Grid *grid) { 
     free(grid->content);
