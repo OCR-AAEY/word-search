@@ -48,7 +48,7 @@ void print_result(int start_height, int start_width, int end_height,
 
 int main(int argc, char **argv) {
     if (argc < 2) {
-        errx(1, "Missing argument grid and word.");
+        errx(1, "Missing arguments grid and word.");
     }
     if (argc < 3) {
         errx(1, "Missing argument word.");
