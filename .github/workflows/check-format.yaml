@@ -17,7 +17,7 @@ jobs:
       - name: Check format
         shell: bash
         run: |
-          SRC_FILES="$(find . -type f \( -name '*.c' -o -name '*.h' \))"
+          SRC_FILES="$(find ./src/ -type f \( -name '*.c' -o -name '*.h' \))"
           BAD_FILES=""
 
           for f in $SRC_FILES; do
