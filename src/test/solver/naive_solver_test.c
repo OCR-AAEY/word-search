@@ -4,7 +4,7 @@
 #include "solver/naive_solver.h"
 
 Test(naive_solver, naive_solve_1) {
-    Grid* grid = load_grid("./src/test/solver/grid_1.txt");
+    Grid *grid = load_grid("./src/test/solver/grid_1.txt");
     int s_h, s_w, e_h, e_w;
     naive_solve(grid, "HORIZONTAL", &s_h, &s_w, &e_h, &e_w);
     free_grid(grid);
@@ -16,7 +16,7 @@ Test(naive_solver, naive_solve_1) {
 }
 
 Test(naive_solver, naive_solve_2) {
-    Grid* grid = load_grid("./src/test/solver/grid_1.txt");
+    Grid *grid = load_grid("./src/test/solver/grid_1.txt");
     int s_h, s_w, e_h, e_w;
     naive_solve(grid, "VERTICAL", &s_h, &s_w, &e_h, &e_w);
     free_grid(grid);
@@ -28,7 +28,7 @@ Test(naive_solver, naive_solve_2) {
 }
 
 Test(naive_solver, naive_solve_3) {
-    Grid* grid = load_grid("./src/test/solver/grid_1.txt");
+    Grid *grid = load_grid("./src/test/solver/grid_1.txt");
     int s_h, s_w, e_h, e_w;
     naive_solve(grid, "DIAGONAL", &s_h, &s_w, &e_h, &e_w);
     free_grid(grid);
@@ -40,7 +40,7 @@ Test(naive_solver, naive_solve_3) {
 }
 
 Test(naive_solver, naive_solve_4) {
-    Grid* grid = load_grid("./src/test/solver/grid_1.txt");
+    Grid *grid = load_grid("./src/test/solver/grid_1.txt");
     int s_h, s_w, e_h, e_w;
     naive_solve(grid, "FIND", &s_h, &s_w, &e_h, &e_w);
     free_grid(grid);
@@ -52,7 +52,7 @@ Test(naive_solver, naive_solve_4) {
 }
 
 Test(naive_solver, naive_solve_5) {
-    Grid* grid = load_grid("./src/test/solver/grid_1.txt");
+    Grid *grid = load_grid("./src/test/solver/grid_1.txt");
     int s_h, s_w, e_h, e_w;
     naive_solve(grid, "HELLO", &s_h, &s_w, &e_h, &e_w);
     free_grid(grid);
@@ -64,7 +64,7 @@ Test(naive_solver, naive_solve_5) {
 }
 
 Test(naive_solver, naive_solve_6) {
-    Grid* grid = load_grid("./src/test/solver/grid_1.txt");
+    Grid *grid = load_grid("./src/test/solver/grid_1.txt");
     int s_h, s_w, e_h, e_w;
     naive_solve(grid, "WORLD", &s_h, &s_w, &e_h, &e_w);
     free_grid(grid);
@@ -76,7 +76,7 @@ Test(naive_solver, naive_solve_6) {
 }
 
 Test(naive_solver, naive_solve_7) {
-    Grid* grid = load_grid("./src/test/solver/grid_1.txt");
+    Grid *grid = load_grid("./src/test/solver/grid_1.txt");
     int s_h, s_w, e_h, e_w;
     naive_solve(grid, "GOLDORAK", &s_h, &s_w, &e_h, &e_w);
     free_grid(grid);
@@ -88,7 +88,7 @@ Test(naive_solver, naive_solve_7) {
 }
 
 Test(naive_solver, naive_solve_8) {
-    Grid* grid = load_grid("./src/test/solver/grid_1.txt");
+    Grid *grid = load_grid("./src/test/solver/grid_1.txt");
     int s_h, s_w, e_h, e_w;
     naive_solve(grid, "EPITA", &s_h, &s_w, &e_h, &e_w);
     free_grid(grid);

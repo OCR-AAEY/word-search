@@ -3,9 +3,9 @@
 
 typedef struct Grid Grid;
 
-Grid* load_grid(char *file_name);
+Grid *load_grid(char *file_name);
 
-const char* grid_content(Grid* grid);
+const char *grid_content(Grid *grid);
 
 size_t grid_height(Grid *grid);
 
