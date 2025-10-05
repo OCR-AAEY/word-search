@@ -90,10 +90,11 @@ Grid *load_grid(char *file_name) {
     }
 
     if (height < 5) {
-        errx(1,
-             "Given grid is too small: its height should be greater or equal to "
-             "5 but got: %i.",
-             height);
+        errx(
+            1,
+            "Given grid is too small: its height should be greater or equal to "
+            "5 but got: %i.",
+            height);
     }
 
     fclose(file_stream);
@@ -106,7 +107,7 @@ Grid *load_grid(char *file_name) {
 /// @brief Returns the content of the given Grid struct.
 /// @param[in] grid The struct to get the content of.
 /// @return The content of the given Grid struct as an char array.
-const char* grid_content(Grid* grid) { return (const char *)grid->content; }
+const char *grid_content(Grid *grid) { return (const char *)grid->content; }
 
 /// @brief Returns the height of the given Grid struct.
 /// @param[in] grid The struct of the sought height.
@@ -122,16 +123,15 @@ size_t grid_width(Grid *grid) { return grid->width; }
 /// given grid. If an error occurs (due to invalid height and width values for
 /// instance), exits the program.
 /// @param[in] grid
-/// @param[in] height The height position (index of the row) from the top. Supports
-/// negative indexes.
+/// @param[in] height The height position (index of the row) from the top.
 /// @param[in] width The width position (index of the column) from the left.
-/// Supports negative indexes.
 /// @return A char located at the given position.
-/// @throw Throws if at least one of height and width are outside the bounds of the grid.
+/// @throw Throws if at least one of height and width are outside the bounds of
+/// the grid.
 char get_char(Grid *grid, size_t height, size_t width) {
     size_t grid_height = grid->height;
     size_t grid_width = grid->width;
-    
+
     // Check if the given height is valid
     if (height >= grid_height) {
         errx(EXIT_FAILURE,
@@ -150,12 +150,13 @@ char get_char(Grid *grid, size_t height, size_t width) {
     return *(grid->content + offset);
 }
 
-/// @brief Frees the data of the given grid as well as the given Grid pointer itself.
+/// @brief Frees the data of the given grid as well as the given Grid pointer
+/// itself.
 /// @param[in] grid The grid to free.
-void free_grid(Grid *grid) { 
+void free_grid(Grid *grid) {
     free(grid->content);
     free(grid);
- }
+}
 
 /// @brief Prints the grid in the standard output.
 /// @param[in] grid The pointer to the grid to print.

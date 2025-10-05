@@ -2,6 +2,6 @@
 #define NAIVE_H
 
 int naive_solve(Grid *grid, char *word, int *start_height, int *start_width,
-          int *end_height, int *end_width);
+                int *end_height, int *end_width);
 
 #endif
