@@ -3,12 +3,12 @@
 #include <stdio.h>
 
 /// @brief Saves the Pixbuf object as a PNG file.
-/// @param[in] pixbuf A pointer to the GdkPixbuf to save
-/// @param[in] filename The string filename with extension (.png)
-/// @param[in] error (Optional) Return location for a GError, or NULL.
+/// @param[in] pixbuf A pointer to the GdkPixbuf to save.
+/// @param[in] filename The string filename with extension (.png).
+/// @param[out] error (Optional) Return location for a GError, or NULL.
 ///  If not NULL and an error occurs, the error will be set.
 ///  The caller is responsible for freeing it with g_error_free().
-/// @return A boolean indicating if the file was successfully saved
+/// @return A boolean indicating if the file was successfully saved.
 int save_pixbuf_to_png(GdkPixbuf *pixbuf, char *filename, GError **error) {
     int success = gdk_pixbuf_save(pixbuf, filename, "png", error, NULL);
     if (!success) {
@@ -28,11 +28,11 @@ void free_pixels(guchar *pixels, gpointer data) {
     free(data); // free pixels from gdkpixbuf object when it has to be deleted
 }
 
-/// @brief Creates a GdkPixbuf from an ImageData struct
-/// @param[in] img The ImageData to transform into a GdkPixbuf
+/// @brief Creates a GdkPixbuf from an ImageData struct.
+/// @param[in] img The ImageData to transform into a GdkPixbuf.
 /// @returns The GdkPixbuf containing the same pixel data as the ImageData
 /// passed as parameter.
-/// @throw Throws if it has not been able to allocate the pixels array
+/// @throw Throws if it has not been able to allocate the pixels array.
 GdkPixbuf *create_pixbuf_from_image_data(ImageData *img) {
     int width = img->width;
     int height = img->height;
@@ -64,12 +64,12 @@ GdkPixbuf *create_pixbuf_from_image_data(ImageData *img) {
     );
 }
 
-/// @brief Loads an image file
+/// @brief Loads an image file.
 /// @attention This function keeps only the 3 first channels of the image
-/// (normally RGB)
-/// @param[in] filename The filename of the image to load
-/// @returns An ImageData containing the data of the image loaded
-/// @throw Throws if an error occured during the process
+/// (normally RGB).
+/// @param[in] filename The filename of the image to load.
+/// @returns An ImageData containing the data of the loaded image.
+/// @throw Throws if an error occured during the process.
 ImageData *load_image(const char *filename) {
     GError *error = NULL;
     GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file(filename, &error);
@@ -118,9 +118,9 @@ ImageData *load_image(const char *filename) {
     return img;
 }
 
-/// @brief Frees the ImageData allocated on the heap
-/// @attention It will free the pixels array and the ImageData itself
-/// @param[in] img The ImageData to free
+/// @brief Frees the ImageData allocated on the heap.
+/// @attention It will free the pixels array and the ImageData itself.
+/// @param[in] img The ImageData to free.
 void free_image(ImageData *img) {
     free(img->pixels);
     free(img);
