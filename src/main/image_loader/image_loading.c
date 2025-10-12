@@ -1,0 +1,141 @@
+#include "image_loading.h"
+#include <err.h>
+#include <stdio.h>
+
+/// @brief Saves the Pixbuf object as a PNG file.
+/// @param[in] pixbuf A pointer to the GdkPixbuf to save.
+/// @param[in] filename The string filename with extension (.png).
+/// @param[out] error (Optional) Return location for a GError, or NULL.
+///  If not NULL and an error occurs, the error will be set.
+///  The caller is responsible for freeing it with g_error_free().
+/// @return A boolean indicating if the file was successfully saved.
+int save_pixbuf_to_png(GdkPixbuf *pixbuf, char *filename, GError **error) {
+    int success = gdk_pixbuf_save(pixbuf, filename, "png", error, NULL);
+    if (!success) {
+        g_printerr("Error saving image: %s\n", (*error)->message);
+    }
+    return success;
+}
+
+/// @brief Callback function used when GdkPixbuf object created by
+/// `create_pixbuf_from_image_data` is destroyed.
+/// @param[in] pixels A pointer to the raw pixel data (not used in this
+/// function).
+/// @param[in] data A pointer to the memory to be freed. This should match the
+///  `pixels` pointer passed during creation of the GdkPixbuf.
+void free_pixels(guchar *pixels, gpointer data) {
+    (void)pixels;
+    free(data); // free pixels from gdkpixbuf object when it has to be deleted
+}
+
+/// @brief Creates a GdkPixbuf from an ImageData struct.
+/// @param[in] img The ImageData to transform into a GdkPixbuf.
+/// @returns The GdkPixbuf containing the same pixel data as the ImageData
+/// passed as parameter.
+/// @throw Throws if it has not been able to allocate the pixels array.
+GdkPixbuf *create_pixbuf_from_image_data(ImageData *img) {
+    int width = img->width;
+    int height = img->height;
+    int channels = 3; // RGB
+    int rowstride = width * channels;
+
+    guchar *pixels = malloc(height * rowstride);
+    if (pixels == NULL) {
+        errx(EXIT_FAILURE, "Failed to allocate the pxiel array");
+    }
+
+    for (int i = 0; i < height * width; i++) {
+        pixels[3 * i] = img->pixels[i].r;
+        pixels[3 * i + 1] = img->pixels[i].g;
+        pixels[3 * i + 2] = img->pixels[i].b;
+    }
+
+    // Create pixbuf from raw data. The last param is the pixel data passed to
+    // free_pixels. Since it is allocated by the user, it has to be freed by a
+    // user made function
+    return gdk_pixbuf_new_from_data(
+        pixels, GDK_COLORSPACE_RGB,
+        FALSE, // has_alpha = FALSE
+        8,     // bits per sample (8 bits per color RGB)
+        width, height,
+        rowstride,   // number of bytes per row
+        free_pixels, // callback to free_pixel function
+        pixels       // data to pass to free_pixels
+    );
+}
+
+/// @brief Loads an image file.
+/// @attention This function keeps only the 3 first channels of the image
+/// (normally RGB).
+/// @param[in] filename The filename of the image to load.
+/// @returns An ImageData containing the data of the loaded image.
+/// @throw Throws if an error occured during the process.
+ImageData *load_image(const char *filename) {
+    GError *error = NULL;
+    GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file(filename, &error);
+
+    if (pixbuf == NULL) {
+        fprintf(stderr, "Error loading image: %s\n", error->message);
+        g_error_free(error);
+        exit(EXIT_FAILURE);
+    }
+
+    int w = gdk_pixbuf_get_width(pixbuf);
+    int h = gdk_pixbuf_get_height(pixbuf);
+    int channels = gdk_pixbuf_get_n_channels(pixbuf);
+    if (channels < 3) {
+        g_object_unref(pixbuf);
+        errx(EXIT_FAILURE, "Unsupported channel number in the image loaded");
+    }
+
+    unsigned char *pixels = gdk_pixbuf_get_pixels(pixbuf);
+
+    // Allocate an array of h*w Pixels for the ImageData
+    Pixel *pixels_copy = malloc(h * w * sizeof(Pixel));
+    if (pixels_copy == NULL) {
+        g_object_unref(pixbuf);
+        errx(EXIT_FAILURE, "Failed to allocate pixels copy");
+    }
+
+    // Populates the Pixel data
+    for (int i = 0; i < h * w; i++) {
+        pixels_copy[i].r = pixels[i * channels];
+        pixels_copy[i].g = pixels[i * channels + 1];
+        pixels_copy[i].b = pixels[i * channels + 2];
+    }
+    g_object_unref(pixbuf);
+
+    ImageData *img = malloc(sizeof(ImageData));
+    if (img == NULL) {
+        free(pixels_copy);
+        errx(EXIT_FAILURE, "Failed to allocate ImageData struct");
+    }
+
+    img->width = w;
+    img->height = h;
+    img->pixels = pixels_copy;
+
+    return img;
+}
+
+/// @brief Frees the ImageData allocated on the heap.
+/// @attention It will free the pixels array and the ImageData itself.
+/// @param[in] img The ImageData to free.
+void free_image(ImageData *img) {
+    free(img->pixels);
+    free(img);
+}
+
+#ifndef UNIT_TEST
+
+int main() {
+    ImageData *img = load_image("assets/sample_images/level_1_image_1.png");
+    GdkPixbuf *pixbuf = create_pixbuf_from_image_data(img);
+    save_pixbuf_to_png(pixbuf, "image1.png", NULL);
+    g_object_unref(pixbuf);
+    free_image(img);
+
+    return EXIT_SUCCESS;
+}
+
+#endif
