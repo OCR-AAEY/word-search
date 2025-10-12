@@ -24,6 +24,7 @@ int save_pixbuf_to_png(GdkPixbuf *pixbuf, char *filename, GError **error) {
 /// @param[in] data A pointer to the memory to be freed. This should match the
 ///  `pixels` pointer passed during creation of the GdkPixbuf.
 void free_pixels(guchar *pixels, gpointer data) {
+    (void)pixels;
     free(data); // free pixels from gdkpixbuf object when it has to be deleted
 }
 
@@ -43,7 +44,7 @@ GdkPixbuf *create_pixbuf_from_image_data(ImageData *img) {
         errx(EXIT_FAILURE, "Failed to allocate the pxiel array");
     }
 
-    for (size_t i = 0; i < height * width; i++) {
+    for (int i = 0; i < height * width; i++) {
         pixels[3 * i] = img->pixels[i].r;
         pixels[3 * i + 1] = img->pixels[i].g;
         pixels[3 * i + 2] = img->pixels[i].b;
@@ -97,7 +98,7 @@ ImageData *load_image(const char *filename) {
     }
 
     // Populates the Pixel data
-    for (size_t i = 0; i < h * w; i++) {
+    for (int i = 0; i < h * w; i++) {
         pixels_copy[i].r = pixels[i * channels];
         pixels_copy[i].g = pixels[i * channels + 1];
         pixels_copy[i].b = pixels[i * channels + 2];
@@ -127,7 +128,7 @@ void free_image(ImageData *img) {
 
 #ifndef UNIT_TEST
 
-int main(int argc, char **argv) {
+int main() {
     ImageData *img = load_image("assets/sample_images/level_1_image_1.png");
     GdkPixbuf *pixbuf = create_pixbuf_from_image_data(img);
     save_pixbuf_to_png(pixbuf, "image1.png", NULL);
