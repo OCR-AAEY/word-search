@@ -1,8 +1,7 @@
 #ifndef IMAGE_LOADING_H
 
 #define IMAGE_LOADING_H
-// #include <SDL2/SDL.h>
-// #include <SDL2/SDL_image.h>
+
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib.h>
