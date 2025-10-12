@@ -1,6 +1,5 @@
-# Executable files
-/solver
-/run_tests
+# Build
+/build
 
 # IDEs
 .idea/
