@@ -41,11 +41,14 @@ MAIN_DIR    := $(SRC_DIR)/main
 TEST_DIR    := $(SRC_DIR)/test
 BUILD_DIR   := build
 
-# Source and object files
+# Source files
 SRC_MAIN    := $(shell find $(MAIN_DIR) -name '*.c')
 SRC_TEST    := $(shell find $(TEST_DIR) -name '*.c')
-OBJ_MAIN    := $(SRC_MAIN:$(MAIN_DIR)/%.c=$(BUILD_DIR)/main/%.o)
-OBJ_TEST    := $(SRC_TEST:$(TEST_DIR)/%.c=$(BUILD_DIR)/test/%.o)
+
+# Object files
+OBJ_MAIN          := $(SRC_MAIN:$(MAIN_DIR)/%.c=$(BUILD_DIR)/main/%.o)
+OBJ_MAIN_FOR_TEST := $(SRC_MAIN:$(MAIN_DIR)/%.c=$(BUILD_DIR)/main_for_test/%.o)
+OBJ_TEST          := $(SRC_TEST:$(TEST_DIR)/%.c=$(BUILD_DIR)/test/%.o)
 
 # Executables
 BIN_SOLVER       := $(BUILD_DIR)/solver
@@ -73,14 +76,28 @@ $(BIN_IMAGE_LOADER): $(filter $(BUILD_DIR)/main/image_loader/%.o,$(OBJ_MAIN))
 #	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(GTK_FLAGS)
 
 # Test binary
-$(BIN_TEST): $(OBJ_MAIN) $(OBJ_TEST)
+$(BIN_TEST): $(OBJ_MAIN_FOR_TEST) $(OBJ_TEST)
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(XCFLAGS) $(TEST_FLAGS) $^ -o $@ $(CRITERION_FLAGS) $(GTK_FLAGS)
 
-# Generic rule to build object files
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+##############################
+#        PATTERN RULES       #
+##############################
+
+# Compile main sources for normal executables
+$(BUILD_DIR)/main/%.o: $(MAIN_DIR)/%.c
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(XCFLAGS) -c $< -o $@
+
+# Compile main sources for tests
+$(BUILD_DIR)/main_for_test/%.o: $(MAIN_DIR)/%.c
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) $(XCFLAGS) $(TEST_FLAGS) -c $< -o $@
+
+# Compile test sources
+$(BUILD_DIR)/test/%.o: $(TEST_DIR)/%.c
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) $(XCFLAGS) $(TEST_FLAGS) -c $< -o $@
 
 ##############################
 #           PHONY            #
