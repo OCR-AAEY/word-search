@@ -9,12 +9,12 @@ solver: $(shell find ./src/main/solver -name *.c)
 	$(CC) $(CFLAGS) $^ -o $@
 
 test: $(SRC_TEST) $(SRC_MAIN)
-	$(CC) $(CFLAGS) $(TEST_FLAGS) $^ -o run_tests -lcriterion
+	$(CC) $(CFLAGS) $(TEST_FLAGS) $^ -o run_tests $(GTK_FLAGS) -lcriterion
 
 image_loader: $(shell find ./src/main/image_loader -name *.c)
 	$(CC) $(CFLAGS) $^ -o $@ $(GTK_FLAGS)
 
 clean:
-	$(RM) run_tests solver img-loader
+	$(RM) run_tests solver image_loader
 
-.PHONY: clean solver
+.PHONY: clean solver image_loader
