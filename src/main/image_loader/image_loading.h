@@ -2,13 +2,9 @@
 
 #define IMAGE_LOADING_H
 
-#include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib.h>
-
-#include <err.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdint.h>
 
 typedef struct {
     uint8_t r;
@@ -22,8 +18,8 @@ typedef struct {
     Pixel *pixels;
 } ImageData;
 
-ImageData *read_image(const char *path);
-void save_pixbuf_to_png(GdkPixbuf *pixbuf, char *filename);
+ImageData *load_image(const char *path);
+int save_pixbuf_to_png(GdkPixbuf *pixbuf, char *filename, GError **error);
 void free_pixels(guchar *pixels, gpointer data);
 void free_image(ImageData *img);
 
