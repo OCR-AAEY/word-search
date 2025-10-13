@@ -10,12 +10,17 @@
 /// @param[in,out] word The NULL-terminated array of character to make upper
 /// case.
 /// @throw Throws if the word contains any not letter character.
-void to_upper_case(char *word) {
+void to_upper_case(char *word)
+{
     size_t i = 0;
-    while (*(word + i) != '\0') {
-        if ('a' <= *(word + i) && *(word + i) <= 'z') {
+    while (*(word + i) != '\0')
+    {
+        if ('a' <= *(word + i) && *(word + i) <= 'z')
+        {
             *(word + i) = *(word + i) - 'a' + 'A';
-        } else if (*(word + i) < 'A' || 'Z' < *(word + i)) {
+        }
+        else if (*(word + i) < 'A' || 'Z' < *(word + i))
+        {
             errx(1, "Non-letter character found in the given word: '%c'.",
                  *(word + i));
         }
@@ -34,11 +39,14 @@ void to_upper_case(char *word) {
 /// @param[in] end_width The width of the end position of the word. A value of
 /// -1 indicatest that the word has not been found in the grid.
 void print_result(int start_height, int start_width, int end_height,
-                  int end_width) {
-    if (start_height < 0 || start_width < 0 || end_height < 0 ||
-        end_width < 0) {
+                  int end_width)
+{
+    if (start_height < 0 || start_width < 0 || end_height < 0 || end_width < 0)
+    {
         printf("Not found\n");
-    } else {
+    }
+    else
+    {
         printf("(%i,%i)(%i,%i)\n", start_width, start_height, end_width,
                end_height);
     }
@@ -46,15 +54,19 @@ void print_result(int start_height, int start_width, int end_height,
 
 #ifndef UNIT_TEST
 
-int main(int argc, char **argv) {
-    if (argc < 2) {
+int main(int argc, char **argv)
+{
+    if (argc < 2)
+    {
         errx(1, "Missing arguments grid and word.");
     }
-    if (argc < 3) {
+    if (argc < 3)
+    {
         errx(1, "Missing argument word.");
     }
     // Not necessary. Can be removed.
-    if (argc > 3) {
+    if (argc > 3)
+    {
         errx(1, "Too many arguments.");
     }
 

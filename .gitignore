@@ -4,6 +4,7 @@
 # IDEs
 .idea/
 .vscode/
+*.swp 
 
 ##############################
 #         C GITIGNORE        #
