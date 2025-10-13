@@ -27,8 +27,14 @@
 #           MACROS           #
 ##############################
 
+VERBOSE ?= 0
+
 # Compiler and flags
+ifeq ($(VERBOSE),0)
+CC          := @gcc
+else
 CC          := gcc
+endif
 CFLAGS      := -Wall -Wextra -std=c11
 XCFLAGS     :=
 TEST_FLAGS   = -DUNIT_TEST -I$(MAIN_DIR)
@@ -87,17 +93,17 @@ $(BIN_TEST): $(OBJ_MAIN_FOR_TEST) $(OBJ_TEST)
 # Compile main sources for normal executables
 $(BUILD_DIR)/main/%.o: $(MAIN_DIR)/%.c
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) $(XCFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(XCFLAGS) -c $< -o $@ $(GTK_FLAGS)
 
 # Compile main sources for tests
 $(BUILD_DIR)/main_for_test/%.o: $(MAIN_DIR)/%.c
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) $(XCFLAGS) $(TEST_FLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(XCFLAGS) $(TEST_FLAGS) -c $< -o $@ $(GTK_FLAGS)
 
 # Compile test sources
 $(BUILD_DIR)/test/%.o: $(TEST_DIR)/%.c
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) $(XCFLAGS) $(TEST_FLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(XCFLAGS) $(TEST_FLAGS) -c $< -o $@ $(CRITERION_FLAGS) $(GTK_FLAGS)
 
 ##############################
 #           PHONY            #
