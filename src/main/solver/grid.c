@@ -5,7 +5,8 @@
 #include "grid.h"
 
 /// @brief A struct representing a two-dimensional word search grid.
-struct Grid {
+struct Grid
+{
     /// @brief The one-dimensional char array representing the two-dimensional
     /// word search grid.
     char *content;
@@ -26,16 +27,19 @@ int is_upper_letter(char c) { return 'A' <= c && c <= 'Z'; }
 /// @return Returns the created grid.
 /// @throw Throws if any error occurs during the process including: file not
 /// found, invalid char in file, grid too small, failed (re)allocation.
-Grid *load_grid(char *file_name) {
+Grid *load_grid(char *file_name)
+{
     FILE *file_stream = fopen(file_name, "r");
 
-    if (file_stream == NULL) {
+    if (file_stream == NULL)
+    {
         errx(1, "Failed to open file: %s", file_name);
     }
 
     // 25 is the minimum number of cells (5×5).
     char *array = malloc(25 * sizeof(char));
-    if (array == NULL) {
+    if (array == NULL)
+    {
         errx(1, "Failed to allocate necessary memory.");
     }
 
@@ -48,12 +52,17 @@ Grid *load_grid(char *file_name) {
     char c;
 
     // Reading the first line.
-    while ((c = fgetc(file_stream)) != EOF) {
-        if (c == '\n') {
-            if (width == 0) {
+    while ((c = fgetc(file_stream)) != EOF)
+    {
+        if (c == '\n')
+        {
+            if (width == 0)
+            {
                 // First row has just finished being read.
                 width = row_length;
-            } else if (row_length != width) {
+            }
+            else if (row_length != width)
+            {
                 errx(1,
                      "Line %i is not of same length as the first line. "
                      "Expected %i and got %i",
@@ -62,14 +71,20 @@ Grid *load_grid(char *file_name) {
 
             height++;
             row_length = 0;
-        } else if (!is_upper_letter(c)) {
+        }
+        else if (!is_upper_letter(c))
+        {
             errx(1, "Invalid character found at line %i: '%c'.", height + 1, c);
-        } else {
+        }
+        else
+        {
             // Resize `array` if needed.
-            if (offset >= array_length) {
+            if (offset >= array_length)
+            {
                 array_length += 10;
                 char *tmp_ptr = realloc(array, array_length);
-                if (tmp_ptr == NULL) {
+                if (tmp_ptr == NULL)
+                {
                     errx(1, "Failed to reallocate memory for the grid array.");
                 }
                 array = tmp_ptr;
@@ -82,14 +97,16 @@ Grid *load_grid(char *file_name) {
         }
     }
 
-    if (width < 5) {
+    if (width < 5)
+    {
         errx(1,
              "Given grid is too small: its width should be greater or equal to "
              "5 but got: %i.",
              width);
     }
 
-    if (height < 5) {
+    if (height < 5)
+    {
         errx(
             1,
             "Given grid is too small: its height should be greater or equal to "
@@ -128,19 +145,22 @@ size_t grid_width(Grid *grid) { return grid->width; }
 /// @return A char located at the given position.
 /// @throw Throws if at least one of height and width are outside the bounds of
 /// the grid.
-char get_char(Grid *grid, size_t height, size_t width) {
+char get_char(Grid *grid, size_t height, size_t width)
+{
     size_t grid_height = grid->height;
     size_t grid_width = grid->width;
 
     // Check if the given height is valid
-    if (height >= grid_height) {
+    if (height >= grid_height)
+    {
         errx(EXIT_FAILURE,
              "Invalid given height: %zu whereas grid's height is %zu", height,
              grid_height);
     }
 
     // Check if the given width is valid
-    if (width >= grid_width) {
+    if (width >= grid_width)
+    {
         errx(EXIT_FAILURE,
              "Invalid given width: %zu whereas grid's width is %zu", width,
              grid_width);
@@ -153,16 +173,20 @@ char get_char(Grid *grid, size_t height, size_t width) {
 /// @brief Frees the data of the given grid as well as the given Grid pointer
 /// itself.
 /// @param[in] grid The grid to free.
-void free_grid(Grid *grid) {
+void free_grid(Grid *grid)
+{
     free(grid->content);
     free(grid);
 }
 
 /// @brief Prints the grid in the standard output.
 /// @param[in] grid The pointer to the grid to print.
-void print_grid(Grid *grid) {
-    for (size_t h = 0; h < grid->height; h++) {
-        for (size_t w = 0; w < grid->width; w++) {
+void print_grid(Grid *grid)
+{
+    for (size_t h = 0; h < grid->height; h++)
+    {
+        for (size_t w = 0; w < grid->width; w++)
+        {
             printf("%c ", *(grid->content + h * grid->width + w));
         }
         printf("\n");
