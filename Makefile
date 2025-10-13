@@ -2,6 +2,9 @@
 #           NOTES            #
 ##############################
 
+# >>> VERBOSE
+# Determines whether make will print the execued gcc compilation commands. By default, it is set to 0 (no print). It can be set using `make VERBOSE=1 <command>`.
+#
 # >>> TEST_FLAGS
 # Adds C flags when the project is compiled for testing with criterion. It defines the macro UNIT_TEST and imports all files from $(MAIN_DIR). Note that it is declared with = and not := because it requires $(MAIN_DIR) which is not yet defined when TEST_FLAGS is declared.
 #
