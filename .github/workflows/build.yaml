@@ -23,5 +23,4 @@ jobs:
 
       - name: Build project
         run: |
-          make test
-          ./run_tests
+          make VERBOSE=1 XCFLAGS=-Werror test
