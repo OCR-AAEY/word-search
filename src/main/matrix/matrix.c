@@ -1,5 +1,6 @@
 #include <err.h>
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "matrix.h"
@@ -103,6 +104,13 @@ Matrix *mat_deepcopy(Matrix *m)
     return new_m;
 }
 
+/// @brief For internal use. More efficient because it does not check for valid
+/// parameters.
+inline double *internal_coef_addr(Matrix *m, size_t h, size_t w)
+{
+    return m->content + h * m->width + w;
+}
+
 /// @brief Returns the address of the coefficient at position (h, w).
 /// @param m Pointer to the matrix.
 /// @param h Row index (0 ≤ h < height).
@@ -116,7 +124,7 @@ inline double *mat_coef_addr(Matrix *m, size_t h, size_t w)
     if (w >= m->width)
         errx(1, "Invalid width given. Expected < %zu and got %zu.", m->width,
              w);
-    return m->content + h * m->width + w;
+    return internal_coef_addr(m, h, w);
 }
 
 /// @brief Returns the coefficient at position (h, w).
@@ -132,7 +140,7 @@ inline double mat_coef(Matrix *m, size_t h, size_t w)
     if (w >= m->width)
         errx(1, "Invalid width given. Expected < %zu and got %zu.", m->width,
              w);
-    return *mat_coef_addr(m, h, w);
+    return *internal_coef_addr(m, h, w);
 }
 
 /// @brief Performs element-wise addition of two matrices.
@@ -167,19 +175,14 @@ Matrix *mat_addition(Matrix *a, Matrix *b)
 /// @param[in,out] mat Pointer to the matrix to be modified.
 /// @param[in] a Scalar value to multiply each element by.
 /// @return Pointer to the modified matrix (same as input).
-Matrix *mat_scalar_multiplication(Matrix *mat, double a)
+Matrix *mat_scalar_multiplication(Matrix *m, double a)
 {
-    size_t height = mat_height(mat);
-    size_t width = mat_width(mat);
-    for (size_t h = 0; h < height; h++)
+    for (size_t i = 0; i < m->height * m->width; i++)
     {
-        for (size_t w = 0; w < width; w++)
-        {
-            double *cell = mat_coef_addr(mat, h, w);
-            *cell *= a;
-        }
+        *(m->content + i) *= a;
     }
-    return mat;
+
+    return m;
 }
 
 /// @brief Computes the matrix product of two matrices.
@@ -202,8 +205,8 @@ Matrix *mat_multiplication(Matrix *a, Matrix *b)
         {
             for (size_t i = 0; i < a->width; i++)
             {
-                *mat_coef_addr(m, h, w) +=
-                    mat_coef(a, h, i) * mat_coef(b, i, w);
+                *internal_coef_addr(m, h, w) +=
+                    *internal_coef_addr(a, h, i) * *internal_coef_addr(b, i, w);
             }
         }
     }
@@ -212,7 +215,7 @@ Matrix *mat_multiplication(Matrix *a, Matrix *b)
 }
 
 /// @brief Applies the sigmoid function element-wise to the given matrix.
-///        Sigmoid(x) = 1 / (1 + exp(-x))
+/// Sigmoid(x) = 1 / (1 + exp(-x))
 /// @param m Pointer to the input matrix.
 /// @return A new matrix containing the sigmoid of each element of m.
 /// @throw Terminates the program if memory allocation fails.
@@ -243,4 +246,31 @@ Matrix *mat_map(Matrix *m, double (*f)(double))
     }
 
     return res;
+}
+
+/// @brief Prints the contents of a matrix to stdout in a formatted 2D layout.
+/// @param m Pointer to the matrix to print.
+/// @param precision Number of decimal places to display for each element.
+void mat_print(Matrix *m, int precision)
+{
+    if (m == NULL)
+    {
+        errx(1, "Given matrix pointer is null.");
+    }
+    else
+    {
+        char fmt[16];
+        snprintf(fmt, sizeof(fmt), "%%.%df", precision);
+
+        for (size_t h = 0; h < m->height; h++)
+        {
+            for (size_t w = 0; w < m->width; w++)
+            {
+                printf(fmt, mat_coef(m, h, w));
+                if (w < m->width - 1)
+                    printf("  ");
+            }
+            printf("\n");
+        }
+    }
 }

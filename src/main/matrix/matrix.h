@@ -11,8 +11,7 @@ size_t mat_width(Matrix *m);
 
 Matrix *mat_create_empty(size_t height, size_t width);
 
-Matrix *mat_create_from_arr(size_t height, size_t width,
-                      double *content);
+Matrix *mat_create_from_arr(size_t height, size_t width, double *content);
 
 void mat_free(Matrix *matrix);
 
@@ -29,5 +28,7 @@ Matrix *mat_scalar_multiplication(Matrix *mat, double a);
 Matrix *mat_multiplication(Matrix *a, Matrix *b);
 
 Matrix *mat_sigmoid(Matrix *m);
+
+void mat_print(Matrix *m, int precision);
 
 #endif
