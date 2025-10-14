@@ -47,7 +47,7 @@ CC          := @gcc
 else
 CC          := gcc
 endif
-CFLAGS      := -Wall -Wextra -I$(MAIN_DIR)
+CFLAGS      := -Wall -Wextra -fsanitize=address -I$(MAIN_DIR)
 XCFLAGS     :=
 TEST_FLAGS  := -DUNIT_TEST $(shell pkg-config --cflags --libs criterion)
 GTK_FLAGS   := $(shell pkg-config --cflags --libs gtk+-3.0)
@@ -65,6 +65,7 @@ OBJ_TEST          := $(SRC_TEST:$(TEST_DIR)/%.c=$(BUILD_DIR)/test/%.o)
 # Executables
 BIN_SOLVER       := $(BUILD_DIR)/solver
 BIN_IMAGE_LOADER := $(BUILD_DIR)/image_loader
+BIN_PRETREATMENT := $(BUILD_DIR)/pretreatment
 # BIN_APP          := $(BUILD_DIR)/app
 BIN_TEST         := $(BUILD_DIR)/run_tests
 
@@ -79,6 +80,11 @@ $(BIN_SOLVER): $(filter $(BUILD_DIR)/main/solver/%.o,$(OBJ_MAIN))
 
 # Image loader target
 $(BIN_IMAGE_LOADER): $(filter $(BUILD_DIR)/main/image_loader/%.o,$(OBJ_MAIN))
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+
+# Image loader target
+$(BIN_PRETREATMENT): $(filter $(BUILD_DIR)/main/bounding_boxes/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/image_loader/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/matrix/%.o,$(OBJ_MAIN))
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 

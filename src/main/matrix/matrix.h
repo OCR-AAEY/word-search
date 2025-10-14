@@ -1,6 +1,8 @@
 #ifndef MATIRX_H
 #define MATIRX_H
 
+#include <stdlib.h>
+
 typedef struct Matrix Matrix;
 
 size_t mat_height(Matrix *m);
@@ -10,7 +12,8 @@ size_t mat_width(Matrix *m);
 Matrix *mat_create_empty(size_t height, size_t width);
 
 Matrix *mat_create_from_arr(size_t height, size_t width,
-                      double *content);
+
+                            double *content);
 
 void mat_free(Matrix *matrix);
 
