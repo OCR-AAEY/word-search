@@ -126,6 +126,14 @@ void free_image(ImageData *img) {
     free(img);
 }
 
+Pixel *get_pixel(ImageData *img, size_t h, size_t w)
+{
+    if (h > img->height || w > img->width)
+        return NULL;
+    
+    return &(img->pixels[h * img->width + w]);
+}
+
 #ifndef UNIT_TEST
 
 int main() {
