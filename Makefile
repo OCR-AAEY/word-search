@@ -5,8 +5,11 @@
 # >>> VERBOSE
 # Determines whether make will print the execued gcc compilation commands. By default, it is set to 0 (no print). It can be set using `make VERBOSE=1 <command>`.
 #
+# >>> -I$(MAIN_DIR)
+# Make src/main/ the default directory. Therefore, files have to be included from this path.
+#
 # >>> TEST_FLAGS
-# Adds C flags when the project is compiled for testing with criterion. It defines the macro UNIT_TEST and imports all files from $(MAIN_DIR). Note that it is declared with = and not := because it requires $(MAIN_DIR) which is not yet defined when TEST_FLAGS is declared.
+# Adds C flags when the project is compiled for testing with criterion. It defines the macro UNIT_TEST and adds the criterion library.
 #
 # >>> XCFLAGS
 # Is by default empty but can be overriden when using make to add C flags without overriding the CFLAGS macro. It is for example used in the build GitHub workflow to add -Werror during the compilation.
@@ -32,23 +35,23 @@
 
 VERBOSE ?= 0
 
+# Directories
+SRC_DIR     := src
+MAIN_DIR    := $(SRC_DIR)/main
+TEST_DIR    := $(SRC_DIR)/test
+BUILD_DIR   := build
+
 # Compiler and flags
 ifeq ($(VERBOSE),0)
 CC          := @gcc
 else
 CC          := gcc
 endif
-CFLAGS      := -Wall -Wextra -std=c11
+CFLAGS      := -Wall -Wextra -I$(MAIN_DIR)
 XCFLAGS     :=
-TEST_FLAGS   = -DUNIT_TEST -I$(MAIN_DIR)
-CRITERION_FLAGS := $(shell pkg-config --cflags --libs criterion)
+TEST_FLAGS  := -DUNIT_TEST $(shell pkg-config --cflags --libs criterion)
 GTK_FLAGS   := $(shell pkg-config --cflags --libs gtk+-3.0)
-
-# Directories
-SRC_DIR     := src
-MAIN_DIR    := $(SRC_DIR)/main
-TEST_DIR    := $(SRC_DIR)/test
-BUILD_DIR   := build
+LIB_FLAGS   := -lm $(GTK_FLAGS)
 
 # Source files
 SRC_MAIN    := $(shell find $(MAIN_DIR) -name '*.c')
@@ -87,7 +90,7 @@ $(BIN_IMAGE_LOADER): $(filter $(BUILD_DIR)/main/image_loader/%.o,$(OBJ_MAIN))
 # Test binary
 $(BIN_TEST): $(OBJ_MAIN_FOR_TEST) $(OBJ_TEST)
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) $(XCFLAGS) $(TEST_FLAGS) $^ -o $@ $(CRITERION_FLAGS) $(GTK_FLAGS)
+	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(TEST_FLAGS) $(GTK_FLAGS)
 
 ##############################
 #        PATTERN RULES       #
@@ -96,17 +99,17 @@ $(BIN_TEST): $(OBJ_MAIN_FOR_TEST) $(OBJ_TEST)
 # Compile main sources for normal executables
 $(BUILD_DIR)/main/%.o: $(MAIN_DIR)/%.c
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) $(XCFLAGS) -c $< -o $@ $(GTK_FLAGS)
+	$(CC) $(CFLAGS) $(XCFLAGS) -c $< -o $@ $(LIB_FLAGS)
 
 # Compile main sources for tests
 $(BUILD_DIR)/main_for_test/%.o: $(MAIN_DIR)/%.c
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) $(XCFLAGS) $(TEST_FLAGS) -c $< -o $@ $(GTK_FLAGS)
+	$(CC) $(CFLAGS) $(XCFLAGS) -c $< -o $@ $(TEST_FLAGS) $(LIB_FLAGS)
 
 # Compile test sources
 $(BUILD_DIR)/test/%.o: $(TEST_DIR)/%.c
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) $(XCFLAGS) $(TEST_FLAGS) -c $< -o $@ $(CRITERION_FLAGS) $(GTK_FLAGS)
+	$(CC) $(CFLAGS) $(XCFLAGS) -c $< -o $@ $(TEST_FLAGS) $(LIB_FLAGS)
 
 ##############################
 #           PHONY            #
