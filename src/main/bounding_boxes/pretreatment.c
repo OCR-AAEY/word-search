@@ -1,6 +1,93 @@
 #include "pretreatment.h"
 #include <math.h>
 #include <stdlib.h>
+#include <err.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
+/// @brief Converts a Pixel to grayscale using Rec.709 luminance weights.
+///
+/// This function applies the weighted sum formula:
+/// Gray = 0.2126 * R + 0.7152 * G + 0.0722 * B
+/// These coefficients correspond to the Rec.709 standard, which models
+/// human perception by giving more weight to green and less to blue.
+///
+/// @param[in] pixel Pointer to the input RGB pixel.
+/// @return Grayscale value in the range [0, 255].
+uint8_t pixel_to_grayscale(Pixel *pixel)
+{
+    return 0.2126 * pixel->r + 0.7152 * pixel->g + 0.0722 * pixel->b;
+}
+
+/// @brief Converts an ImageData to a grayscale matrix.
+///
+/// Each pixel is converted to grayscale using @ref pixel_to_grayscale,
+/// and stored in a matrix. The result is a single-channel image
+/// suitable for further image processing (e.g., Gaussian blur, edge detection).
+///
+/// @param[in] img Pointer to the input image data (RGB).
+/// @return A newly allocated matrix containing grayscale values.
+///         Each element is in the range [0, 255].
+/// @see pixel_to_grayscale
+Matrix *image_to_grayscale(ImageData *img)
+{
+    Matrix *grayscaled_pixels = create_empty_matrix(img->height, img->width);
+    for (size_t h = 0; h < img->height; h++)
+    {
+        for (size_t w = 0; w < img->width; w++)
+        {
+            double *gray_scaled_pixel = get_coef_addr(grayscaled_pixels, h, w);
+            *gray_scaled_pixel = pixel_to_grayscale(get_pixel(img, h, w));
+        }
+    }
+    return grayscaled_pixels;
+}
+
+/// @brief Converts a grayscale matrix to an RGB image.
+/// @param[in] matrix Pointer to the input grayscale matrix (values 0.0–255.0).
+/// @return Pointer to a newly allocated ImageData containing RGB pixels.
+/// @throw Throws if allocations failed or the values in the matrix are not valid
+ImageData *pixel_matrix_to_image(Matrix *matrix)
+{
+    ImageData *img = malloc(sizeof(ImageData));
+    if (img == NULL)
+        errx(EXIT_FAILURE, "Failed to allocate the ImageData struct");
+
+    size_t height = matrix_height(matrix);
+    size_t width = matrix_width(matrix);
+    Pixel *pixels = malloc(height * width * sizeof(Pixel));
+
+    if (pixels == NULL)
+    {
+        free(img);
+        errx(EXIT_FAILURE, "Failed to allocate the pixels array");
+    }
+
+    for (size_t h = 0; h < img->height; h++)
+    {
+        for (size_t w = 0; w < img->width; w++)
+        {
+            double gray_scaled_pixel = get_coef(matrix, h, w);
+
+            if (gray_scaled_pixel < 0 || gray_scaled_pixel > 255)
+            {
+                free(img);
+                free(pixels);
+                errx(EXIT_FAILURE, "Matrix values must be between 0 and 255");
+            }
+
+            Pixel *pixel = &pixels[h * width + w];
+            // Convert the grayscale double to a uint8_t (with rounding)
+            uint8_t gray = (uint8_t)floor(gray_scaled_pixel + 0.5);
+            pixel->r = gray;
+            pixel->g = gray;
+            pixel->b = gray;
+        }
+    }
+    img->height = height;
+    img->width = width;
+    img->pixels = pixels;
+    return img;
+}
 
 /// @brief Computes the value of a 2D Gaussian function at (x, y).
 ///
@@ -100,6 +187,23 @@ Matrix *gaussian_normalize(Matrix *g)
     return scalar_multiplication(g, 1 / sum_matrix_coefs(g));
 }
 
+/// @brief Clamp an integer value between a minimum and a maximum.
+/// 
+/// 
+/// @param[in] value The integer value to clamp.
+/// @param[in] min The minimum allowed value.
+/// @param[in] max The maximum allowed value.
+/// @return The clamped integer in the range [min, max].
+
+int clamp(int value, int min, int max)
+{
+    if (value < min)
+        return min;
+    if (value > max)
+        return max;
+    return max;
+}
+
 /// @brief Convolves an image with a Gaussian kernel to produce a blurred image.
 ///
 /// Each pixel in the output image is computed as the weighted sum of
@@ -179,3 +283,24 @@ Matrix *gaussian_blur(Matrix *pixels, double sigma, size_t kernel_size)
     free_matrix(g);
     return blured;
 }
+
+
+#ifndef UNIT_TEST
+
+int main() {
+    ImageData *img = load_image("assets/sample_images/level_1_image_1.png");
+    Matrix *gray_img = image_to_grayscale(img);
+    Matrix *blured = gaussian_blur(gray_img, 2, 7);
+    ImageData *final_img = pixel_matrix_to_image(blured);
+    GdkPixbuf *pixbuf = create_pixbuf_from_image_data(final_img);
+    save_pixbuf_to_png(pixbuf, "pretreatement.png", NULL);
+    g_object_unref(pixbuf);
+    free_image(img);
+    free_matrix(gray_img);
+    free_matrix(blured);
+    free_image(final_img);
+
+    return EXIT_SUCCESS;
+}
+
+#endif

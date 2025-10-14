@@ -13,14 +13,17 @@ typedef struct {
 } Pixel;
 
 typedef struct {
-    int width;
-    int height;
+    size_t width;
+    size_t height;
     Pixel *pixels;
 } ImageData;
 
 ImageData *load_image(const char *path);
 int save_pixbuf_to_png(GdkPixbuf *pixbuf, char *filename, GError **error);
+GdkPixbuf *create_pixbuf_from_image_data(ImageData *img);
 void free_pixels(guchar *pixels, gpointer data);
 void free_image(ImageData *img);
+
+Pixel *get_pixel(ImageData *img, size_t h, size_t w);
 
 #endif
