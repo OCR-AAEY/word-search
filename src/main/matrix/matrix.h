@@ -1,6 +1,8 @@
 #ifndef MATIRX_H
 #define MATIRX_H
 
+#include <stdlib.h>
+
 typedef struct Matrix Matrix;
 
 size_t mat_height(Matrix *m);
@@ -13,6 +15,8 @@ Matrix *mat_create_from_arr(size_t height, size_t width,
                       double *content);
 
 void mat_free(Matrix *matrix);
+
+Matrix *mat_deepcopy(Matrix *m);
 
 double *mat_coef_addr(Matrix *m, size_t h, size_t w);
 
