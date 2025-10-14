@@ -6,13 +6,15 @@
 #include <glib.h>
 #include <stdint.h>
 
-typedef struct {
+typedef struct
+{
     uint8_t r;
     uint8_t g;
     uint8_t b;
 } Pixel;
 
-typedef struct {
+typedef struct
+{
     size_t width;
     size_t height;
     Pixel *pixels;
