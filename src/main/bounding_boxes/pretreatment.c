@@ -194,9 +194,11 @@ Matrix *gaussian_normalize(Matrix *g)
 /// @param[in] min The minimum allowed value.
 /// @param[in] max The maximum allowed value.
 /// @return The clamped integer in the range [min, max].
-
+/// @throw Throws if the minimum is strictly greater than the maximum
 int clamp(int value, int min, int max)
 {
+    if (max < min)
+        errx(EXIT_FAILURE, "Minimum must be less than or equal maximum");
     if (value < min)
         return min;
     if (value > max)
