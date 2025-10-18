@@ -129,4 +129,8 @@ clean:
 	@echo "Cleaning build files..."
 	@rm -rf $(BUILD_DIR)
 
-.PHONY: all test clean
+format:
+	@echo "Formatting source files..."
+	@find . -iname '*.h' -o -iname '*.c' | xargs clang-format -i
+
+.PHONY: all test clean format
