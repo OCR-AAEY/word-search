@@ -1,7 +1,7 @@
 #include <err.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 
 #include "matrix.h"
 
@@ -41,11 +41,11 @@ Matrix *mat_create_empty(size_t height, size_t width)
     return m;
 }
 
-/// @brief 
-/// @param height 
-/// @param width 
+/// @brief
+/// @param height
+/// @param width
 /// @param content allocated on the heap
-/// @return 
+/// @return
 Matrix *mat_create_from_arr(size_t height, size_t width, double *content)
 {
     Matrix *m = malloc(sizeof(Matrix));
@@ -60,7 +60,6 @@ void mat_free(Matrix *matrix)
     free(matrix->content);
     free(matrix);
 }
-
 
 /// @brief Creates a deep copy of a matrix (allocates a new matrix with the same
 /// contents).
@@ -194,7 +193,8 @@ Matrix *mat_sigmoid(Matrix *m)
     return res;
 }
 
-Matrix* mat_map(Matrix* m, double (*f)(double)) {
+Matrix *mat_map(Matrix *m, double (*f)(double))
+{
     Matrix *res = mat_create_empty(m->height, m->width);
 
     for (size_t i = 0; i < m->height * m->width; i++)

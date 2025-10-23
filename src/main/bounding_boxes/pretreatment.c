@@ -15,7 +15,8 @@
 /// @return Grayscale value in the range [0, 255].
 uint8_t pixel_to_grayscale(Pixel *pixel)
 {
-    return 0.2126 * pixel->r + 0.7152 * pixel->g + 0.0722 * pixel->b;
+    return (uint8_t)round(0.2126 * pixel->r + 0.7152 * pixel->g +
+                          0.0722 * pixel->b);
 }
 
 /// @brief Converts an ImageData to a grayscale matrix.
@@ -102,13 +103,14 @@ double gaussian_function(int x, double sigma)
 
 /// @brief Return the 1D Gaussian kernel for a given sigma and size
 ///
-/// The kernel is centered, normalized and its values are computed 
+/// The kernel is centered, normalized and its values are computed
 /// using the 1D Gaussian function.
 ///
 /// @param[in] sigma The standard deviation of the Gaussian.
 /// @param[in] kernel_size The size of the kernel. Must be odd; even sizes
 /// return NULL.
-/// @return The gaussian kernel vector or NULL if kernel_size is incorrect (even).
+/// @return The gaussian kernel vector or NULL if kernel_size is incorrect
+/// (even).
 double *gaussian_kernel_1d(double sigma, size_t kernel_size)
 {
     int m = (kernel_size - 1) / 2;
@@ -146,7 +148,6 @@ int clamp(int value, int min, int max)
     return value;
 }
 
-
 /// @brief Performs a 1D horizontal convolution on an image.
 ///
 /// Each pixel in the output image is computed as a weighted sum of its
@@ -165,8 +166,8 @@ Matrix *convolve_horizontally(const Matrix *src, const double *kernel,
 {
     if (kernel_size % 2 == 0)
         errx(EXIT_FAILURE, "The kernel size must be an odd number");
-    
-    if(src == NULL)
+
+    if (src == NULL)
         errx(EXIT_FAILURE, "The source matrix is NULL");
 
     int m = (kernel_size - 1) / 2;
@@ -209,12 +210,12 @@ Matrix *convolve_horizontally(const Matrix *src, const double *kernel,
 ///         convolved image.
 /// @throw Throws if the @p src is NULL or kernel_size is even.
 Matrix *convolve_vertically(const Matrix *src, const double *kernel,
-                              size_t kernel_size)
+                            size_t kernel_size)
 {
     if (kernel_size % 2 == 0)
         errx(EXIT_FAILURE, "The kernel size must be an odd number");
-    
-    if(src == NULL)
+
+    if (src == NULL)
         errx(EXIT_FAILURE, "The source matrix is NULL");
 
     int m = (kernel_size - 1) / 2;
@@ -243,7 +244,8 @@ Matrix *convolve_vertically(const Matrix *src, const double *kernel,
     return dst;
 }
 
-/// @brief Applies a Gaussian blur to an input image using separable convolution.
+/// @brief Applies a Gaussian blur to an input image using separable
+/// convolution.
 ///
 /// This function creates a normalized 1D Gaussian kernel based on the specified
 /// standard deviation and kernel size, and applies it in two passes:
@@ -260,10 +262,9 @@ Matrix *gaussian_blur(const Matrix *src, double sigma, size_t kernel_size)
 {
     if (kernel_size % 2 == 0)
         errx(EXIT_FAILURE, "The kernel size must be an odd number");
-    
-    if(src == NULL)
-        errx(EXIT_FAILURE, "The source matrix is NULL");
 
+    if (src == NULL)
+        errx(EXIT_FAILURE, "The source matrix is NULL");
 
     const double *kernel = gaussian_kernel_1d(sigma, kernel_size);
 
@@ -271,18 +272,19 @@ Matrix *gaussian_blur(const Matrix *src, double sigma, size_t kernel_size)
     Matrix *blurred = convolve_vertically(tmp, kernel, kernel_size);
 
     mat_free(tmp);
-    free((void*)kernel);
+    free((void *)kernel);
     return blurred;
 }
 
 /// @brief Applies adaptive Gaussian thresholding to an input image.
 ///
-/// Each pixel is compared to a local threshold computed from the Gaussian-blurred
-/// version of the image. The local threshold for a pixel is defined as the
-/// Gaussian-weighted mean of its neighborhood minus a constant @p c.
+/// Each pixel is compared to a local threshold computed from the
+/// Gaussian-blurred version of the image. The local threshold for a pixel is
+/// defined as the Gaussian-weighted mean of its neighborhood minus a constant
+/// @p c.
 ///
-/// The output pixel value is set to @p max_value if the original pixel is greater
-/// than its local threshold, or 0 otherwise.
+/// The output pixel value is set to @p max_value if the original pixel is
+/// greater than its local threshold, or 0 otherwise.
 ///
 /// This implementation uses a separable Gaussian blur for efficiency.
 ///
@@ -290,9 +292,12 @@ Matrix *gaussian_blur(const Matrix *src, double sigma, size_t kernel_size)
 /// @param[in] max_value Value assigned to pixels that pass the threshold.
 /// @param[in] kernel_size Size of the Gaussian kernel (must be odd).
 /// @param[in] sigma Standard deviation of the Gaussian kernel (must be > 0).
-/// @param[in] c Constant subtracted from the local mean to determine the threshold.
-/// @return Pointer to a newly allocated matrix containing the thresholded image.
-/// @throw Throws if the @p max_value or @p sigma are invalid or if @p src is NULL.
+/// @param[in] c Constant subtracted from the local mean to determine the
+/// threshold.
+/// @return Pointer to a newly allocated matrix containing the thresholded
+/// image.
+/// @throw Throws if the @p max_value or @p sigma are invalid or if @p src is
+/// NULL.
 Matrix *adaptative_gaussian_thresholding(const Matrix *src, double max_value,
                                          size_t kernel_size, double sigma,
                                          double c)
