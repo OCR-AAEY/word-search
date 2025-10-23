@@ -1,8 +1,8 @@
 #include "pretreatment.h"
-#include <math.h>
-#include <stdlib.h>
 #include <err.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <math.h>
+#include <stdlib.h>
 
 /// @brief Converts a Pixel to grayscale using Rec.709 luminance weights.
 ///
@@ -45,7 +45,8 @@ Matrix *image_to_grayscale(ImageData *img)
 /// @brief Converts a grayscale matrix to an RGB image.
 /// @param[in] matrix Pointer to the input grayscale matrix (values 0.0–255.0).
 /// @return Pointer to a newly allocated ImageData containing RGB pixels.
-/// @throw Throws if allocations failed or the values in the matrix are not valid
+/// @throw Throws if allocations failed or the values in the matrix are not
+/// valid
 ImageData *pixel_matrix_to_image(Matrix *matrix)
 {
     ImageData *img = malloc(sizeof(ImageData));
@@ -89,82 +90,43 @@ ImageData *pixel_matrix_to_image(Matrix *matrix)
     return img;
 }
 
-/// @brief Computes the value of a 2D Gaussian function at (x, y).
+/// @brief Computes the value of a 1D Gaussian function at (x).
 ///
-/// @param[in] x The x-coordinate relative to the center of the kernel.
-/// @param[in] y The y-coordinate relative to the center of the kernel.
+/// @param[in] x The x-coordinate relative to the center of the kernel vector.
 /// @param[in] sigma The standard deviation of the Gaussian.
 /// @return The Gaussian value at the given coordinates.
-double gaussian_function(int x, int y, double sigma)
+double gaussian_function(int x, double sigma)
 {
-    // double res = 1.0 / (2.0 * M_PI * sigma * sigma);
-    // res *= exp(-(x * x + y * y) / (2.0 * sigma * sigma));
-    return exp(-(x * x + y * y) / (2.0 * sigma * sigma));
+    return exp(-(x * x) / (2.0 * sigma * sigma));
 }
 
-/// @brief Return the 2D Gaussian kernel for a given sigma and size
+/// @brief Return the 1D Gaussian kernel for a given sigma and size
 ///
-/// The kernel is centered, and its values are computed using the standard
-/// 2D Gaussian function.
+/// The kernel is centered, normalized and its values are computed 
+/// using the 1D Gaussian function.
 ///
 /// @param[in] sigma The standard deviation of the Gaussian.
 /// @param[in] kernel_size The size of the kernel. Must be odd; even sizes
 /// return NULL.
-/// @return The gaussian matrix or NULL if kernel_size is incorrect (even).
-Matrix *gaussian_kernel(double sigma, size_t kernel_size)
+/// @return The gaussian kernel vector or NULL if kernel_size is incorrect (even).
+double *gaussian_kernel_1d(double sigma, size_t kernel_size)
 {
-    // this is our kernel
-    Matrix *kernel = mat_create_empty(kernel_size, kernel_size);
-    if (kernel == NULL)
-        errx(EXIT_FAILURE, "Failed to allocate the kernel");
-
-    if (kernel_size % 2 == 0)
-    {
-        return NULL;
-    }
     int m = (kernel_size - 1) / 2;
+    double *kernel = malloc(kernel_size * sizeof(double));
+    double sum = 0.0;
+
     for (int i = -m; i <= m; i++)
     {
-        for (int j = -m; j <= m; j++)
-        {
-            double *cell = mat_coef_addr(kernel, i + m, j + m);
-            *cell = gaussian_function(i, j, sigma);
-        }
+        double value = gaussian_function(i, sigma);
+        kernel[i + m] = value;
+        sum += value;
     }
+
+    // Normalize to make sum = 1
+    for (size_t i = 0; i < kernel_size; i++)
+        kernel[i] /= sum;
+
     return kernel;
-}
-
-/// @brief Computes the sum of all coefficients in a matrix.
-///
-/// @param[in] mat Pointer to the input matrix whose elements are to be summed.
-/// @return The sum of all coefficients in the matrix.
-double sum_matrix_coefs(Matrix *mat)
-{
-    size_t height = mat_height(mat);
-    size_t width = mat_width(mat);
-    double res = 0;
-    for (size_t h = 0; h < height; h++)
-    {
-        for (size_t w = 0; w < width; w++)
-        {
-            res += mat_coef(mat, h, w);
-        }
-    }
-    return res;
-}
-
-/// @brief Normalizes inplace a Gaussian kernel so that the sum of all
-/// coefficients equals 1.
-///
-/// This function modifies the input matrix by dividing each element by the
-/// total sum of all coefficients. Useful to preserve image brightness after
-/// convolution.
-///
-/// @param[in,out] g Pointer to the Gaussian kernel matrix to be normalized.
-/// @return Pointer to the normalized matrix (same as input).
-Matrix *gaussian_normalize(Matrix *g)
-{
-    return mat_scalar_multiplication(g, 1 / sum_matrix_coefs(g));
 }
 
 /// @brief Clamp an integer value between a minimum and a maximum.
@@ -184,103 +146,217 @@ int clamp(int value, int min, int max)
     return value;
 }
 
-/// @brief Convolves an image with a Gaussian kernel to produce a blurred image.
+
+/// @brief Performs a 1D horizontal convolution on an image.
 ///
-/// Each pixel in the output image is computed as the weighted sum of
-/// neighboring pixels in the input image, using the provided Gaussian kernel.
-/// Out-of-bounds pixels are handled by clamping to the nearest valid pixel
-/// (edge repetition).
+/// Each pixel in the output image is computed as a weighted sum of its
+/// horizontal neighbors in the input image, using the specified 1D convolution
+/// kernel. Out-of-bounds pixels are handled by clamping to the nearest valid
+/// pixel (edge repetition).
 ///
-/// @param[in] g Pointer to the Gaussian kernel matrix (kernel_size x
-/// kernel_size).
-/// @param[in] image Pointer to the input image matrix to be blurred.
-/// @param[in] kernel_size Size of the square Gaussian kernel (must be odd).
-/// @return Pointer to a newly allocated matrix containing the blurred image, or
-/// NULL if kernel_size is even.
-Matrix *gaussian_convolute(Matrix *g, Matrix *image, size_t kernel_size)
+/// @param[in] src Pointer to the source image matrix.
+/// @param[in] kernel Pointer to a 1D array of convolution weights.
+/// @param[in] kernel_size Length of the 1D kernel (must be odd).
+/// @return Pointer to the matrix containing the horizontally
+///         convolved image.
+/// @throw Throws if the @p src is NULL or kernel_size is even.
+Matrix *convolve_horizontally(const Matrix *src, const double *kernel,
+                              size_t kernel_size)
 {
     if (kernel_size % 2 == 0)
-        return NULL;
+        errx(EXIT_FAILURE, "The kernel size must be an odd number");
+    
+    if(src == NULL)
+        errx(EXIT_FAILURE, "The source matrix is NULL");
 
     int m = (kernel_size - 1) / 2;
-    size_t height = mat_height(image);
-    size_t width = mat_width(image);
-    Matrix *blured = mat_create_empty(height, width);
+    size_t height = mat_height(src);
+    size_t width = mat_width(src);
+    Matrix *dst = mat_create_empty(height, width);
 
     for (size_t x = 0; x < height; x++)
         for (size_t y = 0; y < width; y++)
         {
-            double *blured_pixel = mat_coef_addr(blured, x, y);
+            double *dst_pixel = mat_coef_addr(dst, x, y);
             for (int i = -m; i <= m; i++)
             {
-                for (int j = -m; j <= m; j++)
-                {
-                    // clamp will treat indexes out of bound to stay at the last
-                    // acceptable value. This will repeat the pixel inside the
-                    // image to fill the missing pixels.
-                    double image_pixel =
-                        mat_coef(image, clamp(x + i, 0, height - 1),
-                                 clamp(y + j, 0, width - 1));
-                    // i and j are indexes from the center of the kernel
-                    // by adding m we make sure that we use the indexing method
-                    // of matrices to get the correct coef.
-                    double g_i_j = mat_coef(g, i + m, j + m);
-                    *blured_pixel += g_i_j * image_pixel;
-                }
+                // clamp will treat indexes out of bound to stay at the last
+                // acceptable value. This will repeat the pixel inside the
+                // image to fill the missing pixels.
+                double image_pixel =
+                    mat_coef(src, x, clamp(y + i, 0, width - 1));
+                // i is the index from the center of the kernel
+                // by adding m we make sure that we use the indexing method
+                // of the kernel vector
+                double weight = kernel[m + i];
+                *dst_pixel += weight * image_pixel;
             }
         }
-    return blured;
+    return dst;
 }
 
-/// @brief Applies a Gaussian blur to an input image.
+/// @brief Performs a 1D vertical convolution on an image.
 ///
-/// This function creates a Gaussian kernel of the specified size and standard
-/// deviation, normalizes it, and then convolves it with the input image to
-/// produce a blurred output. The input image is not modified. The kernel matrix
-/// is automatically freed after convolution.
+/// Each pixel in the output image is computed as a weighted sum of its
+/// vertical neighbors in the input image, using the specified 1D convolution
+/// kernel. Out-of-bounds pixels are handled by clamping to the nearest valid
+/// pixel (edge repetition).
 ///
-/// @param[in] pixels Pointer to the input image matrix to be blurred.
-/// @param[in] sigma The standard deviation of the Gaussian blur.
-/// @param[in] kernel_size Size of the square Gaussian kernel (must be odd).
-/// @return Pointer to a newly allocated matrix containing the blurred image,
-///         or NULL if kernel_size is even.
-Matrix *gaussian_blur(Matrix *pixels, double sigma, size_t kernel_size)
+/// @param[in] src Pointer to the source image matrix.
+/// @param[in] kernel Pointer to a 1D array of convolution weights.
+/// @param[in] kernel_size Length of the 1D kernel (must be odd).
+/// @return Pointer to the matrix containing the vertically
+///         convolved image.
+/// @throw Throws if the @p src is NULL or kernel_size is even.
+Matrix *convolve_vertically(const Matrix *src, const double *kernel,
+                              size_t kernel_size)
 {
     if (kernel_size % 2 == 0)
-    {
-        return NULL;
-    }
+        errx(EXIT_FAILURE, "The kernel size must be an odd number");
+    
+    if(src == NULL)
+        errx(EXIT_FAILURE, "The source matrix is NULL");
 
-    // we transform it into a gaussian kernel matrix
-    Matrix *kernel = gaussian_kernel(sigma, kernel_size);
-    // we normalize it to have the sum of the weights = 1
-    Matrix *normalized_kernel = gaussian_normalize(kernel);
-    Matrix *blured = gaussian_convolute(normalized_kernel, pixels, kernel_size);
-    mat_free(kernel);
-    return blured;
+    int m = (kernel_size - 1) / 2;
+    size_t height = mat_height(src);
+    size_t width = mat_width(src);
+    Matrix *dst = mat_create_empty(height, width);
+
+    for (size_t x = 0; x < height; x++)
+        for (size_t y = 0; y < width; y++)
+        {
+            double *dst_pixel = mat_coef_addr(dst, x, y);
+            for (int i = -m; i <= m; i++)
+            {
+                // clamp will treat indexes out of bound to stay at the last
+                // acceptable value. This will repeat the pixel inside the
+                // image to fill the missing pixels.
+                double image_pixel =
+                    mat_coef(src, clamp(x + i, 0, height - 1), y);
+                // i is the index from the center of the kernel
+                // by adding m we make sure that we use the indexing method
+                // of the kernel vector
+                double weight = kernel[m + i];
+                *dst_pixel += weight * image_pixel;
+            }
+        }
+    return dst;
 }
 
+/// @brief Applies a Gaussian blur to an input image using separable convolution.
+///
+/// This function creates a normalized 1D Gaussian kernel based on the specified
+/// standard deviation and kernel size, and applies it in two passes:
+///  - A horizontal 1D convolution
+///  - A vertical 1D convolution
+/// This separated approach improves performances.
+///
+/// @param[in] src Pointer to the input image matrix to be blurred.
+/// @param[in] sigma The standard deviation of the Gaussian blur.
+/// @param[in] kernel_size Size of the square Gaussian kernel (must be odd).
+/// @return Pointer to a newly allocated matrix containing the blurred image.
+/// @throw Throws if the kernel_size is even or the @p src is NULL.
+Matrix *gaussian_blur(const Matrix *src, double sigma, size_t kernel_size)
+{
+    if (kernel_size % 2 == 0)
+        errx(EXIT_FAILURE, "The kernel size must be an odd number");
+    
+    if(src == NULL)
+        errx(EXIT_FAILURE, "The source matrix is NULL");
+
+
+    const double *kernel = gaussian_kernel_1d(sigma, kernel_size);
+
+    Matrix *tmp = convolve_horizontally(src, kernel, kernel_size);
+    Matrix *blurred = convolve_vertically(tmp, kernel, kernel_size);
+
+    mat_free(tmp);
+    free((void*)kernel);
+    return blurred;
+}
+
+/// @brief Applies adaptive Gaussian thresholding to an input image.
+///
+/// Each pixel is compared to a local threshold computed from the Gaussian-blurred
+/// version of the image. The local threshold for a pixel is defined as the
+/// Gaussian-weighted mean of its neighborhood minus a constant @p c.
+///
+/// The output pixel value is set to @p max_value if the original pixel is greater
+/// than its local threshold, or 0 otherwise.
+///
+/// This implementation uses a separable Gaussian blur for efficiency.
+///
+/// @param[in] src Pointer to the input grayscale image matrix.
+/// @param[in] max_value Value assigned to pixels that pass the threshold.
+/// @param[in] kernel_size Size of the Gaussian kernel (must be odd).
+/// @param[in] sigma Standard deviation of the Gaussian kernel (must be > 0).
+/// @param[in] c Constant subtracted from the local mean to determine the threshold.
+/// @return Pointer to a newly allocated matrix containing the thresholded image.
+/// @throw Throws if the @p max_value or @p sigma are invalid or if @p src is NULL.
+Matrix *adaptative_gaussian_thresholding(const Matrix *src, double max_value,
+                                         size_t kernel_size, double sigma,
+                                         double c)
+{
+    if (max_value < 0)
+        errx(EXIT_FAILURE, "The max value must be a positive double");
+    if (sigma <= 0)
+        errx(EXIT_FAILURE, "Sigma must be positive");
+    if (src == NULL)
+        errx(EXIT_FAILURE, "The source matrix is NULL");
+
+    Matrix *blurred = gaussian_blur(src, sigma, kernel_size);
+    size_t height = mat_height(src);
+    size_t width = mat_width(src);
+    Matrix *dest = mat_create_empty(height, width);
+
+    for (size_t h = 0; h < height; h++)
+    {
+        for (size_t w = 0; w < width; w++)
+        {
+            double *pixel = mat_coef_addr(dest, h, w);
+            double blurred_pixel = mat_coef(blurred, h, w);
+            double src_pixel = mat_coef(src, h, w);
+            double T = blurred_pixel - c;
+            *pixel = src_pixel > T ? max_value : 0;
+        }
+    }
+    mat_free(blurred);
+    return dest;
+}
 
 #ifndef UNIT_TEST
 
-int main() {
+int main()
+{
     ImageData *img = load_image("assets/test_images/montgolfiere.jpg");
-    
+
     Matrix *gray = image_to_grayscale(img);
-    Matrix *blured = gaussian_blur(gray, 10, 11);
-    ImageData *blured_img = pixel_matrix_to_image(blured);
-    ImageData *gray_img = pixel_matrix_to_image(gray);
-    GdkPixbuf *pixbuf_blur = create_pixbuf_from_image_data(blured_img);
-    save_pixbuf_to_png(pixbuf_blur, "blured.png", NULL);
-    GdkPixbuf *pixbuf_gray = create_pixbuf_from_image_data(gray_img);
-    save_pixbuf_to_png(pixbuf_gray, "gray.png", NULL);
-    g_object_unref(pixbuf_blur);
-    g_object_unref(pixbuf_gray);
+    // ImageData *gray_img = pixel_matrix_to_image(gray);
+    // GdkPixbuf *pixbuf_gray = create_pixbuf_from_image_data(gray_img);
+    // save_pixbuf_to_png(pixbuf_gray, "gray.png", NULL);
+    // g_object_unref(pixbuf_gray);
+    // free_image(gray_img);
+
+    // Matrix *blured = gaussian_blur(gray, 10, 11);
+    //  ImageData *blured_img = pixel_matrix_to_image(blured);
+    //  GdkPixbuf *pixbuf_blur = create_pixbuf_from_image_data(blured_img);
+    //  save_pixbuf_to_png(pixbuf_blur, "blured.png", NULL);
+    //  g_object_unref(pixbuf_blur);
+    //  free_image(blured_img);
+
+    Matrix *threashold =
+        adaptative_gaussian_thresholding(gray, 255, 11, 1.5, 0);
+    ImageData *threashold_img = pixel_matrix_to_image(threashold);
+    GdkPixbuf *pixbuf_threashold =
+        create_pixbuf_from_image_data(threashold_img);
+    save_pixbuf_to_png(pixbuf_threashold, "threashold.png", NULL);
+    g_object_unref(pixbuf_threashold);
+    free_image(threashold_img);
+
     free_image(img);
     mat_free(gray);
-    mat_free(blured);
-    free_image(blured_img);
-    free_image(gray_img);
+    // mat_free(blured);
+    mat_free(threashold);
 
     return EXIT_SUCCESS;
 }
