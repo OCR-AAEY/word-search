@@ -49,7 +49,7 @@ CC          := gcc
 endif
 CFLAGS      := -Wall -Wextra -I$(MAIN_DIR)
 XCFLAGS     :=
-TEST_FLAGS  := -DUNIT_TEST $(shell pkg-config --cflags --libs criterion)
+TEST_FLAGS  := -DUNIT_TEST -fsanitize=address $(shell pkg-config --cflags --libs criterion)
 GTK_FLAGS   := $(shell pkg-config --cflags --libs gtk+-3.0)
 LIB_FLAGS   := -lm $(GTK_FLAGS)
 
@@ -129,4 +129,8 @@ clean:
 	@echo "Cleaning build files..."
 	@rm -rf $(BUILD_DIR)
 
-.PHONY: all test clean
+format:
+	@echo "Formatting source files..."
+	@find . -iname '*.h' -o -iname '*.c' | xargs clang-format -i
+
+.PHONY: all test clean format
