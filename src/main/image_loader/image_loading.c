@@ -109,10 +109,12 @@ ImageData *load_image(const char *filename)
     }
 
     // Populates the Pixel data
-    
-    for (int h = 0; h < height; h++) {
+
+    for (int h = 0; h < height; h++)
+    {
         guchar *row = pixels + h * rowstride;
-        for (int w = 0; w < width; w++) {
+        for (int w = 0; w < width; w++)
+        {
             pixels_copy[h * width + w].r = row[w * channels];
             pixels_copy[h * width + w].g = row[w * channels + 1];
             pixels_copy[h * width + w].b = row[w * channels + 2];
@@ -147,7 +149,7 @@ Pixel *get_pixel(ImageData *img, size_t h, size_t w)
 {
     if (h >= img->height || w >= img->width)
         return NULL;
-    
+
     return &(img->pixels[h * img->width + w]);
 }
 
