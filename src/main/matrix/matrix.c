@@ -19,12 +19,12 @@ struct Matrix
 /// @brief Returns the height (number of rows) of the given matrix.
 /// @param m Pointer to the matrix.
 /// @return The number of rows in the matrix.
-inline size_t mat_height(Matrix *m) { return m->height; }
+inline size_t mat_height(const Matrix *m) { return m->height; }
 
 /// @brief Returns the width (number of columns) of the given matrix.
 /// @param m Pointer to the matrix.
 /// @return The number of columns in the matrix.
-inline size_t mat_width(Matrix *m) { return m->width; }
+inline size_t mat_width(const Matrix *m) { return m->width; }
 
 /// @brief Creates an empty matrix (initialized with zeros) on the heap.
 /// @param height Number of rows in the new matrix (must be non-zero).
@@ -87,7 +87,7 @@ void mat_free(Matrix *matrix)
 /// @param m Pointer to the matrix to copy.
 /// @return A pointer to a new matrix identical to the original.
 /// @throw Terminates the program if memory allocation fails.
-Matrix *mat_deepcopy(Matrix *m)
+Matrix *mat_deepcopy(const Matrix *m)
 {
     double *content = calloc(m->height * m->width, sizeof(double));
     if (content == NULL)
@@ -104,11 +104,11 @@ Matrix *mat_deepcopy(Matrix *m)
     return new_m;
 }
 
-double *mat_internal_coef_addr(Matrix *m, size_t h, size_t w);
+double *mat_internal_coef_addr(const Matrix *m, size_t h, size_t w);
 
 /// @brief For internal use. More efficient because it does not check for valid
 /// parameters.
-inline double *mat_internal_coef_addr(Matrix *m, size_t h, size_t w)
+inline double *mat_internal_coef_addr(const Matrix *m, size_t h, size_t w)
 {
     return m->content + h * m->width + w;
 }
@@ -118,7 +118,7 @@ inline double *mat_internal_coef_addr(Matrix *m, size_t h, size_t w)
 /// @param h Row index (0 ≤ h < height).
 /// @param w Column index (0 ≤ w < width).
 /// @return A pointer to the coefficient at position (h, w).
-inline double *mat_coef_addr(Matrix *m, size_t h, size_t w)
+inline double *mat_coef_addr(const Matrix *m, size_t h, size_t w)
 {
     if (h >= m->height)
         errx(1, "Invalid height given. Expected < %zu and got %zu.", m->height,
@@ -134,7 +134,7 @@ inline double *mat_coef_addr(Matrix *m, size_t h, size_t w)
 /// @param h Row index (0 ≤ h < height).
 /// @param w Column index (0 ≤ w < width).
 /// @return The value of the coefficient at position (h, w).
-inline double mat_coef(Matrix *m, size_t h, size_t w)
+inline double mat_coef(const Matrix *m, size_t h, size_t w)
 {
     if (h >= m->height)
         errx(1, "Invalid height given. Expected < %zu and got %zu.", m->height,
@@ -151,7 +151,7 @@ inline double mat_coef(Matrix *m, size_t h, size_t w)
 /// @return A new matrix representing a + b.
 /// @throw Terminates the program if the matrices have mismatched dimensions or
 /// memory allocation fails.
-Matrix *mat_addition(Matrix *a, Matrix *b)
+Matrix *mat_addition(const Matrix *a, const Matrix *b)
 {
     if (a->height != b->height)
         errx(1, "Matrix addition failed: mismatched heights (%zu vs %zu).",
@@ -193,7 +193,7 @@ Matrix *mat_scalar_multiplication(Matrix *m, double a)
 /// @return A new matrix representing the result of A × B.
 /// @throw Terminates the program if a->width != b->height or memory allocation
 /// fails.
-Matrix *mat_multiplication(Matrix *a, Matrix *b)
+Matrix *mat_multiplication(const Matrix *a, const Matrix *b)
 {
     if (a->width != b->height)
         errx(1, "Cannot multiply two matrices if the width of the first does "
@@ -222,7 +222,7 @@ Matrix *mat_multiplication(Matrix *a, Matrix *b)
 /// @param m Pointer to the input matrix.
 /// @return A new matrix containing the sigmoid of each element of m.
 /// @throw Terminates the program if memory allocation fails.
-Matrix *mat_sigmoid(Matrix *m)
+Matrix *mat_sigmoid(const Matrix *m)
 {
     Matrix *res = mat_create_empty(m->height, m->width);
 
@@ -239,7 +239,7 @@ Matrix *mat_sigmoid(Matrix *m)
 /// @param f Function pointer taking a double and returning a double.
 /// @return A new matrix where each element is f(original_element).
 /// @throw Terminates the program if memory allocation fails.
-Matrix *mat_map(Matrix *m, double (*f)(double))
+Matrix *mat_map(const Matrix *m, double (*f)(double))
 {
     Matrix *res = mat_create_empty(m->height, m->width);
 
@@ -254,7 +254,7 @@ Matrix *mat_map(Matrix *m, double (*f)(double))
 /// @brief Prints the contents of a matrix to stdout in a formatted 2D layout.
 /// @param m Pointer to the matrix to print.
 /// @param precision Number of decimal places to display for each element.
-void mat_print(Matrix *m, int precision)
+void mat_print(const Matrix *m, int precision)
 {
     if (m == NULL)
     {
