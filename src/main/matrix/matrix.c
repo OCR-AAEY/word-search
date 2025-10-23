@@ -104,11 +104,11 @@ Matrix *mat_deepcopy(const Matrix *m)
     return new_m;
 }
 
-double *mat_internal_coef_addr(const Matrix *m, size_t h, size_t w);
+double *mat_unsafe_coef_addr(const Matrix *m, size_t h, size_t w);
 
 /// @brief For internal use. More efficient because it does not check for valid
 /// parameters.
-inline double *mat_internal_coef_addr(const Matrix *m, size_t h, size_t w)
+inline double *mat_unsafe_coef_addr(const Matrix *m, size_t h, size_t w)
 {
     return m->content + h * m->width + w;
 }
@@ -126,7 +126,7 @@ inline double *mat_coef_addr(const Matrix *m, size_t h, size_t w)
     if (w >= m->width)
         errx(1, "Invalid width given. Expected < %zu and got %zu.", m->width,
              w);
-    return mat_internal_coef_addr(m, h, w);
+    return mat_unsafe_coef_addr(m, h, w);
 }
 
 /// @brief Returns the coefficient at position (h, w).
@@ -142,7 +142,7 @@ inline double mat_coef(const Matrix *m, size_t h, size_t w)
     if (w >= m->width)
         errx(1, "Invalid width given. Expected < %zu and got %zu.", m->width,
              w);
-    return *mat_internal_coef_addr(m, h, w);
+    return *mat_unsafe_coef_addr(m, h, w);
 }
 
 /// @brief Performs element-wise addition of two matrices.
@@ -207,9 +207,9 @@ Matrix *mat_multiplication(const Matrix *a, const Matrix *b)
         {
             for (size_t i = 0; i < a->width; i++)
             {
-                *mat_internal_coef_addr(m, h, w) +=
-                    *mat_internal_coef_addr(a, h, i) *
-                    *mat_internal_coef_addr(b, i, w);
+                *mat_unsafe_coef_addr(m, h, w) +=
+                    *mat_unsafe_coef_addr(a, h, i) *
+                    *mat_unsafe_coef_addr(b, i, w);
             }
         }
     }
