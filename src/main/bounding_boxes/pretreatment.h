@@ -8,7 +8,6 @@
 #include "image_loader/image_loading.h"
 #include "matrix/matrix.h"
 
-
 enum Orientation
 {
     Vertical,
@@ -24,11 +23,21 @@ enum MorphTransform
 };
 
 Matrix *gaussian_blur(const Matrix *src, double sigma, size_t kernel_size);
+
 Matrix *image_to_grayscale(ImageData *img);
+
 ImageData *pixel_matrix_to_image(Matrix *matrix);
+
 Matrix *adaptative_gaussian_thresholding(const Matrix *src, double max_value,
                                          size_t kernel_size, double sigma,
                                          double c);
+
+Matrix *erosion(const Matrix *src, size_t kernel_size);
+
+Matrix *dilation(const Matrix *src, size_t kernel_size);
+
+Matrix *morph_transform(Matrix *src, size_t kernel_size,
+                        enum MorphTransform transform);
 
 /// ============= internal functions ===============
 
@@ -40,4 +49,7 @@ Matrix *convolve_horizontally(const Matrix *src, const double *kernel,
 Matrix *convolve_vertically(const Matrix *src, const double *kernel,
                             size_t kernel_size);
 int clamp(int value, int min, int max);
+Matrix *morph_transformation_1d(const Matrix *src, size_t kernel_size,
+                                enum MorphTransform transform,
+                                enum Orientation orientation);
 #endif
