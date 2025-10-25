@@ -329,11 +329,159 @@ Matrix *adaptative_gaussian_thresholding(const Matrix *src, double max_value,
     return dest;
 }
 
+/// @brief Performs a 1D morphological transformation (erosion or dilation) along a specified orientation.
+/// @param[in] src Pointer to the source matrix. Must not be NULL.
+/// @param[in] kernel_size Size of the kernel. OpenCV-style anchor is used; even sizes are supported.
+/// @param[in] transform Type of morphological transformation (Erosion or Dilation).
+/// @param[in] orientation Orientation of the 1D pass (Horizontal or Vertical).
+/// @return Pointer to a newly allocated matrix containing the transformed image.
+/// @throw Throws if src is NULL, transform is invalid, or orientation is invalid.
+/// @note Caller is responsible for freeing the returned matrix using mat_free().
+Matrix *morph_transformation_1d(const Matrix *src, size_t kernel_size,
+                                enum MorphTransform transform,
+                                enum Orientation orientation)
+{
+
+    if (src == NULL)
+        errx(EXIT_FAILURE, "The source matrix is NULL");
+
+    if (transform != Erosion && transform != Dilation)
+        errx(EXIT_FAILURE, "Invalid MorphTransform type");
+
+    if (orientation != Vertical && orientation != Horizontal)
+        errx(EXIT_FAILURE, "Invalid Orientation");
+
+    int anchor = kernel_size / 2; //handles even kernels
+    size_t height = mat_height(src);
+    size_t width = mat_width(src);
+    Matrix *dst = mat_create_empty(height, width);
+
+    for (size_t x = 0; x < height; x++)
+        for (size_t y = 0; y < width; y++)
+        {
+            double *dst_pixel = mat_coef_addr(dst, x, y);
+            double extreme_val = transform == Erosion ? 255 : 0;
+            for (int i = -anchor; i < (int)kernel_size - anchor; i++)
+            {
+                // clamp will treat indexes out of bound to stay at the last
+                // acceptable value. This will repeat the pixel inside the
+                // image to fill the missing pixels.
+                double image_pixel;
+                switch (orientation)
+                {
+                case Horizontal:
+                    image_pixel = mat_coef(src, x, clamp(y + i, 0, width - 1));
+                    break;
+
+                case Vertical:
+                    image_pixel = mat_coef(src, clamp(x + i, 0, height - 1), y);
+                    break;
+                }
+
+                // i is the index from the center of the kernel
+                // by adding m we make sure that we use the indexing method
+                // of the kernel vector
+                switch (transform)
+                {
+                case Erosion:
+                    if (image_pixel < extreme_val)
+                        extreme_val = image_pixel;
+                    break;
+
+                case Dilation:
+                    if (image_pixel > extreme_val)
+                        extreme_val = image_pixel;
+                    break;
+                default :
+                    errx(EXIT_FAILURE, "Invalid MorphTransform type");
+                }
+            }
+            *dst_pixel = extreme_val;
+        }
+    return dst;
+}
+
+/// @brief Applies erosion to a matrix using a separable 2-pass approach (horizontal then vertical).
+/// @param[in] src Pointer to the source matrix. Must not be NULL.
+/// @param[in] kernel_size Size of the kernel. Even kernel sizes are supported.
+/// @return Pointer to a newly allocated matrix containing the eroded image.
+/// @throw Throws if src is NULL.
+/// @note Caller is responsible for freeing the returned matrix using mat_free().
+Matrix *erosion(const Matrix *src, size_t kernel_size)
+{
+
+    if (src == NULL)
+        errx(EXIT_FAILURE, "The source matrix is NULL");
+
+    Matrix *tmp = morph_transformation_1d(src, kernel_size, Erosion, Horizontal);
+    Matrix *eroded = morph_transformation_1d(tmp, kernel_size, Erosion, Vertical);
+
+    mat_free(tmp);
+    return eroded;
+}
+
+/// @brief Applies dilation to a matrix using a separable 2-pass approach (horizontal then vertical).
+/// @param[in] src Pointer to the source matrix. Must not be NULL.
+/// @param[in] kernel_size Size of the kernel. Even kernel sizes are supported.
+/// @return Pointer to a newly allocated matrix containing the dilated image.
+/// @throw Throws if src is NULL.
+/// @note Caller is responsible for freeing the returned matrix using mat_free().
+Matrix *dilation(const Matrix *src, size_t kernel_size)
+{
+
+    if (src == NULL)
+        errx(EXIT_FAILURE, "The source matrix is NULL");
+
+    Matrix *tmp = morph_transformation_1d(src, kernel_size, Dilation, Horizontal);
+    Matrix *dilated = morph_transformation_1d(tmp, kernel_size, Dilation, Vertical);
+
+    mat_free(tmp);
+    return dilated;
+}
+
+/// @brief Applies a morphological transformation to a matrix (Erosion, Dilation, Opening, Closing).
+/// @param[in] src Pointer to the source matrix. Must not be NULL.
+/// @param[in] kernel_size Size of the kernel. Even kernel sizes are supported.
+/// @param[in] transform Type of morphological transformation (Erosion, Dilation, Opening, Closing).
+/// @return Pointer to a newly allocated matrix containing the transformed image.
+/// @throw Throws if src is NULL or transform type is invalid.
+/// @note Caller is responsible for freeing the returned matrix using mat_free().
+Matrix *morph_transform(Matrix *src, size_t kernel_size, enum MorphTransform transform)
+{
+    switch (transform)
+    {
+    case Erosion:
+        return erosion(src, kernel_size);
+    
+    case Dilation:
+        return dilation(src, kernel_size);
+    
+    case Opening:
+        Matrix *eroded = erosion(src, kernel_size);
+        Matrix *opened = dilation(eroded, kernel_size);
+        mat_free(eroded);
+        return opened;
+    
+    case Closing:
+        Matrix *dilated = dilation(src, kernel_size);
+        Matrix *closed = erosion(dilated, kernel_size);
+        mat_free(dilated);
+        return closed;
+    
+    default:
+        errx(EXIT_FAILURE, "Invalid MorphTransform type");
+    }
+}
+
 #ifndef UNIT_TEST
 
 int main()
 {
-    ImageData *img = load_image("assets/test_images/montgolfiere.jpg");
+    // ImageData *img = load_image("assets/test_images/montgolfiere.jpg");
+    // ImageData *img = load_image("assets/sample_images/level_1_image_1.png");
+    // ImageData *img = load_image("assets/sample_images/level_1_image_2.png");
+    ImageData *img = load_image("assets/sample_images/level_2_image_1.png");
+    // ImageData *img = load_image("assets/sample_images/level_2_image_2.png");
 
     Matrix *gray = image_to_grayscale(img);
     // ImageData *gray_img = pixel_matrix_to_image(gray);
@@ -349,19 +497,26 @@ int main()
     //  g_object_unref(pixbuf_blur);
     //  free_image(blured_img);
 
-    Matrix *threashold =
-        adaptative_gaussian_thresholding(gray, 255, 11, 1.5, 0);
-    ImageData *threashold_img = pixel_matrix_to_image(threashold);
-    GdkPixbuf *pixbuf_threashold =
-        create_pixbuf_from_image_data(threashold_img);
-    save_pixbuf_to_png(pixbuf_threashold, "threashold.png", NULL);
-    g_object_unref(pixbuf_threashold);
-    free_image(threashold_img);
+    Matrix *threshold = adaptative_gaussian_thresholding(gray, 255, 11, 10, 7);
+    mat_free(gray);
+    
+    Matrix *opening = morph_transform(threshold, 2, Opening);
+    mat_free(threshold);
+
+    Matrix *closing = morph_transform(opening, 2, Closing);
+    mat_free(opening);
+
+    ImageData *result_img = pixel_matrix_to_image(closing);
+    GdkPixbuf *pixbuf_result =
+        create_pixbuf_from_image_data(result_img);
+    save_pixbuf_to_png(pixbuf_result, "result.png", NULL);
+    g_object_unref(pixbuf_result);
+    free_image(result_img);
 
     free_image(img);
-    mat_free(gray);
+    
     // mat_free(blured);
-    mat_free(threashold);
+    mat_free(closing);
 
     return EXIT_SUCCESS;
 }
