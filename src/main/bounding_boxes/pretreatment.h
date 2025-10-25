@@ -8,6 +8,21 @@
 #include "image_loader/image_loading.h"
 #include "matrix/matrix.h"
 
+
+enum Orientation
+{
+    Vertical,
+    Horizontal
+};
+
+enum MorphTransform
+{
+    Erosion,
+    Dilation,
+    Opening,
+    Closing
+};
+
 Matrix *gaussian_blur(const Matrix *src, double sigma, size_t kernel_size);
 Matrix *image_to_grayscale(ImageData *img);
 ImageData *pixel_matrix_to_image(Matrix *matrix);
