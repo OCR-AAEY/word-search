@@ -34,19 +34,19 @@ Matrix *mat_create_empty(size_t height, size_t width);
 /// fails.
 Matrix *mat_create_from_arr(size_t height, size_t width, double *content);
 
-/// @brief Creates a new matrix with random Gaussian-distributed elements.
-/// @param[in] height Number of rows in the matrix (must be non-zero).
-/// @param[in] width Number of columns in the matrix (must be non-zero).
-/// @return A pointer to a new matrix initialized with Gaussian random values.
-/// @throw Terminates the program if allocation fails or dimensions are invalid.
-Matrix *mat_create_gaussian_random(size_t height, size_t width);
-
 /// @brief Creates a new matrix with random uniformly distributed elements.
 /// @param[in] height Number of rows in the matrix (must be non-zero).
 /// @param[in] width Number of columns in the matrix (must be non-zero).
 /// @return A pointer to a new matrix initialized with uniform random values.
 /// @throw Terminates the program if allocation fails or dimensions are invalid.
 Matrix *mat_create_uniform_random(size_t height, size_t width);
+
+/// @brief Creates a new matrix with random Gaussian-distributed elements.
+/// @param[in] height Number of rows in the matrix (must be non-zero).
+/// @param[in] width Number of columns in the matrix (must be non-zero).
+/// @return A pointer to a new matrix initialized with Gaussian random values.
+/// @throw Terminates the program if allocation fails or dimensions are invalid.
+Matrix *mat_create_gaussian_random(size_t height, size_t width);
 
 /// @brief Frees a matrix and its associated memory.
 /// @param[in] matrix Pointer to the matrix to be freed.

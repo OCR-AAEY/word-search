@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "matrix.h"
+#include "utils/random.h"
 #include "utils/shuffle_array.h"
 
 /// @brief A 2D matrix of double-precision floating point numbers.
@@ -67,34 +68,6 @@ Matrix *mat_create_from_arr(size_t height, size_t width, double *content)
     return m;
 }
 
-Matrix *mat_create_gaussian_random(size_t height, size_t width)
-{
-    if (height == 0)
-        errx(1,
-             "Failed to create matrix: invalid height '%zu'. Height must be "
-             "non-zero.",
-             height);
-    if (width == 0)
-        errx(1,
-             "Failed to create matrix: invalid width '%zu'. Width must be "
-             "non-zero.",
-             width);
-
-    double *content = calloc(height * width, sizeof(double));
-    if (content == NULL)
-        errx(1, "Failed to allocate memory for matrix content.");
-
-    // TODO: Implement Gaussian distribution on content
-    shuffle_array(content, height * width);
-
-    Matrix *m = malloc(sizeof(Matrix));
-    if (m == NULL)
-        errx(1, "Failed to allocate memory for matrix struct.");
-
-    *m = (Matrix){.height = height, .width = width, .content = content};
-    return m;
-}
-
 Matrix *mat_create_uniform_random(size_t height, size_t width)
 {
     if (height == 0)
@@ -112,12 +85,50 @@ Matrix *mat_create_uniform_random(size_t height, size_t width)
     if (content == NULL)
         errx(1, "Failed to allocate memory for matrix content.");
 
-    // TODO: Implement uniform distribution on content
-    shuffle_array(content, height * width);
+    for (size_t i = 0; i < height * width; i++)
+    {
+        *(content + i) = rand_d_uniform_nm(-1.0, 1.0);
+    }
 
     Matrix *m = malloc(sizeof(Matrix));
     if (m == NULL)
+    {
+        free(content);
         errx(1, "Failed to allocate memory for matrix struct.");
+    }
+
+    *m = (Matrix){.height = height, .width = width, .content = content};
+    return m;
+}
+
+Matrix *mat_create_gaussian_random(size_t height, size_t width)
+{
+    if (height == 0)
+        errx(1,
+             "Failed to create matrix: invalid height '%zu'. Height must be "
+             "non-zero.",
+             height);
+    if (width == 0)
+        errx(1,
+             "Failed to create matrix: invalid width '%zu'. Width must be "
+             "non-zero.",
+             width);
+
+    double *content = calloc(height * width, sizeof(double));
+    if (content == NULL)
+        errx(1, "Failed to allocate memory for matrix content.");
+
+    for (size_t i = 0; i < height * width; i++)
+    {
+        *(content + i) = rand_d_gaussian();
+    }
+
+    Matrix *m = malloc(sizeof(Matrix));
+    if (m == NULL)
+    {
+        free(content);
+        errx(1, "Failed to allocate memory for matrix struct.");
+    }
 
     *m = (Matrix){.height = height, .width = width, .content = content};
     return m;
