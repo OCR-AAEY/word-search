@@ -75,22 +75,22 @@ BIN_TEST         := $(BUILD_DIR)/run_tests
 # Solver target
 $(BIN_SOLVER): $(filter $(BUILD_DIR)/main/solver/%.o,$(OBJ_MAIN))
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 
 # Image loader target
 $(BIN_IMAGE_LOADER): $(filter $(BUILD_DIR)/main/image_loader/%.o,$(OBJ_MAIN))
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(GTK_FLAGS)
+	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 
 ## App target
 #$(BIN_APP): $(filter %app/%.o,$(OBJ_MAIN))
 #	@mkdir -p $(@D)
-#	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(GTK_FLAGS)
+#	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 
 # Test binary
 $(BIN_TEST): $(OBJ_MAIN_FOR_TEST) $(OBJ_TEST)
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(TEST_FLAGS) $(GTK_FLAGS)
+	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(TEST_FLAGS) $(LIB_FLAGS)
 
 ##############################
 #        PATTERN RULES       #
