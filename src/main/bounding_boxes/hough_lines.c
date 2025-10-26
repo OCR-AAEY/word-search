@@ -1,0 +1,238 @@
+#include "bounding_boxes/hough_lines.h"
+#include <err.h>
+#include <glib.h>
+#include <math.h>
+#include <stddef.h>
+#include <stdio.h>
+
+double sind(double degrees) { return sin(DEG2RAD(degrees)); }
+
+double cosd(double degrees) { return cos(DEG2RAD(degrees)); }
+
+Matrix *create_hough_accumulator(size_t height, size_t width,
+                                 float theta_precision)
+{
+    if (theta_precision <= 0)
+        errx(EXIT_FAILURE, "Theta precision must be strictly positive");
+
+    // Maximum possible distance from the origin of the image (image diagonal)
+    double diag = sqrt((double)height * height + (double)width * width);
+    size_t r_max = (size_t)ceil(diag);
+
+    // Number of rows = 2*r_max + 1 to include both negative and positive r
+    // values
+    size_t acc_height = 2 * r_max + 1;
+
+    // Number of columns = number of theta steps (0°..180° exclusive)
+    size_t acc_width = (size_t)round(180.0 / theta_precision);
+
+    // columns are the theta values, and lines are the r values
+    Matrix *accumulator = mat_create_empty(acc_height, acc_width);
+
+    return accumulator;
+}
+
+void populate_hough_lines(Matrix *src, Matrix *accumulator,
+                          float theta_precision, size_t *max_count)
+{
+    if (src == NULL)
+        errx(EXIT_FAILURE, "The source matrix is NULL");
+
+    if (accumulator == NULL)
+        errx(EXIT_FAILURE, "The accumulator matrix is NULL");
+
+    if (max_count == NULL)
+        errx(EXIT_FAILURE, "The max_count output parameter is NULL");
+
+    size_t height = mat_height(src);
+    size_t width = mat_width(src);
+    size_t theta_max = mat_width(accumulator);
+    // according to the definition of the accumulator height
+    size_t r_max = (mat_height(accumulator) - 1) / 2;
+    *max_count = 0;
+
+    for (size_t h = 0; h < height; h++)
+    {
+        for (size_t w = 0; w < width; w++)
+        {
+            double pixel = mat_coef(src, h, w);
+            // if the pixel is not black, we skip it
+            if (pixel != 0)
+            {
+                continue;
+            }
+            // for all the theta possible we calculate the r associated
+            // this is derived from conversion between cartesian and polar
+            // coordinates
+            for (size_t theta_index = 0; theta_index < theta_max; theta_index++)
+            {
+                // theta_max is the maximum index for theta in the accumulator
+                // since we have a step of theta_precision, we have :
+                double r = w * cosd(theta_index * theta_precision) +
+                           h * sind(theta_index * theta_precision);
+
+                // since r can be at least -r_max, we shift it to an integer
+                // to have the index in the accumulator
+                size_t r_index = (size_t)round(r + r_max);
+
+                double *accumulator_cell =
+                    mat_coef_addr(accumulator, r_index, theta_index);
+                (*accumulator_cell)++;
+
+                // we keep track of the maximum value of the accumulator
+                if (*accumulator_cell > *max_count)
+                    *max_count = *accumulator_cell;
+            }
+        }
+    }
+}
+
+Line **extract_hough_lines(Matrix *accumulator, size_t threshold,
+                           float theta_precision, size_t *line_count)
+{
+    if (accumulator == NULL)
+        errx(EXIT_FAILURE, "The accumulator matrix is NULL");
+    if (line_count == NULL)
+        errx(EXIT_FAILURE, "The line_count output parameter is NULL");
+    if (threshold == 0)
+        errx(EXIT_FAILURE, "Threshold should not be 0 because it would "
+                           "generate to much noise");
+
+    size_t theta_max = mat_width(accumulator);
+    size_t r_max = mat_height(accumulator);
+
+    size_t max_lines = 20; // initial size of the lines alloc
+    Line **lines = malloc(max_lines * sizeof(Line *));
+    *line_count = 0;
+
+    for (size_t r = 0; r < r_max; r++)
+    {
+        for (size_t theta_index = 0; theta_index < theta_max; theta_index++)
+        {
+            double count = mat_coef(accumulator, r, theta_index);
+            // ignore values that are below the threshold
+            if (count < threshold)
+                continue;
+            // increase the size of the array if the max number of lines is
+            // reached
+            if (*line_count == max_lines)
+            {
+                max_lines += 10;
+                lines = realloc(lines, max_lines * sizeof(Line *));
+                if (lines == NULL)
+                    errx(EXIT_FAILURE, "Reallocation of lines array failed");
+            }
+            // add the line to the list of lines
+            Line *line = malloc(sizeof(Line));
+            lines[(*line_count)++] = line;
+            line->r = r;
+            line->theta = theta_index * theta_precision;
+        }
+    }
+    return lines;
+}
+
+Line **hough_lines_NMS(Line **lines, size_t *line_count, double delta_r,
+                       double delta_theta)
+{
+    if (lines == NULL)
+        errx(EXIT_FAILURE, "The Lines array is NULL");
+    if (line_count == NULL || *line_count == 0)
+        errx(EXIT_FAILURE, "The line count is NULL or 0");
+    if (delta_r < 0 || delta_theta < 0)
+        errx(EXIT_FAILURE, "delta_r and delta_theta must not be negative");
+
+    int *suppressed = calloc(*line_count, sizeof(int));
+
+    for (size_t i = 0; i < *line_count; i++)
+    {
+        // ignore if already suppressed line
+        if (suppressed[i])
+            continue;
+
+        Line *li = lines[i];
+
+        for (size_t j = i + 1; j < *line_count; j++)
+        {
+            // ignore if already suppressed line
+            if (suppressed[j])
+                continue;
+            Line *lj = lines[j];
+
+            // mark as suppressed the lines that are too close in r and theta
+            // considering they are the same
+            if (ABS(round(lj->r - li->r)) < delta_r &&
+                ABS(round(lj->theta - li->theta)) < delta_theta)
+            {
+                suppressed[j] = TRUE;
+            }
+        }
+    }
+
+    // overwrite the lines with the filtered ones
+    size_t rewrite_index = 0;
+    for (size_t i = 0; i < *line_count; i++)
+    {
+        if (!suppressed[i])
+            lines[rewrite_index++] = lines[i];
+        else
+        {
+            // free the ones that are suppressed
+            free(lines[i]);
+        }
+    }
+    // the new number of lines is the number of non suppressed lines
+    *line_count = rewrite_index;
+    free(suppressed);
+    return lines;
+}
+
+Line **hough_transform_lines(Matrix *src, float theta_precision, double delta_r,
+                             double delta_theta, size_t *size_out)
+{
+    if (src == NULL)
+        errx(EXIT_FAILURE, "The source matrix is NULL");
+    if (size_out == NULL)
+        errx(EXIT_FAILURE, "The size output parameter is NULL");
+
+    Matrix *accumulator = create_hough_accumulator(
+        mat_height(src), mat_width(src), theta_precision);
+
+    size_t max_acc;
+    populate_hough_lines(src, accumulator, theta_precision, &max_acc);
+
+    float threshold = max_acc * 0.8;
+    Line **lines =
+        extract_hough_lines(accumulator, threshold, theta_precision, size_out);
+
+    // filter lines that are too similar
+    lines = hough_lines_NMS(lines, size_out, delta_r, delta_theta);
+
+    mat_free(accumulator);
+
+    return lines;
+}
+
+void print_lines(Line **lines, size_t size /*, size_t offset*/)
+{
+    for (size_t i = 0; i < size; i++)
+    {
+        double theta = lines[i]->theta;
+        double r = lines[i]->r;
+
+        printf("Line %zu : (%f, %f)\n", i, r, theta);
+
+        /*
+        size_t h_0 = r * cos(theta);
+        size_t w_0 = r * sin(theta);
+
+        size_t h_1 = h_0 + offset * (- sin(theta));
+        size_t w_1 = w_0 + offset * cos(theta);
+
+        size_t h_1 = h_0 - offset * (- sin(theta));
+        size_t w_1 = w_0 - offset * cos(theta);
+        */
+        free(lines[i]);
+    }
+    free(lines);
+}
