@@ -1,31 +1,54 @@
 #include <gtk/gtk.h>
+#include "../image_loader/image_loading.h"
 #include "rotation.h"
 
 int main(int argc, char *argv[])
 {
-    if (argc != 3) {
-        g_print("Usage: %s <input.png> <output.png>\n", argv[0]);
+    if (argc != 4) {
+        g_print("Usage: %s <input.png> <output.png> <degrees>\n", argv[0]);
         return 1;
     }
 
     gtk_init(&argc, &argv);
 
-    GError *error = NULL;
-    GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file(argv[1], &error);
-    if (!pixbuf) {
-        g_printerr("Error loading image: %s\n", error->message);
-        g_error_free(error);
+    ImageData *img = load_image(argv[1]);
+    if (!img) {
+        g_printerr("Failed to load image '%s'\n", argv[1]);
         return 1;
     }
 
-    GdkPixbuf *rotated = rotate_pixbuf(pixbuf, 45.0); // rotate 45 degrees
-    gdk_pixbuf_save(rotated, argv[2], "png", &error, NULL);
-    if (error) {
-        g_printerr("Error saving image: %s\n", error->message);
-        g_error_free(error);
+    ImageData *rotated = rotate_image(img,  atof(argv[3]));
+    if (!rotated) {
+        g_printerr("Rotation failed\n");
+        free_image(img);
+        return 1;
     }
 
-    g_object_unref(pixbuf);
-    g_object_unref(rotated);
+    GdkPixbuf *pixbuf_out = create_pixbuf_from_image_data(rotated);
+    if (!pixbuf_out) {
+        g_printerr("Failed to create GdkPixbuf from rotated image\n");
+        free_image(rotated);
+        free_image(img);
+        return 1;
+    }
+
+    GError *error = NULL;
+    if (!save_pixbuf_to_png(pixbuf_out, argv[2], &error)) {
+        if (error) {
+            g_printerr("Error saving image: %s\n", error->message);
+            g_error_free(error);
+        }
+        g_object_unref(pixbuf_out);
+        free_image(rotated);
+        free_image(img);
+        return 1;
+    }
+
+    g_print("✅ Rotated image saved to %s\n", argv[2]);
+
+    g_object_unref(pixbuf_out);
+    free_image(rotated);
+    free_image(img);
+
     return 0;
 }
