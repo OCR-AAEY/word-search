@@ -1,6 +1,6 @@
 # Word Search Project
 
-This project is a [word search puzzle](https://en.wikipedia.org/wiki/Word_search) solver written in C. It takes a photo of the grid and the word list and finds solve the puzzle, i.e. it highlights the sought words in the grid.
+This project is a [word search puzzle](https://en.wikipedia.org/wiki/Word_search) solver written in C. It takes a photo of the grid and the word list as input and solve the puzzle, i.e. it highlights the sought words in the grid.
 
 # Compilation
 
@@ -9,6 +9,8 @@ This project is a [word search puzzle](https://en.wikipedia.org/wiki/Word_search
 This project requires GTK3 for graphics handling, and [Criterion](https://github.com/Snaipe/Criterion) for unit testing. The latter does not have to be installed to build and run the project.
 
 It also requires clang-format 16 or higher in order to use `make format`.
+
+### Ubuntu
 
 On Ubuntu, it is possible to install the dependencies through:
 
@@ -38,7 +40,13 @@ make test
 
 ## Formatting
 
-The code has to be formatted using clang-format according to the provided configuration (`./.clang-format`).
+The code has to be formatted using clang-format according to the provided configuration (`./.clang-format`). It can be formatted using:
+
+```bash
+make format
+```
+
+The latter format make rule is an alias for:
 
 ```bash
 find . -iname '*.h' -o -iname '*.c' | xargs clang-format -i
