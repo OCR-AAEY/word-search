@@ -1,58 +1,72 @@
-#include "rotation.h"
+#include "../image_loader/image_loading.h"
 #include <math.h>
 #include <stdlib.h>
+#include <err.h>
 
-GdkPixbuf *rotate_pixbuf(GdkPixbuf *src, double angle)
+ImageData *rotate_image(ImageData *img, double angle)
 {
-    int width = gdk_pixbuf_get_width(src);
-    int height = gdk_pixbuf_get_height(src);
-    int n_channels = gdk_pixbuf_get_n_channels(src);
-    int src_rowstride = gdk_pixbuf_get_rowstride(src);
-    guchar *src_pixels = gdk_pixbuf_get_pixels(src);
-
-    GdkPixbuf *dst = gdk_pixbuf_new(GDK_COLORSPACE_RGB,
-                                    gdk_pixbuf_get_has_alpha(src),
-                                    8, width, height);
-    if (!dst)
-        return NULL;
-
-    int dst_rowstride = gdk_pixbuf_get_rowstride(dst);
-    guchar *dst_pixels = gdk_pixbuf_get_pixels(dst);
+    int w = img->width;
+    int h = img->height;
+    Pixel *p = img->pixels;
 
     double rad = angle * M_PI / 180.0;
-    double cx = width / 2.0;
-    double cy = height / 2.0;
 
-    for (int y = 0; y < height; y++)
+
+    // new height and width to scale if rotation means pixels loss
+    // it reduces the image
+    int nw = (int)(fabs(w * cos(rad)) + fabs(h * sin(rad)) + 0.5);
+    int nh = (int)(fabs(h * cos(rad)) + fabs(w * sin(rad)) + 0.5);
+
+    Pixel *np = calloc(nw * nh, sizeof(Pixel));
+    if (!np)
     {
-        for (int x = 0; x < width; x++)
+        errx(EXIT_FAILURE, "rotate_image malloc fail");
+    }
+
+    // make a white background
+    for (int i = 0; i < nw * nh; i++)
+    {
+        np[i].r = 255;
+        np[i].g = 255;
+        np[i].b = 255;
+    }
+
+    double cx = w / 2.0;
+    double cy = h / 2.0;
+
+    double ncx = nw / 2.0;
+    double ncy = nh / 2.0;
+
+    for (int y = 0; y < nh; y++)
+    {
+        for (int x = 0; x < nw; x++)
         {
-            double xt = (x - cx) * cos(rad) + (y - cy) * sin(rad) + cx;
-            double yt = -(x - cx) * sin(rad) + (y - cy) * cos(rad) + cy;
 
-            guchar *dst_p = dst_pixels + y * dst_rowstride + x * n_channels;
+            // formula for pixels is :
+            // original_x = (rotated_x - new_center_x) x cos(angle_in_radians) - (rotated_y - new_center_y) x sin(angle_in_radians) + original_center_x
+            // original_y = (rotated_x - new_center_x) × sin(angle_in_radians) + (rotated_y - new_center_y) × cos(angle_in_radians) + original_center_y
 
-            if (xt >= 0 && xt < width && yt >= 0 && yt < height)
+            double tx = (x - ncx) * cos(rad) - (y - ncy) * sin(rad) + cx;
+            double ty = (x - ncx) * sin(rad) + (y - ncy) * cos(rad) + cy;
+
+            if (tx >= 0 && tx < w && ty >= 0 && ty < h)
             {
-                int xi = (int)xt;
-                int yi = (int)yt;
-                guchar *src_p = src_pixels + yi * src_rowstride + xi * n_channels;
-
-                for (int c = 0; c < n_channels; c++)
-                    dst_p[c] = src_p[c];
-            }
-            else
-            {
-                for (int c = 0; c < n_channels; c++)
-                    dst_p[c] = (c == 3) ? 0 : 255; // white background
+                int ix = (int)tx;
+                int iy = (int)ty;
+                np[y * nw + x] = p[iy * w + ix];
             }
         }
     }
 
-    return dst;
+    ImageData *out = malloc(sizeof(ImageData));
+    if (!out)
+    {
+        errx(EXIT_FAILURE, "rotate_image malloc fail out");
+    }
+
+    out->width = nw;
+    out->height = nh;
+    out->pixels = np;
+
+    return out;
 }
-
-
-
-
-

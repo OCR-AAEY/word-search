@@ -1,14 +1,9 @@
 #ifndef ROTATION_H
 #define ROTATION_H
 
-#include <gtk/gtk.h>
+#include "../image_loader/image_loading.h"
 
-/**
- * @brief Rotates a GdkPixbuf around its center by a given angle (degrees).
- * @param src   The source GdkPixbuf.
- * @param angle The rotation angle in degrees.
- * @return A newly allocated rotated GdkPixbuf (caller must unref it).
- */
-GdkPixbuf *rotate_pixbuf(GdkPixbuf *src, double angle);
+// Rotate an ImageData by the given angle (in degrees)
+ImageData *rotate_image(ImageData *src, double angle);
 
 #endif
