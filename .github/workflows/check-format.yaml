@@ -1,0 +1,35 @@
+name: Check format
+
+on:
+  push:
+
+jobs:
+  check-format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install clang-format
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+
+      - name: Check format
+        shell: bash
+        run: |
+          SRC_FILES="$(find ./src/ -type f \( -name '*.c' -o -name '*.h' \))"
+          BAD_FILES=""
+
+          for f in $SRC_FILES; do
+            if ! clang-format --dry-run --Werror "$f"; then
+              BAD_FILES="$BAD_FILES$f\n"
+            fi
+          done
+
+          if [[ -n "$BAD_FILES" ]]; then
+            echo "The following files are not properly formatted:"
+            printf "$BAD_FILES"
+            exit 1
+          fi

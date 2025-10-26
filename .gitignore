@@ -1,6 +1,10 @@
+# Build
+/build
+
 # IDEs
 .idea/
 .vscode/
+*.swp 
 
 ##############################
 #         C GITIGNORE        #
