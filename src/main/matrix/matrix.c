@@ -324,7 +324,8 @@ Matrix *mat_map(const Matrix *m, double (*f)(double))
     return res;
 }
 
-Matrix *mat_map_with_indexes(const Matrix *m, double (*f)(double, size_t, size_t))
+Matrix *mat_map_with_indexes(const Matrix *m,
+                             double (*f)(double, size_t, size_t))
 {
     Matrix *res = mat_create_empty(m->height, m->width);
 

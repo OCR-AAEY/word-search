@@ -163,7 +163,8 @@ Matrix *mat_map(const Matrix *m, double (*f)(double));
 /// returning a double.
 /// @return A new matrix where each element is f(original_value, row, col).
 /// @throw Terminates the program if memory allocation fails.
-Matrix *mat_map_with_indexes(const Matrix *m, double (*f)(double, size_t, size_t));
+Matrix *mat_map_with_indexes(const Matrix *m,
+                             double (*f)(double, size_t, size_t));
 
 /// @brief Prints the contents of a matrix to stdout in a formatted 2D layout.
 /// @param[in] m Pointer to the matrix to print.
