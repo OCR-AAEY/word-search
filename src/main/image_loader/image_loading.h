@@ -21,7 +21,6 @@ typedef struct {
 ImageData *load_image(const char *path);
 int save_pixbuf_to_png(GdkPixbuf *pixbuf, char *filename, GError **error);
 void free_pixels(guchar *pixels, gpointer data);
-GdkPixbuf *create_pixbuf_from_image_data(ImageData *img);
 void free_image(ImageData *img);
 
 #endif
