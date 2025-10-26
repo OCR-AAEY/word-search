@@ -1,11 +1,6 @@
-CC = gcc
-CFLAGS = -Wall -Wextra -g `pkg-config --cflags gtk+-3.0`
-LIBS = `pkg-config --libs gtk+-3.0`
-
-all: rotate_gui
-
-rotate_gui: main.c rotation.c ../image_loader/image_loading.c
-	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+all:
+	gcc test_rotation.c rotation.c ../image_loader/image_loading.c -DUNIT_TEST -o test_rotation `pkg-config --cflags --libs gtk+-3.0` -lm
 
 clean:
-	rm -f rotate_gui
+	rm -f test_rotation
+
