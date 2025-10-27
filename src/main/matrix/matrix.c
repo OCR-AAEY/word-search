@@ -2,9 +2,9 @@
 #include <stdio.h>
 
 #include "matrix.h"
-#include "utils/random/random.h"
-#include "utils/math/sigmoid.h"
 #include "utils/math/gcd.h"
+#include "utils/math/sigmoid.h"
+#include "utils/random/random.h"
 
 /// @brief A 2D matrix of double-precision floating point numbers.
 struct Matrix

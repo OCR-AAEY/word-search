@@ -1,14 +1,16 @@
 #include <limits.h>
 #include <math.h>
-#include <time.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "random.h"
 
 /// @brief Ensures that a seed for rand has been set at least once.
-static void seed_once() {
+static void seed_once()
+{
     static int has_been_seeded = 0;
-    if (!has_been_seeded) {
+    if (!has_been_seeded)
+    {
         srand((unsigned int)time(NULL));
         has_been_seeded = 1;
     }
