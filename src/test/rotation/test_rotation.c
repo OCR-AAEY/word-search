@@ -1,6 +1,10 @@
 #include <gtk/gtk.h>
-#include "../image_loader/image_loading.h"
-#include "rotation.h"
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib.h>
+#include <err.h>
+#include <stdint.h>
+#include "image_loader/image_loading.h"
+#include "rotation-manual/rotation.h"
 
 int main(int argc, char *argv[])
 {
