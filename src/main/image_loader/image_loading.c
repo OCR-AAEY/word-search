@@ -1,4 +1,4 @@
-#include "image_loading.h"
+#include "image_loader/image_loading.h"
 #include <err.h>
 #include <stdio.h>
 
@@ -88,8 +88,9 @@ ImageData *load_image(const char *filename)
         exit(EXIT_FAILURE);
     }
 
-    int w = gdk_pixbuf_get_width(pixbuf);
-    int h = gdk_pixbuf_get_height(pixbuf);
+    int width = gdk_pixbuf_get_width(pixbuf);
+    int height = gdk_pixbuf_get_height(pixbuf);
+    int rowstride = gdk_pixbuf_get_rowstride(pixbuf);
     int channels = gdk_pixbuf_get_n_channels(pixbuf);
     if (channels < 3)
     {
@@ -97,10 +98,10 @@ ImageData *load_image(const char *filename)
         errx(EXIT_FAILURE, "Unsupported channel number in the image loaded");
     }
 
-    unsigned char *pixels = gdk_pixbuf_get_pixels(pixbuf);
+    guchar *pixels = gdk_pixbuf_get_pixels(pixbuf);
 
     // Allocate an array of h*w Pixels for the ImageData
-    Pixel *pixels_copy = malloc(h * w * sizeof(Pixel));
+    Pixel *pixels_copy = malloc(height * width * sizeof(Pixel));
     if (pixels_copy == NULL)
     {
         g_object_unref(pixbuf);
@@ -108,11 +109,16 @@ ImageData *load_image(const char *filename)
     }
 
     // Populates the Pixel data
-    for (int i = 0; i < h * w; i++)
+
+    for (int h = 0; h < height; h++)
     {
-        pixels_copy[i].r = pixels[i * channels];
-        pixels_copy[i].g = pixels[i * channels + 1];
-        pixels_copy[i].b = pixels[i * channels + 2];
+        guchar *row = pixels + h * rowstride;
+        for (int w = 0; w < width; w++)
+        {
+            pixels_copy[h * width + w].r = row[w * channels];
+            pixels_copy[h * width + w].g = row[w * channels + 1];
+            pixels_copy[h * width + w].b = row[w * channels + 2];
+        }
     }
     g_object_unref(pixbuf);
 
@@ -123,8 +129,8 @@ ImageData *load_image(const char *filename)
         errx(EXIT_FAILURE, "Failed to allocate ImageData struct");
     }
 
-    img->width = w;
-    img->height = h;
+    img->width = width;
+    img->height = height;
     img->pixels = pixels_copy;
 
     return img;
@@ -139,17 +145,25 @@ void free_image(ImageData *img)
     free(img);
 }
 
-#ifndef UNIT_TEST
-
-int main()
+Pixel *get_pixel(ImageData *img, size_t h, size_t w)
 {
-    ImageData *img = load_image("assets/sample_images/level_1_image_1.png");
-    GdkPixbuf *pixbuf = create_pixbuf_from_image_data(img);
-    save_pixbuf_to_png(pixbuf, "image1.png", NULL);
-    g_object_unref(pixbuf);
-    free_image(img);
+    if (h >= img->height || w >= img->width)
+        return NULL;
 
-    return EXIT_SUCCESS;
+    return &(img->pixels[h * img->width + w]);
 }
 
-#endif
+// #ifndef UNIT_TEST
+
+// int main()
+// {
+//     ImageData *img = load_image("assets/sample_images/level_1_image_1.png");
+//     GdkPixbuf *pixbuf = create_pixbuf_from_image_data(img);
+//     save_pixbuf_to_png(pixbuf, "image1.png", NULL);
+//     g_object_unref(pixbuf);
+//     free_image(img);
+
+//     return EXIT_SUCCESS;
+// }
+
+// #endif
