@@ -1,6 +1,6 @@
 # Word Search Project
 
-This project is a [word search puzzle](https://en.wikipedia.org/wiki/Word_search) solver written in C. It takes a photo of the grid and the word list as input and solve the puzzle, i.e. it highlights the sought words in the grid.
+This project is a [word search puzzle](https://en.wikipedia.org/wiki/Word_search) solver written in C. It takes a photo of the grid and the word list as input and solves the puzzle, i.e. it highlights the sought words in the grid.
 
 # Compilation
 
