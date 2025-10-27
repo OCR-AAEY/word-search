@@ -1,11 +1,10 @@
 #include <err.h>
-#include <math.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "matrix.h"
 #include "utils/random.h"
-#include "utils/shuffle_array.h"
+#include "utils/sigmoid.h"
+#include "utils/gcd.h"
 
 /// @brief A 2D matrix of double-precision floating point numbers.
 struct Matrix
@@ -140,6 +139,32 @@ void mat_free(Matrix *matrix)
     free(matrix);
 }
 
+void mat_free_matrix_array(Matrix **array, size_t lentgh)
+{
+    for (size_t i = 0; i < lentgh; i++)
+    {
+        mat_free(array[i]);
+    }
+    free(array);
+}
+
+int mat_eq(Matrix *a, Matrix *b)
+{
+    if (a == b)
+        return 1;
+
+    if (a->height != b->height || a->width != b->width)
+        return 0;
+
+    for (size_t i = 0; i < a->height * a->width; i++)
+    {
+        if (a->content[i] != b->content[i])
+            return 0;
+    }
+
+    return 1;
+}
+
 Matrix *mat_deepcopy(const Matrix *m)
 {
     double *content = calloc(m->height * m->width, sizeof(double));
@@ -206,7 +231,7 @@ Matrix *mat_addition(const Matrix *a, const Matrix *b)
     return mat_create_from_arr(a->height, a->width, content);
 }
 
-void mat_inplace_addition(Matrix *a, Matrix *b)
+void mat_inplace_addition(Matrix *a, const Matrix *b)
 {
     if (a->height != b->height)
         errx(1, "Matrix addition failed: mismatched heights (%zu vs %zu).",
@@ -218,6 +243,42 @@ void mat_inplace_addition(Matrix *a, Matrix *b)
     for (size_t i = 0; i < a->height * a->width; i++)
     {
         *(a->content + i) += *(b->content + i);
+    }
+}
+
+Matrix *mat_substraction(const Matrix *a, const Matrix *b)
+{
+    if (a->height != b->height)
+        errx(1, "Matrix substraction failed: mismatched heights (%zu vs %zu).",
+             a->height, b->height);
+    if (a->width != b->width)
+        errx(1, "Matrix substraction failed: mismatched widths (%zu vs %zu).",
+             a->width, b->width);
+
+    double *content = calloc(a->height * a->width, sizeof(double));
+    if (content == NULL)
+        errx(1, "Failed to allocate memory for matrix substraction result.");
+
+    for (size_t i = 0; i < a->height * a->width; i++)
+    {
+        *(content + i) = *(a->content + i) - *(b->content + i);
+    }
+
+    return mat_create_from_arr(a->height, a->width, content);
+}
+
+void mat_inplace_substraction(Matrix *a, const Matrix *b)
+{
+    if (a->height != b->height)
+        errx(1, "Matrix substraction failed: mismatched heights (%zu vs %zu).",
+             a->height, b->height);
+    if (a->width != b->width)
+        errx(1, "Matrix substraction failed: mismatched widths (%zu vs %zu).",
+             a->width, b->width);
+
+    for (size_t i = 0; i < a->height * a->width; i++)
+    {
+        *(a->content + i) -= *(b->content + i);
     }
 }
 
@@ -264,13 +325,51 @@ Matrix *mat_multiplication(const Matrix *a, const Matrix *b)
     return m;
 }
 
+Matrix *mat_hadamard(const Matrix *a, const Matrix *b)
+{
+    if (a->height != b->height)
+        errx(1,
+             "Matrix hadamard product failed: mismatched heights (%zu vs %zu).",
+             a->height, b->height);
+    if (a->width != b->width)
+        errx(1,
+             "Matrix hadamard product failed: mismatched widths (%zu vs %zu).",
+             a->width, b->width);
+
+    Matrix *res = mat_create_empty(a->height, a->width);
+
+    for (size_t i = 0; i < a->height * a->width; i++)
+    {
+        res->content[i] = a->content[i] * b->content[i];
+    }
+
+    return res;
+}
+
+void mat_inplace_hadamard(Matrix *a, const Matrix *b)
+{
+    if (a->height != b->height)
+        errx(1,
+             "Matrix hadamard product failed: mismatched heights (%zu vs %zu).",
+             a->height, b->height);
+    if (a->width != b->width)
+        errx(1,
+             "Matrix hadamard product failed: mismatched widths (%zu vs %zu).",
+             a->width, b->width);
+
+    for (size_t i = 0; i < a->height * a->width; i++)
+    {
+        a->content[i] *= b->content[i];
+    }
+}
+
 Matrix *mat_sigmoid(const Matrix *m)
 {
     Matrix *res = mat_create_empty(m->height, m->width);
 
     for (size_t i = 0; i < m->height * m->width; i++)
     {
-        *(res->content + i) = 1.0 / (1.0 + exp(-*(m->content + i)));
+        res->content[i] = sigmoid(res->content[i]);
     }
 
     return res;
@@ -280,22 +379,114 @@ void mat_inplace_sigmoid(Matrix *m)
 {
     for (size_t i = 0; i < m->height * m->width; i++)
     {
-        *(m->content + i) = 1.0 / (1.0 + exp(-*(m->content + i)));
+        m->content[i] = sigmoid(m->content[i]);
     }
 }
 
-void mat_inplace_normalize(Matrix *m)
+Matrix *mat_sigmoid_derivative(const Matrix *m)
 {
-    double sum = 0.0;
+    Matrix *res = mat_create_empty(m->height, m->width);
 
     for (size_t i = 0; i < m->height * m->width; i++)
     {
-        sum += *(m->content + i);
+        res->content[i] = sigmoid_derivative(res->content[i]);
     }
 
+    return res;
+}
+
+void mat_inplace_sigmoid_derivative(Matrix *m)
+{
     for (size_t i = 0; i < m->height * m->width; i++)
     {
-        *(m->content + i) /= sum;
+        m->content[i] = sigmoid_derivative(m->content[i]);
+    }
+}
+
+double mat_mean_squared_error(Matrix *actual, Matrix *expected)
+{
+    if (actual->height != expected->height)
+        errx(1,
+             "Matrix mean squared error calculation failed: mismatched heights "
+             "(%zu vs %zu).",
+             actual->height, expected->height);
+    if (actual->width != expected->width)
+        errx(1,
+             "Matrix mean squared error calculation failed: mismatched widths "
+             "(%zu vs %zu).",
+             actual->height, expected->height);
+
+    double sum = 0.0;
+
+    for (size_t i = 0; i < actual->height * actual->width; i++)
+    {
+        double error = (actual->content[i] - expected->content[i]);
+        sum += error * error;
+    }
+
+    return sum / (actual->height * actual->width);
+}
+
+Matrix *mat_transpose(const Matrix *m)
+{
+    Matrix *res = mat_create_empty(m->width, m->height);
+
+    for (size_t h = 0; h < m->height; h++)
+    {
+        for (size_t w = 0; w < m->width; w++)
+        {
+            *mat_unsafe_coef_ptr(res, w, h) = *mat_unsafe_coef_ptr(m, h, w);
+        }
+    }
+
+    return res;
+}
+
+void mat_inplace_transpose(Matrix *m)
+{
+    if (m->height == m->width)
+    {
+        for (size_t h = 0; h < m->height; h++)
+        {
+            for (size_t w = h + 1; w < m->width; w++)
+            {
+                size_t i = h * m->width + w;
+                size_t j = w * m->width + h;
+                double tmp = m->content[i];
+                m->content[i] = m->content[j];
+                m->content[j] = tmp;
+            }
+        }
+    }
+    else
+    {
+        size_t cycles = gcd(m->height, m->width);
+
+        for (size_t i = 0; i < cycles; i++)
+        {
+            size_t current = i;
+            double tmp = m->content[i];
+
+            while (1)
+            {
+                size_t r = current / m->width;
+                size_t c = current % m->width;
+                size_t next = c * m->height + r;
+
+                if (next == i)
+                {
+                    m->content[current] = tmp;
+                    break;
+                }
+
+                m->content[current] = m->content[next];
+                current = next;
+            }
+        }
+
+        size_t tmp = m->height;
+        m->height = m->width;
+        m->width = tmp;
     }
 }
 
@@ -311,6 +502,12 @@ Matrix *mat_vertical_flatten(const Matrix *m)
     return res;
 }
 
+void mat_inplace_vertical_flatten(Matrix *m)
+{
+    m->height *= m->width;
+    m->width = 1;
+}
+
 Matrix *mat_horizontal_flatten(const Matrix *m)
 {
     Matrix *res = mat_create_empty(m->height * m->width, 1);
@@ -321,6 +518,46 @@ Matrix *mat_horizontal_flatten(const Matrix *m)
     }
 
     return res;
+}
+
+void mat_inplace_horizontal_flatten(Matrix *m)
+{
+    m->width *= m->height;
+    m->height = 1;
+}
+
+Matrix *mat_normalize(const Matrix *m)
+{
+    Matrix *res = mat_create_empty(m->height, m->width);
+
+    double sum = 0.0;
+
+    for (size_t i = 0; i < m->height * m->width; i++)
+    {
+        sum += *(m->content + i);
+    }
+
+    for (size_t i = 0; i < m->height * m->width; i++)
+    {
+        *(res->content + i) = *(m->content + i) / sum;
+    }
+
+    return res;
+}
+
+void mat_inplace_normalize(Matrix *m)
+{
+    double sum = 0.0;
+
+    for (size_t i = 0; i < m->height * m->width; i++)
+    {
+        sum += *(m->content + i);
+    }
+
+    for (size_t i = 0; i < m->height * m->width; i++)
+    {
+        *(m->content + i) /= sum;
+    }
 }
 
 Matrix *mat_map(const Matrix *m, double (*f)(double))
