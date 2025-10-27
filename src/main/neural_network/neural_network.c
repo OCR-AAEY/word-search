@@ -5,8 +5,8 @@
 
 #include "matrix/matrix.h"
 #include "neural_network.h"
-#include "utils/shuffle_array.h"
-#include "utils/sigmoid.h"
+#include "utils/random/shuffle_array.h"
+#include "utils/math/sigmoid.h"
 
 struct Neural_Network
 {
