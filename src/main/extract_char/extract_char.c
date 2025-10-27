@@ -1,4 +1,4 @@
-#include "extraxt_char.h"
+#include "extract_char.h"
 
 void extarct(const Matrix *matrix, size_t x0, size_t y0, size_t x1, size_t y1)
 {
