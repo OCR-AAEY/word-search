@@ -1,6 +1,7 @@
 #include "bounding_boxes/location.h"
 #include "bounding_boxes/hough_lines.h"
 #include "bounding_boxes/pretreatment.h"
+#include "bounding_boxes/visualization.h"
 
 #ifndef UNIT_TEST
 
@@ -41,7 +42,6 @@ int main()
     size_t nb_lines;
     Line **lines = hough_transform_lines(closing, 1, 3, 1, &nb_lines);
 
-    print_lines(lines, nb_lines);
     ImageData *result_img = pixel_matrix_to_image(closing);
     GdkPixbuf *pixbuf_result = create_pixbuf_from_image_data(result_img);
     save_pixbuf_to_png(pixbuf_result, "result.png", NULL);
@@ -52,6 +52,14 @@ int main()
 
     // mat_free(blured);
     mat_free(closing);
+
+    // print_lines(lines, nb_lines);
+
+    draw_lines_on_img(lines, nb_lines, "result.png");
+
+    size_t nb_points;
+    Point **points = extract_intersection_points(lines, nb_lines, &nb_points);
+    print_points(points, nb_points);
 
     return EXIT_SUCCESS;
 }

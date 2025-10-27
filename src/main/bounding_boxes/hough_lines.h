@@ -19,6 +19,16 @@ typedef struct Line
     double theta;
 } Line;
 
+/// @brief Represents a Point in cartesian coordinates.
+typedef struct Point
+{
+    /// The width component, the x axis component.
+    int x;
+
+    /// The height component, the y axis component.
+    int y;
+} Point;
+
 /// @brief Performs a Hough Transform on a source image to detect lines,
 /// followed by Non-Maximum Suppression (NMS).
 /// @param[in] src Pointer to the source binary image matrix. Must not be NULL.
@@ -38,6 +48,9 @@ typedef struct Line
 /// caller.
 Line **hough_transform_lines(Matrix *src, float theta_precision, double delta_r,
                              double delta_theta, size_t *size_out);
+
+Point **extract_intersection_points(Line **lines, size_t line_count,
+                                    size_t *size_out);
 
 /// ============= internal functions ===============
 
@@ -132,4 +145,13 @@ Line **hough_lines_NMS(Line **lines, size_t *line_count, double delta_r,
                        double delta_theta);
 
 void print_lines(Line **lines, size_t size /*, size_t offset*/);
+
+void insert_line_in_group(Line *line, Line ***lines_group, size_t *lines_count,
+                          size_t *max_group);
+
+void split_lines(Line **lines, size_t line_count, Line ***lines_1,
+                 size_t *lines_1_count, Line ***lines_2, size_t *lines_2_count);
+
+void print_points(Point **points, size_t size);
+
 #endif
