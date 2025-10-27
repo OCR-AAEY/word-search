@@ -4,8 +4,19 @@
 
 #include "random.h"
 
+/// @brief Ensures that a seed for rand has been set at least once.
+static void seed_once() {
+    static int has_been_seeded = 0;
+    if (!has_been_seeded) {
+        srand((unsigned int)time(NULL));
+        has_been_seeded = 1;
+    }
+}
+
 unsigned long rand_ul_uniform(unsigned long max)
 {
+    seed_once();
+
     if (max == 0)
         return 0;
 
@@ -28,6 +39,8 @@ unsigned long rand_ul_uniform_nm(unsigned long min, unsigned long max)
 
 double rand_d_uniform()
 {
+    seed_once();
+
     unsigned long r = ((unsigned long)rand() << 0) |
                       ((unsigned long)rand() << 15) |
                       ((unsigned long)rand() << 30);
