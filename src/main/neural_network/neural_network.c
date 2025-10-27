@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "matrix/matrix.h"
 #include "neural_network.h"
@@ -86,12 +87,198 @@ void net_free(Neural_Network *net)
 
 Neural_Network *net_load_from_file(char *filename)
 {
-    // TODO
+    FILE *file_stream = fopen(filename, "r");
+    if (file_stream == NULL)
+        errx(1, "Failed to open file: %s", filename);
+
+    int fd = fileno(file_stream);
+    if (fd == -1)
+        errx(1, "Failed to open file descriptor of file %s.", filename);
+
+    Neural_Network *net = malloc(sizeof(Neural_Network));
+    if (net == NULL)
+        errx(1, "Failed to allocate memory for net_load_from_file (net).");
+
+    // The number of bytes read has read.
+    ssize_t r;
+
+    // Read the layer number.
+    r = read(fd, &net->layer_number, sizeof(size_t));
+    if (r != sizeof(size_t))
+        errx(1, "Invalid file %s: failed to read layer_number.", filename);
+
+    // Allocate the necessary arrays.
+    net->layer_heights = calloc(net->layer_number, sizeof(size_t));
+    if (net->layer_heights == NULL)
+        errx(1, "Failed to allocate memory for net_load_from_file "
+                "(net->layer_heights).");
+
+    net->weights = calloc(net->layer_number, sizeof(Matrix *));
+    if (net->weights == NULL)
+        errx(1, "Failed to allocate memory for net_load_from_file "
+                "(net->weights).");
+
+    net->biases = calloc(net->layer_number, sizeof(Matrix *));
+    if (net->biases == NULL)
+        errx(1, "Failed to allocate memory for net_load_from_file "
+                "(net->biases).");
+
+    // Read the height of the layers.
+    for (size_t i = 0; i < net->layer_number; i++)
+    {
+        r = read(fd, &net->layer_heights[i], sizeof(size_t));
+        if (r != sizeof(size_t))
+            errx(1, "Invalid file %s: failed to read %zuth layer's height.",
+                 filename, i);
+    }
+
+    // Read the weights.
+    for (size_t i = 0; i < net->layer_number; i++)
+    {
+        size_t height, width;
+
+        r = read(fd, &height, sizeof(size_t));
+        if (r != sizeof(size_t))
+            errx(
+                1,
+                "Invalid file %s: failed to read %zuth weight matrix's height.",
+                filename, i);
+
+        r = read(fd, &width, sizeof(size_t));
+        if (r != sizeof(size_t))
+            errx(1,
+                 "Invalid file %s: failed to read %zuth weight matrix's width.",
+                 filename, i);
+
+        double *content = calloc(height * width, sizeof(double));
+        if (content == NULL)
+            errx(1,
+                 "Failed to allocate memory for net_load_from_file (content).");
+
+        // Read the matrix content.
+        for (size_t j = 0; j < height * width; j++)
+        {
+            r = read(fd, &content[j], sizeof(double));
+            if (r != sizeof(double))
+                errx(1,
+                     "Invalid file %s: failed to read %zuth weight matrix's "
+                     "%zuth coefficient.",
+                     filename, i, j);
+        }
+
+        net->weights[i] = mat_create_from_arr(height, width, content);
+    }
+
+    // Read the biases.
+    for (size_t i = 0; i < net->layer_number; i++)
+    {
+        size_t height, width;
+
+        r = read(fd, &height, sizeof(size_t));
+        if (r != sizeof(size_t))
+            errx(1,
+                 "Invalid file %s: failed to read %zuth bias matrix's height.",
+                 filename, i);
+
+        r = read(fd, &width, sizeof(size_t));
+        if (r != sizeof(size_t))
+            errx(1,
+                 "Invalid file %s: failed to read %zuth bias matrix's width.",
+                 filename, i);
+
+        double *content = calloc(height * width, sizeof(double));
+        if (content == NULL)
+            errx(1,
+                 "Failed to allocate memory for net_load_from_file (content).");
+
+        // Read the matrix content.
+        for (size_t j = 0; j < height * width; j++)
+        {
+            r = read(fd, &content[j], sizeof(double));
+            if (r != sizeof(double))
+                errx(1,
+                     "Invalid file %s: failed to read %zuth bias matrix's "
+                     "%zuth coefficient.",
+                     filename, i, j);
+        }
+
+        net->biases[i] = mat_create_from_arr(height, width, content);
+    }
+
+    fclose(file_stream);
+
+    return net;
 }
 
 void net_save_to_file(const Neural_Network *net, char *filename)
 {
-    // TODO
+    FILE *file_stream = fopen(filename, "w");
+    if (file_stream == NULL)
+        errx(1, "Failed to open file: %s", filename);
+
+    int fd = fileno(file_stream);
+    if (fd == -1)
+        errx(1, "Failed to open file descriptor of file %s.", filename);
+
+    // The number of bytes write has written.
+    ssize_t w;
+
+    // Write the layer number.
+    w = write(fd, &net->layer_number, sizeof(size_t));
+    if (w != sizeof(size_t))
+        errx(1, "Failed to write file %s: failed to write net->layer_number.",
+             filename);
+
+    // Write the height of the layers.
+    for (size_t i = 0; i < net->layer_number; i++)
+    {
+        w = write(fd, &net->layer_heights[i], sizeof(size_t));
+        if (w != sizeof(size_t))
+            errx(1,
+                 "Failed to write file %s: failed to write %zuth layer's "
+                 "height.",
+                 filename, i);
+    }
+
+    // Write the weights.
+    for (size_t i = 0; i < net->layer_number; i++)
+    {
+        size_t write_buff;
+
+        write_buff = mat_height(net->weights[i]);
+        w = write(fd, &write_buff, sizeof(size_t));
+        if (w != sizeof(size_t))
+            errx(1,
+                 "Failed to write file %s: failed to write %zuth weight "
+                 "matrix's height.",
+                 filename, i);
+
+        write_buff = mat_width(net->weights[i]);
+        w = write(fd, &write_buff, sizeof(size_t));
+        if (w != sizeof(size_t))
+            errx(1,
+                 "Failed to write file %s: failed to write %zuth weight "
+                 "matrix's width.",
+                 filename, i);
+
+        // Write the matrix content.
+        for (size_t h = 0; h < mat_height(net->weights[i]); h++)
+        {
+            for (size_t w = 0; w < mat_width(net->weights[i]); w++)
+            {
+                w = write(fd, mat_coef_ptr(net->weights[i], h, w),
+                          sizeof(double));
+                if (w != sizeof(double))
+                    errx(1,
+                         "Failed to write file %s: failed to write %zuth "
+                         "weight matrix's "
+                         "coefficient at position (h:%zu, w:%zu).",
+                         filename, i, h, w);
+            }
+        }
+    }
+
+    fclose(file_stream);
 }
 
 /// @brief The result of input through the net.
