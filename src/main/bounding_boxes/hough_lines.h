@@ -1,0 +1,135 @@
+#ifndef M_PI
+#define M_PI 3.14159265358979323846 /* pi */
+#endif
+
+#ifndef HOUGH_LINES_H
+#define HOUGH_LINES_H
+
+#include "matrix/matrix.h"
+
+#define DEG2RAD(deg) ((deg) * M_PI / 180.0)
+
+/// @brief Represents a line in polar coordinates.
+typedef struct Line
+{
+    /// The distance from the origin to the line.
+    double r;
+
+    /// The angle of the line in degrees.
+    double theta;
+} Line;
+
+/// @brief Performs a Hough Transform on a source image to detect lines,
+/// followed by Non-Maximum Suppression (NMS).
+/// @param[in] src Pointer to the source binary image matrix. Must not be NULL.
+/// @param[in] theta_precision Angular resolution in degrees for the Hough
+/// accumulator. Must be strictly positive.
+/// @param[in] delta_r Maximum allowed difference in r to consider two lines
+/// similar for NMS. Must be >= 0.
+/// @param[in] delta_theta Maximum allowed difference in theta to consider two
+/// lines similar for NMS. Must be >= 0.
+/// @param[out] size_out Pointer to the variable that will hold the number of
+/// result lines. Must not be NULL.
+/// @return An array of pointers to `Line` structures representing detected
+/// lines.
+/// @throw Throws if `src` or `size_out` is NULL or `threshold` is 0 or
+/// `theta_precision <= 0`.
+/// @note The returned array is dynamically allocated and should be freed by the
+/// caller.
+Line **hough_transform_lines(Matrix *src, float theta_precision, double delta_r,
+                             double delta_theta, size_t *size_out);
+
+/// ============= internal functions ===============
+
+/// @brief Computes sine of an angle in degrees.
+/// @param[in] degrees Angle in degrees.
+/// @return Sine of the angle.
+double sind(double degrees);
+
+/// @brief Computes cosine of an angle in degrees.
+/// @param[in] degrees Angle in degrees.
+/// @return Cosine of the angle.
+double cosd(double degrees);
+
+/// @brief Creates an empty Hough accumulator matrix.
+///
+/// The accumulator has :
+/// as columns : the angles theta (0 to 180 with a step of theta_precision) and
+/// as rows : the distances r (from -r_max to r_max)
+/// where the r_max is the diagonal of the image.
+///
+/// @param[in] height The height of the source image.
+/// @param[in] width The width of the source image.
+/// @param[in] theta_precision The angular precision in degrees. Must be
+/// strictly positive.
+/// @return A pointer to the allocated accumulator matrix.
+/// @throw Throws if `theta_precision <= 0`.
+Matrix *create_hough_accumulator(size_t height, size_t width,
+                                 float theta_precision);
+
+/// @brief Populates a Hough accumulator from a source image.
+/// For each pixel that is black (`0`), increment the r values corresponding to
+/// all theta angles possible.
+/// @param[in] src Pointer to the source binary image matrix. Must not be NULL.
+/// @param[in,out] accumulator Pointer to the accumulator matrix to populate.
+/// Must not be NULL.
+/// @param[in] theta_precision The angular precision in degrees. Must be
+/// strictly positive.
+/// @param[out] max_count Pointer to the variable that will hold the maximum of
+/// the accumulator. Must not be NULL.
+/// @throw Throws if `src` or `accumulator` or `max_count` is NULL.
+void populate_hough_lines(Matrix *src, Matrix *accumulator,
+                          float theta_precision, size_t *max_count);
+
+/// @brief Extracts lines from a populated Hough accumulator.
+/// @param[in] accumulator Pointer to the populated accumulator matrix. Must not
+/// be NULL.
+/// @param[in] threshold Minimum number of votes to consider a line. Must be
+/// greater than 0.
+/// @param[in] threshold Minimum number of votes to consider a line. Must be
+/// greater than 0.
+/// @param[in] theta_precision The angular precision in degrees. Must be
+/// strictly positive.
+/// @param[out] line_count Pointer to the variable that will hold the number of
+/// lines in the array. Must not be NULL.
+/// @return An array of pointers to `Line` structures representing detected
+/// lines.
+/// @throw Throws if `accumulator` or `line_count` is NULL or `threshold` is 0.
+/// @note The returned array is dynamically allocated and should be freed by the
+/// caller.
+Line **extract_hough_lines(Matrix *accumulator, size_t threshold,
+                           float theta_precision, size_t *line_count);
+
+/// @brief Applies Non-Maximum Suppression (NMS) to a set of Hough lines.
+///
+/// For each line in the input array, all other lines that are "too close" in
+/// both r and theta (within delta_r and delta_theta) are suppressed (removed).
+/// The remaining lines are compacted in the input array. Lines that are
+/// suppressed are freed.
+///
+/// @param[in,out] lines Array of pointers to Line structures. Must not be NULL.
+///                     After the call, contains only the lines that survived
+///                     NMS.
+/// @param[in,out] line_count Pointer to the number of lines in the array. Must
+/// be > 0 and not NULL.
+///                           After the call, updated to reflect the number of
+///                           remaining lines.
+/// @param[in] delta_r Maximum allowed difference in r to consider two lines
+/// similar. Must be >= 0.
+/// @param[in] delta_theta Maximum allowed difference in theta to consider two
+/// lines similar. Must be >= 0.
+///
+/// @return Pointer to the (same) input array `lines`, now containing only the
+/// lines that survived NMS.
+///
+/// @throw Throws if `lines` is NULL.
+/// @throw Throws if `line_count` is NULL or *line_count is 0.
+/// @throw Throws if `delta_r` or `delta_theta` is negative.
+///
+/// @note The function frees memory for suppressed lines.
+/// @note The function modifies the input array in-place.
+Line **hough_lines_NMS(Line **lines, size_t *line_count, double delta_r,
+                       double delta_theta);
+
+void print_lines(Line **lines, size_t size /*, size_t offset*/);
+#endif
