@@ -27,7 +27,7 @@ void extarct(const Matrix *matrix, size_t x0, size_t y0, size_t x1, size_t y1)
         guchar *p = pixels + j * rowstride;
         for (size_t i = 0; i < width; i++)
         {
-            guchar value = (guchar)(mat_coef(matrix,j+y0,i+x0));
+            guchar value = (guchar)(mat_coef(matrix, j + y0, i + x0));
             p[3 * i + 0] = value;
             p[3 * i + 1] = value;
             p[3 * i + 2] = value;
