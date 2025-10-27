@@ -79,13 +79,8 @@ Neural_Network *net_create_empty(size_t layer_number, size_t *layer_heights)
 void net_free(Neural_Network *net)
 {
     free(net->layer_heights);
-    for (size_t i = 1; net->layer_number; i++)
-    {
-        mat_free(net->weights[i]);
-        mat_free(net->biases[i]);
-    }
-    free(net->weights);
-    free(net->biases);
+    mat_free_matrix_array(net->weights, net->layer_number);
+    mat_free_matrix_array(net->biases, net->layer_number);
     free(net);
 }
 
