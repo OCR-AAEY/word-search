@@ -213,7 +213,7 @@ Line **hough_transform_lines(Matrix *src, float theta_precision, double delta_r,
     return lines;
 }
 
-void print_lines(Line **lines, size_t size /*, size_t offset*/)
+void print_lines(Line **lines, size_t size)
 {
     for (size_t i = 0; i < size; i++)
     {
@@ -221,18 +221,140 @@ void print_lines(Line **lines, size_t size /*, size_t offset*/)
         double r = lines[i]->r;
 
         printf("Line %zu : (%f, %f)\n", i, r, theta);
+    }
+}
 
-        /*
-        size_t h_0 = r * cos(theta);
-        size_t w_0 = r * sin(theta);
+void insert_line_in_group(Line *line, Line ***lines_group, size_t *lines_count,
+                          size_t *max_group)
+{
+    if (*lines_count == *max_group)
+    {
+        *max_group += 10;
+        *lines_group = realloc(*lines_group, *max_group * sizeof(Line *));
+        if (*lines_group == NULL)
+            errx(EXIT_FAILURE, "Failed to reallocate lines group");
+    }
+    (*lines_group)[(*lines_count)++] = line;
+}
 
-        size_t h_1 = h_0 + offset * (- sin(theta));
-        size_t w_1 = w_0 + offset * cos(theta);
+void split_lines(Line **lines, size_t line_count, Line ***lines_1,
+                 size_t *lines_1_count, Line ***lines_2, size_t *lines_2_count)
+{
+    if (lines == NULL)
+        errx(EXIT_FAILURE, "The lines array is NULL");
+    if (lines_1 == NULL)
+        errx(EXIT_FAILURE, "The lines_1 output parameter is NULL");
+    if (lines_2 == NULL)
+        errx(EXIT_FAILURE, "The lines_2 output parameter is NULL");
+    if (line_count == 0)
+        errx(EXIT_FAILURE, "There is no lines to sort");
+    if (lines_1_count == NULL)
+        errx(EXIT_FAILURE, "The lines_1_count output parameter is NULL");
+    if (lines_2_count == NULL)
+        errx(EXIT_FAILURE, "The lines_2_count output parameter is NULL");
 
-        size_t h_1 = h_0 - offset * (- sin(theta));
-        size_t w_1 = w_0 - offset * cos(theta);
-        */
-        free(lines[i]);
+    size_t max_1 = line_count / 2;
+    size_t max_2 = line_count / 2;
+    *lines_1_count = 0;
+    *lines_2_count = 0;
+    *lines_1 = malloc(max_1 * sizeof(Line *));
+    *lines_2 = malloc(max_2 * sizeof(Line *));
+
+    for (size_t i = 0; i < line_count; i++)
+    {
+        Line *li = lines[i];
+        if (*lines_1_count == 0 || li->theta == (*lines_1)[0]->theta)
+        {
+            insert_line_in_group(li, lines_1, lines_1_count, &max_1);
+        }
+        else if (*lines_2_count == 0 || li->theta == (*lines_2)[0]->theta)
+        {
+            insert_line_in_group(li, lines_2, lines_2_count, &max_2);
+        }
+        else
+        {
+            if (li->theta == (*lines_1)[0]->theta)
+            {
+                insert_line_in_group(li, lines_1, lines_1_count, &max_1);
+            }
+            else if (li->theta == (*lines_2)[0]->theta)
+            {
+                insert_line_in_group(li, lines_2, lines_2_count, &max_2);
+            }
+            else
+            {
+                printf("theta1 = %f, theta2 = %f, got %f\n",
+                       (*lines_1)[0]->theta, (*lines_2)[0]->theta, li->theta);
+                errx(EXIT_FAILURE,
+                     "There are 3 lines angles : impossible to split in 2");
+            }
+        }
     }
     free(lines);
+}
+
+Point **extract_intersection_points(Line **lines, size_t line_count,
+                                    size_t *size_out)
+{
+    if (lines == NULL)
+        errx(EXIT_FAILURE, "The lines array is NULL");
+    if (size_out == NULL)
+        errx(EXIT_FAILURE, "The size output parameter is NULL");
+
+    Line **lines_1;
+    Line **lines_2;
+    size_t lines_1_count;
+    size_t lines_2_count;
+
+    split_lines(lines, line_count, &lines_1, &lines_1_count, &lines_2,
+                &lines_2_count);
+
+    printf("Lines separated in 2 groups of %zu and %zu lines\n", lines_1_count,
+           lines_2_count);
+    Point **points = malloc(lines_1_count * lines_2_count * sizeof(Point *));
+    *size_out = 0;
+
+    for (size_t i_1 = 0; i_1 < lines_1_count; i_1++)
+    {
+        Line *l1 = lines_1[i_1];
+        for (size_t i_2 = 0; i_2 < lines_2_count; i_2++)
+        {
+            Line *l2 = lines_2[i_2];
+            if (l1->theta == l2->theta)
+                errx(EXIT_FAILURE, "Both group of lines have the same angle, "
+                                   "there is no intersection");
+
+            Point *intersection = malloc(sizeof(Point));
+            intersection->x =
+                (int)round((l2->r * sind(l1->theta) - l1->r * sind(l2->theta)) /
+                           sind(l1->theta - l2->theta));
+            intersection->y =
+                (int)round((l1->r * cosd(l2->theta) - l2->r * cosd(l1->theta)) /
+                           sind(l1->theta - l2->theta));
+            points[(*size_out)++] = intersection;
+        }
+        free(l1);
+    }
+
+    for (size_t i_2 = 0; i_2 < lines_2_count; i_2++)
+    {
+        free(lines_2[i_2]);
+    }
+
+    free(lines_1);
+    free(lines_2);
+    return points;
+}
+
+void print_points(Point **points, size_t size)
+{
+    printf("Found %zu points\n", size);
+    for (size_t i = 0; i < size; i++)
+    {
+
+        printf("Point %zu : (%i, %i)\n", i, points[i]->x, points[i]->y);
+
+        free(points[i]);
+    }
+    free(points);
 }
