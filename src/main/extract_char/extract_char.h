@@ -5,6 +5,7 @@
 #include "../matrix/matrix.h"
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-void extarct(const Matrix *matrix, size_t x0, size_t y0, size_t x1, size_t y1);
+void save_image_region(const Matrix *matrix, const char *name, size_t x0,
+                       size_t y0, size_t x1, size_t y1);
 
 #endif
