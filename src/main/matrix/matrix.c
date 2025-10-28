@@ -157,9 +157,10 @@ int mat_eq(Matrix *a, Matrix *b)
     if (a->height != b->height || a->width != b->width)
         return 0;
 
+    double epsilon = 1E-9;
     for (size_t i = 0; i < a->height * a->width; i++)
     {
-        if (a->content[i] != b->content[i])
+        if (fabs(a->content[i] - b->content[i]) > epsilon)
             return 0;
     }
 
