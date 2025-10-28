@@ -580,6 +580,14 @@ Matrix *mat_map(const Matrix *m, double (*f)(double))
     return res;
 }
 
+void mat_inplace_map(Matrix *m, double (*f)(double))
+{
+    for (size_t i = 0; i < m->height * m->width; i++)
+    {
+        *(m->content + i) = f(*(m->content + i));
+    }
+}
+
 Matrix *mat_map_with_indexes(const Matrix *m,
                              double (*f)(double, size_t, size_t))
 {
@@ -593,6 +601,17 @@ Matrix *mat_map_with_indexes(const Matrix *m,
     }
 
     return res;
+}
+
+void mat_inplace_map_with_indexes(Matrix *m,
+                                  double (*f)(double, size_t, size_t))
+{
+    for (size_t h = 0; h < m->height; h++)
+    {
+        for (size_t w = 0; w < m->width; w++)
+            *mat_unsafe_coef_ptr(m, h, w) =
+                f(*mat_unsafe_coef_ptr(m, h, w), h, w);
+    }
 }
 
 void mat_print(const Matrix *m, unsigned int precision)

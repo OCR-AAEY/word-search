@@ -250,6 +250,14 @@ void mat_inplace_normalize(Matrix *m);
 /// @throw Terminates the program if memory allocation fails.
 Matrix *mat_map(const Matrix *m, double (*f)(double));
 
+/// @brief Applies a function to every element of a matrix (in place).
+/// @param[in,out] m The matrix whose elements will be modified in place.
+/// @param[in] f A pointer to a function that takes a double and returns a
+/// double.
+/// @note This function directly modifies the contents of m.
+/// No new memory is allocated.
+void mat_inplace_map(Matrix *m, double (*f)(double));
+
 /// @brief Applies a user-defined function element-wise to a matrix, with access
 /// to element indexes.
 /// @param[in] m Pointer to the input matrix.
@@ -259,6 +267,21 @@ Matrix *mat_map(const Matrix *m, double (*f)(double));
 /// @throw Terminates the program if memory allocation fails.
 Matrix *mat_map_with_indexes(const Matrix *m,
                              double (*f)(double, size_t, size_t));
+
+/// @brief Applies a function to each element of a matrix (in place), passing
+/// element coordinates. This function iterates over all elements of the matrix
+/// @p m and applies the given function @p f to each element. The function @p f
+/// receives the element's current value and its (row, column) coordinates, and
+/// its return value replaces the element.
+/// @param[in,out] m The matrix whose elements will be modified in place.
+/// @param[in] f A pointer to a function taking the current element value, its
+/// row index (h), and its column index (w), and returning the new value to
+/// store at that position. Signature: `double f(double value, size_t h, size_t
+/// w)`.
+/// @note This function modifies @p m directly and does not allocate new memory.
+/// Useful for applying coordinate-dependent transformations.
+void mat_inplace_map_with_indexes(Matrix *m,
+                                  double (*f)(double, size_t, size_t));
 
 /// @brief Prints the contents of a matrix to stdout in a formatted 2D layout.
 /// @param[in] m Pointer to the matrix to print.
