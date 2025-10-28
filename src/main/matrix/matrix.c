@@ -143,7 +143,8 @@ void mat_free_matrix_array(Matrix **array, size_t lentgh)
 {
     for (size_t i = 0; i < lentgh; i++)
     {
-        mat_free(array[i]);
+        if (array[i] != NULL)
+            mat_free(array[i]);
     }
     free(array);
 }
@@ -537,6 +538,9 @@ Matrix *mat_normalize(const Matrix *m)
         sum += *(m->content + i);
     }
 
+    if (sum == 0.0)
+        errx(1, "Cannot normalize a zero matrix.");
+
     for (size_t i = 0; i < m->height * m->width; i++)
     {
         *(res->content + i) = *(m->content + i) / sum;
@@ -553,6 +557,9 @@ void mat_inplace_normalize(Matrix *m)
     {
         sum += *(m->content + i);
     }
+
+    if (sum == 0.0)
+        errx(1, "Cannot normalize a zero matrix.");
 
     for (size_t i = 0; i < m->height * m->width; i++)
     {
