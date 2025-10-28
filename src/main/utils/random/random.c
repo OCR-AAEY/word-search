@@ -37,7 +37,7 @@ unsigned long rand_ul_uniform(unsigned long max)
 
 unsigned long rand_ul_uniform_nm(unsigned long min, unsigned long max)
 {
-    return min + rand_ul_uniform(max - min + 1);
+    return min + rand_ul_uniform(max - min);
 }
 
 double rand_d_uniform()

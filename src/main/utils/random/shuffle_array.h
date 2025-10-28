@@ -1,6 +1,8 @@
 #ifndef SHUFFLE_ARRAY_H
 #define SHUFFLE_ARRAY_H
 
+#include <stdlib.h>
+
 /// @brief Shuffles the elements of a generic array in place using the
 /// Fisher–Yates algorithm.
 /// @param array Pointer to the array to shuffle.
