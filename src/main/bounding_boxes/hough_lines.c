@@ -348,12 +348,15 @@ void split_lines(Line **lines, size_t line_count, Line ***lines_1,
 }
 
 Point **extract_intersection_points(Line **lines, size_t line_count,
-                                    size_t *size_out)
+                                                size_t *height_out,
+                                                size_t *width_out)
 {
     if (lines == NULL)
         errx(EXIT_FAILURE, "The lines array is NULL");
-    if (size_out == NULL)
-        errx(EXIT_FAILURE, "The size output parameter is NULL");
+    if (height_out == NULL)
+        errx(EXIT_FAILURE, "The height output parameter is NULL");
+    if (width_out == NULL)
+        errx(EXIT_FAILURE, "The width output parameter is NULL");
 
     Line **lines_1;
     Line **lines_2;
@@ -363,11 +366,21 @@ Point **extract_intersection_points(Line **lines, size_t line_count,
     split_lines(lines, line_count, &lines_1, &lines_1_count, &lines_2,
                 &lines_2_count);
 
-    // printf("Lines separated in 2 groups of %zu and %zu lines\n",
-    // lines_1_count,
-    //        lines_2_count);
-    Point **points = malloc(lines_1_count * lines_2_count * sizeof(Point *));
-    *size_out = 0;
+    *height_out = lines_1_count;
+    *width_out = lines_2_count;
+
+    Point **points =
+        malloc(lines_1_count * sizeof(Point *));
+
+    if (points == NULL)
+        errx(EXIT_FAILURE, "Memory allocation failed for points");
+
+    for (size_t i = 0; i < lines_1_count; i++)
+    {
+        points[i] = malloc(lines_2_count * sizeof(Point));
+        if (points[i] == NULL)
+            errx(EXIT_FAILURE, "Memory allocation failed for points row");
+    }
 
     for (size_t i_1 = 0; i_1 < lines_1_count; i_1++)
     {
@@ -379,14 +392,14 @@ Point **extract_intersection_points(Line **lines, size_t line_count,
                 errx(EXIT_FAILURE, "Both group of lines have the same angle, "
                                    "there is no intersection");
 
-            Point *intersection = malloc(sizeof(Point));
-            intersection->x =
+            Point intersection;
+            intersection.x =
                 (int)round((l2->r * sind(l1->theta) - l1->r * sind(l2->theta)) /
                            sind(l1->theta - l2->theta));
-            intersection->y =
+            intersection.y =
                 (int)round((l1->r * cosd(l2->theta) - l2->r * cosd(l1->theta)) /
                            sind(l1->theta - l2->theta));
-            points[(*size_out)++] = intersection;
+            points[i_1][i_2] = intersection;
         }
     }
 
@@ -395,20 +408,23 @@ Point **extract_intersection_points(Line **lines, size_t line_count,
     return points;
 }
 
-void print_points(Point **points, size_t size)
+void print_points(Point **points, size_t height, size_t width)
 {
-    printf("Found %zu points\n", size);
-    for (size_t i = 0; i < size; i++)
+    printf("Found %zu points\n", height * width);
+    for (size_t h = 0; h < height; h++)
     {
-        printf("Point %zu : (%i, %i)\n", i, points[i]->x, points[i]->y);
+        for (size_t w = 0; w < width; w++)
+        {
+            printf("Point (%zu, %zu) : (%i, %i)\n", h, w, points[h][w].x, points[h][w].y);
+        }
     }
 }
 
-void free_points(Point **points, size_t size)
+void free_points(Point **points, size_t height)
 {
-    for (size_t i = 0; i < size; i++)
+    for (size_t h = 0; h < height; h++)
     {
-        free(points[i]);
+        free(points[h]);
     }
     free(points);
 }

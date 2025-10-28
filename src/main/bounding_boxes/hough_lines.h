@@ -52,15 +52,16 @@ Line **hough_transform_lines(Matrix *src, float theta_precision, double delta_r,
 /// @brief Computes intersection points of two groups of lines.
 /// @param[in] lines Array of pointers to Line structures (must not be NULL).
 /// @param[in] line_count Number of lines in the input array (must be > 0).
-/// @param[out] size_out Stores the number of intersection points (must not be
-/// NULL).
-/// @return Dynamically allocated array of Point pointers. Caller must free both
-///         the array and the Point objects.
+/// @param[out] height_out Stores the number of lines in the 2D array of
+/// intersection points (must not be NULL).
+/// @param[out] width_out Stores the number of columns in the 2D array of
+/// intersection points (must not be NULL).
+/// @return Dynamically allocated 2D array of Point.
 /// @throw Exits if any pointer is NULL, lines have the same angle in both
-/// groups,
-///         or memory allocation fails.
+/// groups, or memory allocation fails.
+/// @note Caller must free the array using `free_points()` function.
 Point **extract_intersection_points(Line **lines, size_t line_count,
-                                    size_t *size_out);
+                                    size_t *height_out, size_t *width_out);
 
 /// ============= internal functions ===============
 
@@ -209,17 +210,18 @@ void insert_line_in_group(Line *line, Line ***lines_group, size_t *lines_count,
 void split_lines(Line **lines, size_t line_count, Line ***lines_1,
                  size_t *lines_1_count, Line ***lines_2, size_t *lines_2_count);
 
-/// @brief Prints an array of points.
-/// @param[in,out] points Array of pointers to Point structures.
-/// @param[in] size Number of points in the array.
-void print_points(Point **points, size_t size);
+/// @brief Prints a 2D array of points.
+/// @param[in] points 2D array of Point structures.
+/// @param[in] height Number of lines in the 2D array.
+/// @param[in] width Number of columns in the 2D array.
+void print_points(Point **points, size_t height, size_t width);
 
-/// @brief Frees an array of points.
-/// @param[in,out] points Array of pointers to Point structures. Each Point is
-/// freed.
-/// @param[in] size Number of points in the array.
-/// @note The function frees both the individual Point objects and the array
-/// itself.
-void free_points(Point **points, size_t size);
+/// @brief Frees a 2D array of points.
+/// @param[in,out] points A 2D array of Point structures.
+/// Each Point array is freed.
+/// @param[in] height Number of lines in the 2D array.
+/// @note The function frees both the row Point arrays and
+/// the array itself.
+void free_points(Point **points, size_t height);
 
 #endif

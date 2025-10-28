@@ -10,7 +10,7 @@ void draw_point(cairo_t *cr, double x, double y, double radius)
     cairo_fill(cr);
 }
 
-void draw_points_on_img(Point **points, size_t points_count, char *filename)
+void draw_points_on_img(Point **points, size_t height, size_t width, char *filename)
 {
     cairo_t *cr;
     cairo_surface_t *surface;
@@ -20,9 +20,12 @@ void draw_points_on_img(Point **points, size_t points_count, char *filename)
     cr = cairo_create(surface);
 
     cairo_set_source_rgb(cr, 0, 1, 0);
-    for (size_t i = 0; i < points_count; i++)
+    for (size_t h = 0; h < height; h++)
     {
-        draw_point(cr, points[i]->x, points[i]->y, 7);
+        for (size_t w = 0; w < width; w++)
+        {
+            draw_point(cr, points[h][w].x, points[h][w].y, 7);
+        }
     }
 
     char *result_filename = malloc(128 * sizeof(char));

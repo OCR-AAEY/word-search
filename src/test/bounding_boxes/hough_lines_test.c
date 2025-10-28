@@ -50,8 +50,8 @@ static void run_test_for_file(const char *file_path, size_t expected_points,
     Line **lines = hough_transform_lines(threshold, 1, 5, 1, &nb_lines);
     cr_assert_not_null(lines, "Failed to detect lines for %s", file_path);
 
-    size_t nb_points = 0;
-    Point **points = extract_intersection_points(lines, nb_lines, &nb_points);
+    size_t points_width, points_height;
+    Point **points = extract_intersection_points(lines, nb_lines, &points_height, &points_width);
     cr_assert_not_null(points, "Failed to extract intersection points for %s",
                        file_path);
 
@@ -59,13 +59,13 @@ static void run_test_for_file(const char *file_path, size_t expected_points,
                  "Unexpected number of lines in %s: got %zu, expected %zu",
                  file_path, nb_lines, expected_lines);
 
-    cr_expect_eq(nb_points, expected_points,
+    cr_expect_eq(points_width * points_height, expected_points,
                  "Unexpected number of points in %s: got %zu, expected %zu",
-                 file_path, nb_points, expected_points);
+                 file_path, points_width * points_height, expected_points);
 
     // Cleanup
     free_lines(lines, nb_lines);
-    free_points(points, nb_points);
+    free_points(points, points_height);
     mat_free(threshold);
     free_image(img);
 }
