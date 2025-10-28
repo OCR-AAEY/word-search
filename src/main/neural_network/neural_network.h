@@ -71,8 +71,8 @@ void net_save_to_file(const Neural_Network *net, char *filename);
 /// input layer, or if only one of layers_results or layers_activations is
 /// provided (must be both or neither).
 Matrix *net_feed_forward(const Neural_Network *net, Matrix *input,
-                         Matrix *layers_results[net->layer_number],
-                         Matrix *layers_activations[net->layer_number]);
+                         Matrix *layers_results[net_layer_number(net)],
+                         Matrix *layers_activations[net_layer_number(net)]);
 
 /// @brief Performs backpropagation on a neural network, computing the gradients
 /// of the cost function.
@@ -88,10 +88,10 @@ Matrix *net_feed_forward(const Neural_Network *net, Matrix *input,
 /// each layer.
 /// @throw Exits the program if delta_nabla_w or delta_nabla_b arrays are NULL.
 void net_back_propagation(Neural_Network *net, Matrix *expected,
-                          Matrix *layers_results[net->layer_number],
-                          Matrix *layers_activations[net->layer_number],
-                          Matrix *delta_nabla_w[net->layer_number],
-                          Matrix *delta_nabla_b[net->layer_number]);
+                          Matrix *layers_results[net_layer_number(net)],
+                          Matrix *layers_activations[net_layer_number(net)],
+                          Matrix *delta_nabla_w[net_layer_number(net)],
+                          Matrix *delta_nabla_b[net_layer_number(net)]);
 
 /// @brief Updates a neural network's weights and biases using computed
 /// gradients and a learning rate.

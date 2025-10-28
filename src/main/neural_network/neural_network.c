@@ -318,8 +318,8 @@ void net_save_to_file(const Neural_Network *net, char *filename)
 }
 
 Matrix *net_feed_forward(const Neural_Network *net, Matrix *input,
-                         Matrix *layers_results[net->layer_number],
-                         Matrix *layers_activations[net->layer_number])
+                         Matrix *layers_results[net_layer_number(net)],
+                         Matrix *layers_activations[net_layer_number(net)])
 {
     if (mat_height(input) != net->layer_heights[0])
         errx(1, "TODO");
@@ -372,10 +372,10 @@ Matrix *net_feed_forward(const Neural_Network *net, Matrix *input,
 }
 
 void net_back_propagation(Neural_Network *net, Matrix *expected,
-                          Matrix *layers_results[net->layer_number],
-                          Matrix *layers_activations[net->layer_number],
-                          Matrix *delta_nabla_w[net->layer_number],
-                          Matrix *delta_nabla_b[net->layer_number])
+                          Matrix *layers_results[net_layer_number(net)],
+                          Matrix *layers_activations[net_layer_number(net)],
+                          Matrix *delta_nabla_w[net_layer_number(net)],
+                          Matrix *delta_nabla_b[net_layer_number(net)])
 {
     if (delta_nabla_w == NULL)
         errx(1, "TODO");
