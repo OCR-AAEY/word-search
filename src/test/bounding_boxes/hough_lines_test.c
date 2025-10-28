@@ -27,7 +27,7 @@ Test(hough_lines, level_2_image_1)
     // Line **lines = hough_transform_lines(closing, 1, 3, 1, &nb_lines);
 
     // print_lines(lines, nb_lines);
-
+    free_lines(lines, nb_lines);
     free_image(img);
 
     mat_free(closing);
@@ -51,7 +51,8 @@ static void run_test_for_file(const char *file_path, size_t expected_points,
     cr_assert_not_null(lines, "Failed to detect lines for %s", file_path);
 
     size_t points_width, points_height;
-    Point **points = extract_intersection_points(lines, nb_lines, &points_height, &points_width);
+    Point **points = extract_intersection_points(lines, nb_lines,
+                                                 &points_height, &points_width);
     cr_assert_not_null(points, "Failed to extract intersection points for %s",
                        file_path);
 
