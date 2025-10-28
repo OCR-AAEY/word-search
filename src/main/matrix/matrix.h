@@ -21,14 +21,14 @@ double *mat_coef_addr(const Matrix *m, size_t h, size_t w);
 
 double mat_coef(const Matrix *m, size_t h, size_t w);
 
-Matrix *mat_addition(Matrix *a, Matrix *b);
+Matrix *mat_addition(const Matrix *a, const Matrix *b);
 
 Matrix *mat_scalar_multiplication(Matrix *mat, double a);
 
-Matrix *mat_multiplication(Matrix *a, Matrix *b);
+Matrix *mat_multiplication(const Matrix *a, const Matrix *b);
 
-Matrix *mat_sigmoid(Matrix *m);
+Matrix *mat_sigmoid(const Matrix *m);
 
-void mat_print(Matrix *m, int precision);
+void mat_print(const Matrix *m, int precision);
 
 #endif
