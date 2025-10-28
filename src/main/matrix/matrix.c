@@ -370,7 +370,7 @@ Matrix *mat_sigmoid(const Matrix *m)
 
     for (size_t i = 0; i < m->height * m->width; i++)
     {
-        res->content[i] = sigmoid(res->content[i]);
+        res->content[i] = sigmoid(m->content[i]);
     }
 
     return res;
@@ -390,7 +390,7 @@ Matrix *mat_sigmoid_derivative(const Matrix *m)
 
     for (size_t i = 0; i < m->height * m->width; i++)
     {
-        res->content[i] = sigmoid_derivative(res->content[i]);
+        res->content[i] = sigmoid_derivative(m->content[i]);
     }
 
     return res;
