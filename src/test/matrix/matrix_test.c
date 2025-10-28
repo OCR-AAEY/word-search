@@ -99,3 +99,36 @@ Test(matrix, mat_addition_2)
     mat_free(m2);
     mat_free(res);
 }
+
+Test(matrix, mat_normalize_1)
+{
+    Matrix *m = mat_create_empty(2, 1);
+    *mat_coef_ptr(m, 0, 0) = 3.0;
+    *mat_coef_ptr(m, 1, 0) = 1.0;
+
+    mat_inplace_normalize(m);
+
+    double sum = 0.0;
+    for (size_t h = 0; h < mat_height(m); h++)
+    {
+        for (size_t w = 0; w < mat_width(m); w++)
+        {
+            double coef = mat_coef(m, h, w);
+            cr_expect(0.0 <= coef && coef <= 1.0,
+                      "Coef %lf at (h:%zu,w:%zu) is not between 0 and 1.", coef,
+                      h, w);
+            sum += coef;
+        }
+    }
+
+    cr_expect_float_eq(sum, 1.0, 1E-3);
+
+    mat_free(m);
+}
+
+Test(matrix, mat_normalize_2, .exit_code = 1)
+{
+    Matrix *m = mat_create_empty(4, 6);
+    mat_inplace_normalize(m);
+    mat_free(m);
+}
