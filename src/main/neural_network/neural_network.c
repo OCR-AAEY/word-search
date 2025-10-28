@@ -269,10 +269,47 @@ void net_save_to_file(const Neural_Network *net, char *filename)
                 w = write(fd, mat_coef_ptr(net->weights[i], h, w),
                           sizeof(double));
                 if (w != sizeof(double))
+                    errx(
+                        1,
+                        "Failed to write file %s: failed to write %zuth weight "
+                        "matrix's coefficient at position (h:%zu, w:%zu).",
+                        filename, i, h, w);
+            }
+        }
+    }
+
+    // Write the biases.
+    for (size_t i = 0; i < net->layer_number; i++)
+    {
+        size_t write_buff;
+
+        write_buff = mat_height(net->biases[i]);
+        w = write(fd, &write_buff, sizeof(size_t));
+        if (w != sizeof(size_t))
+            errx(1,
+                 "Failed to write file %s: failed to write %zuth bias matrix's "
+                 "height.",
+                 filename, i);
+
+        write_buff = mat_width(net->biases[i]);
+        w = write(fd, &write_buff, sizeof(size_t));
+        if (w != sizeof(size_t))
+            errx(1,
+                 "Failed to write file %s: failed to write %zuth bias matrix's "
+                 "width.",
+                 filename, i);
+
+        // Write the matrix content.
+        for (size_t h = 0; h < mat_height(net->biases[i]); h++)
+        {
+            for (size_t w = 0; w < mat_width(net->biases[i]); w++)
+            {
+                w = write(fd, mat_coef_ptr(net->biases[i], h, w),
+                          sizeof(double));
+                if (w != sizeof(double))
                     errx(1,
-                         "Failed to write file %s: failed to write %zuth "
-                         "weight matrix's "
-                         "coefficient at position (h:%zu, w:%zu).",
+                         "Failed to write file %s: failed to write %zuth bias "
+                         "matrix's coefficient at position (h:%zu, w:%zu).",
                          filename, i, h, w);
             }
         }
