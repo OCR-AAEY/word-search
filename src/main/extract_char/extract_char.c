@@ -1,6 +1,6 @@
 #include "extract_char.h"
 
-void save_image_region(const Matrix *matrix, const char *name, size_t x0,
+void save_image_region(const Matrix *matrix,  char *name, size_t x0,
                        size_t y0, size_t x1, size_t y1)
 {
     // Matrix check
