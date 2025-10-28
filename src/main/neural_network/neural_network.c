@@ -9,14 +9,16 @@
 #include "utils/math/sigmoid.h"
 #include "utils/random/shuffle_array.h"
 
+/// @brief Represents a fully connected neural network.
 struct Neural_Network
 {
-    /// @brief At least 2
+    /// @brief Number of layers in the network (must be at least 2).
     size_t layer_number;
+    /// @brief Array of layer heights (number of neurons per layer).
     size_t *layer_heights;
-    /// @brief Array of matrix pointers (first is NULL)
+    /// @brief Array of bias matrices, one per layer (first element is NULL).
     Matrix **biases;
-    /// @brief Array of matrix pointers (first is NULL)
+    /// @brief Array of weight matrices, one per layer (first element is NULL).
     Matrix **weights;
 };
 
@@ -30,10 +32,6 @@ size_t net_layer_height(const Neural_Network *net, size_t layer_id)
     return *(net->layer_heights + layer_id);
 }
 
-/// @brief Allocates mem. Do not free layer_heights. Random weights.
-/// @param layer_number
-/// @param layer_heights
-/// @return
 Neural_Network *net_create_empty(size_t layer_number, size_t *layer_heights)
 {
     // Check if arguments are valid.
@@ -115,13 +113,14 @@ Neural_Network *net_load_from_file(char *filename)
 
     net->weights = calloc(net->layer_number, sizeof(Matrix *));
     if (net->weights == NULL)
-        errx(1, "Failed to allocate memory for net_load_from_file "
-                "(net->weights).");
+        errx(
+            1,
+            "Failed to allocate memory for net_load_from_file (net->weights).");
 
     net->biases = calloc(net->layer_number, sizeof(Matrix *));
     if (net->biases == NULL)
-        errx(1, "Failed to allocate memory for net_load_from_file "
-                "(net->biases).");
+        errx(1,
+             "Failed to allocate memory for net_load_from_file (net->biases).");
 
     // Read the height of the layers.
     for (size_t i = 0; i < net->layer_number; i++)
@@ -318,13 +317,6 @@ void net_save_to_file(const Neural_Network *net, char *filename)
     fclose(file_stream);
 }
 
-/// @brief The result of input through the net.
-/// @param net
-/// @param input is not freed
-/// @param[out] layers_results
-/// @param[out] layers_activations
-/// @return A normalized matrix equal to activation[last] but not same (deep
-/// copied).
 Matrix *net_feed_forward(const Neural_Network *net, Matrix *input,
                          Matrix *layers_results[net->layer_number],
                          Matrix *layers_activations[net->layer_number])
