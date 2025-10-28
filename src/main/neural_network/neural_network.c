@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "matrix/matrix.h"
 #include "neural_network.h"
 #include "utils/math/sigmoid.h"
 #include "utils/random/shuffle_array.h"
@@ -44,33 +43,40 @@ Neural_Network *net_create_empty(size_t layer_number, size_t *layer_heights)
     {
         errx(1, "TODO");
     }
-    Matrix **weights = calloc(layer_number, sizeof(Matrix *));
-    if (weights == NULL)
+    net->layer_number = layer_number;
+    net->layer_heights = calloc(layer_number, sizeof(size_t));
+    if (net->layer_heights == NULL)
     {
         free(net);
         errx(1, "TODO");
     }
-    Matrix **biases = calloc(layer_number, sizeof(Matrix *));
-    if (biases == NULL)
+    net->weights = calloc(layer_number, sizeof(Matrix *));
+    if (net->weights == NULL)
     {
+        free(net->layer_heights);
         free(net);
-        free(weights);
+        errx(1, "TODO");
+    }
+    net->biases = calloc(layer_number, sizeof(Matrix *));
+    if (net->biases == NULL)
+    {
+        free(net->layer_heights);
+        free(net->weights);
+        free(net);
         errx(1, "TODO");
     }
 
-    weights[0] = NULL;
-    biases[0] = NULL;
+    for (size_t i = 0; i < layer_number; i++)
+        net->layer_heights[i] = layer_heights[i];
+
+    net->weights[0] = NULL;
+    net->biases[0] = NULL;
     for (size_t i = 1; i < layer_number; i++)
     {
-        weights[i] =
+        net->weights[i] =
             mat_create_gaussian_random(layer_heights[i], layer_heights[i - 1]);
-        biases[i] = mat_create_gaussian_random(layer_heights[i], 1);
+        net->biases[i] = mat_create_gaussian_random(layer_heights[i], 1);
     }
-
-    *net = (Neural_Network){.layer_number = layer_number,
-                            .layer_heights = layer_heights,
-                            .biases = biases,
-                            .weights = weights};
 
     return net;
 }

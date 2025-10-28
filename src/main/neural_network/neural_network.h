@@ -1,13 +1,22 @@
 #ifndef NEURAL_NETWORK_H
 #define NEURAL_NETWORK_H
 
+#include "matrix/matrix.h"
+#include <stddef.h>
+
+/// @brief Represents a fully connected neural network.
 typedef struct Neural_Network Neural_Network;
 
+/// @brief Represents a single training example for a neural network.
 struct Training_Data
 {
+    /// @brief Input column matrix for the network.
     Matrix *input;
+    /// @brief Expected output column matrix corresponding to the input.
     Matrix *expected;
 };
+
+/// @brief Represents a single training example for a neural network.
 typedef struct Training_Data Training_Data;
 
 /// @brief Retrieves the number of layers in a neural network.
@@ -29,8 +38,8 @@ size_t net_layer_height(const Neural_Network *net, size_t layer_id);
 /// @param[in] layer_number Number of layers in the network (must be at least
 /// 2).
 /// @param[in] layer_heights Array specifying the number of neurons in each
-/// layer. This array must remain valid for the lifetime of the network and
-/// should not be freed manually.
+/// layer. This array is copied and should therefore be freed manually if
+/// necessary.
 /// @return Pointer to a newly allocated Neural_Network structure.
 /// @throw Exits the program with an error if memory allocation fails or if
 /// layer_number < 2.
