@@ -126,7 +126,21 @@ Test(matrix, mat_normalize_1)
     mat_free(m);
 }
 
-Test(matrix, mat_normalize_2, .exit_code = 1)
+Test(matrix, mat_normalize_2)
+{
+    Matrix *m = mat_create_empty(2, 1);
+    *mat_coef_ptr(m, 0, 0) = 3.0;
+    *mat_coef_ptr(m, 1, 0) = 1.0;
+
+    mat_inplace_normalize(m);
+
+    cr_expect_float_eq(mat_coef(m, 0, 0), 3.0 / 4.0, 1E-6);
+    cr_expect_float_eq(mat_coef(m, 1, 0), 1.0 / 4.0, 1E-6);
+
+    mat_free(m);
+}
+
+Test(matrix, mat_normalize_3, .exit_code = 1)
 {
     Matrix *m = mat_create_empty(4, 6);
     mat_inplace_normalize(m);
