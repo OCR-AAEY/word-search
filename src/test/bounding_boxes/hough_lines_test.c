@@ -33,33 +33,62 @@ Test(hough_lines, level_2_image_1)
     mat_free(closing);
 }
 
-Test(lines_intersection, level_2_image_1)
+// Helper to run one test case
+static void run_test_for_file(const char *file_path, size_t expected_points,
+                              size_t expected_lines)
 {
-    ImageData *img = load_image("assets/sample_images/level_2_image_1.png");
+    cr_log_info("Testing file: %s\n", file_path);
+
+    ImageData *img = load_image(file_path);
+    cr_assert_not_null(img, "Failed to load image: %s", file_path);
 
     Matrix *gray = image_to_grayscale(img);
-
     Matrix *threshold = adaptative_gaussian_thresholding(gray, 255, 11, 10, 7);
     mat_free(gray);
 
-    Matrix *opening = morph_transform(threshold, 2, Opening);
-    mat_free(threshold);
+    size_t nb_lines = 0;
+    Line **lines = hough_transform_lines(threshold, 1, 5, 1, &nb_lines);
+    cr_assert_not_null(lines, "Failed to detect lines for %s", file_path);
 
-    Matrix *closing = morph_transform(opening, 2, Closing);
-    mat_free(opening);
-
-    // size_t offset =
-    //     (size_t)round(sqrt(mat_height(closing) * mat_height(closing) +
-    //                        mat_width(closing) * mat_width(closing)));
-    size_t nb_lines;
-    Line **lines = hough_transform_lines(closing, 1, 3, 1, &nb_lines);
-
-    // print_lines(lines, nb_lines);
-    size_t nb_points;
+    size_t nb_points = 0;
     Point **points = extract_intersection_points(lines, nb_lines, &nb_points);
-    // print_points(points, nb_points);
+    cr_assert_not_null(points, "Failed to extract intersection points for %s",
+                       file_path);
 
+    cr_expect_eq(nb_lines, expected_lines,
+                 "Unexpected number of lines in %s: got %zu, expected %zu",
+                 file_path, nb_lines, expected_lines);
+
+    cr_expect_eq(nb_points, expected_points,
+                 "Unexpected number of points in %s: got %zu, expected %zu",
+                 file_path, nb_points, expected_points);
+
+    // Cleanup
+    free_lines(lines, nb_lines);
+    free_points(points, nb_points);
+    mat_free(threshold);
     free_image(img);
-
-    mat_free(closing);
 }
+
+Test(lines_intersection, level_1_image_1_png)
+{
+    run_test_for_file("assets/sample_images/level_1_image_1.png", 18 * 18,
+                      18 + 18);
+}
+
+Test(lines_intersection, level_1_image_2_png)
+{
+    run_test_for_file("assets/sample_images/level_1_image_2.png", 13 * 13,
+                      13 + 13);
+}
+
+Test(lines_intersection, level_2_image_1_png)
+{
+    run_test_for_file("assets/sample_images/level_2_image_1.png", 9 * 8, 9 + 8);
+}
+
+// Test(lines_intersection, level_2_image_2_png)
+// {
+//     run_test_for_file("assets/sample_images/level_2_image_2.png", 15 * 15, 15
+//     + 15);
+// }

@@ -49,6 +49,16 @@ typedef struct Point
 Line **hough_transform_lines(Matrix *src, float theta_precision, double delta_r,
                              double delta_theta, size_t *size_out);
 
+/// @brief Computes intersection points of two groups of lines.
+/// @param[in] lines Array of pointers to Line structures (must not be NULL).
+/// @param[in] line_count Number of lines in the input array (must be > 0).
+/// @param[out] size_out Stores the number of intersection points (must not be
+/// NULL).
+/// @return Dynamically allocated array of Point pointers. Caller must free both
+///         the array and the Point objects.
+/// @throw Exits if any pointer is NULL, lines have the same angle in both
+/// groups,
+///         or memory allocation fails.
 Point **extract_intersection_points(Line **lines, size_t line_count,
                                     size_t *size_out);
 
@@ -80,6 +90,16 @@ double cosd(double degrees);
 Matrix *create_hough_accumulator(size_t height, size_t width,
                                  float theta_precision);
 
+/// @brief Computes mean and standard deviation of a Hough accumulator.
+/// @param[in] accumulator Pointer to the accumulator matrix (must not be NULL).
+/// @param[out] stddev_out Pointer to store the standard deviation (must not be
+/// NULL).
+/// @param[out] mean_out Pointer to store the mean (must not be NULL).
+/// @return void
+/// @throw Throws if any pointer is NULL.
+void statistics_on_accumulator(Matrix *accumulator, double *stddev_out,
+                               double *mean_out);
+
 /// @brief Populates a Hough accumulator from a source image.
 /// For each pixel that is black (`0`), increment the r values corresponding to
 /// all theta angles possible.
@@ -92,7 +112,7 @@ Matrix *create_hough_accumulator(size_t height, size_t width,
 /// the accumulator. Must not be NULL.
 /// @throw Throws if `src` or `accumulator` or `max_count` is NULL.
 void populate_hough_lines(Matrix *src, Matrix *accumulator,
-                          float theta_precision, size_t *max_count);
+                          double theta_precision, size_t *max_count);
 
 /// @brief Extracts lines from a populated Hough accumulator.
 /// @param[in] accumulator Pointer to the populated accumulator matrix. Must not
@@ -111,7 +131,7 @@ void populate_hough_lines(Matrix *src, Matrix *accumulator,
 /// @note The returned array is dynamically allocated and should be freed by the
 /// caller.
 Line **extract_hough_lines(Matrix *accumulator, size_t threshold,
-                           float theta_precision, size_t *line_count);
+                           double theta_precision, size_t *line_count);
 
 /// @brief Applies Non-Maximum Suppression (NMS) to a set of Hough lines.
 ///
@@ -144,14 +164,62 @@ Line **extract_hough_lines(Matrix *accumulator, size_t threshold,
 Line **hough_lines_NMS(Line **lines, size_t *line_count, double delta_r,
                        double delta_theta);
 
+/// @brief Prints an array of lines with their r and theta values.
+/// @param[in] lines Array of pointers to Line structures.
+/// @param[in] size Number of lines in the array.
 void print_lines(Line **lines, size_t size /*, size_t offset*/);
 
+/// @brief Frees memory allocated for an array of lines.
+/// @param[in] lines Array of pointers to Line structures.
+/// @param[in] size Number of lines in the array.
+void free_lines(Line **lines, size_t size);
+
+/// @brief Inserts a line into a dynamically growing group of lines.
+/// @param[in] line Pointer to the Line to insert (must not be NULL).
+/// @param[out] lines_group Pointer to the array of Line pointers (may be
+/// reallocated).
+/// @param[out] lines_count Pointer to the current number of lines in the group.
+/// @param[out] max_group Pointer to the current allocated capacity of the
+/// group.
+/// @return void
+/// @throw Exits if memory allocation fails.
 void insert_line_in_group(Line *line, Line ***lines_group, size_t *lines_count,
                           size_t *max_group);
 
+/// @brief Splits an array of lines into two groups based on their theta values.
+///
+/// The function groups lines with the same theta into one of the two output
+/// arrays. It assumes that all lines have at most two distinct theta values.
+/// Exits with error if a third distinct theta is encountered.
+///
+/// @param[in,out] lines Array of pointers to Line structures (must not be
+/// NULL).
+/// @param[in] line_count Number of lines in the input array (must be > 0).
+/// @param[out] lines_1 Output pointer to the first group of lines (will be
+/// allocated).
+/// @param[out] lines_1_count Pointer to store the number of lines in the first
+/// group.
+/// @param[out] lines_2 Output pointer to the second group of lines (will be
+/// allocated).
+/// @param[out] lines_2_count Pointer to store the number of lines in the second
+/// group.
+/// @return void
+/// @throw Exits if any pointer is NULL, there is not lines, or more than two
+/// theta values exist.
 void split_lines(Line **lines, size_t line_count, Line ***lines_1,
                  size_t *lines_1_count, Line ***lines_2, size_t *lines_2_count);
 
+/// @brief Prints an array of points.
+/// @param[in,out] points Array of pointers to Point structures.
+/// @param[in] size Number of points in the array.
 void print_points(Point **points, size_t size);
+
+/// @brief Frees an array of points.
+/// @param[in,out] points Array of pointers to Point structures. Each Point is
+/// freed.
+/// @param[in] size Number of points in the array.
+/// @note The function frees both the individual Point objects and the array
+/// itself.
+void free_points(Point **points, size_t size);
 
 #endif
