@@ -10,7 +10,8 @@ void draw_point(cairo_t *cr, double x, double y, double radius)
     cairo_fill(cr);
 }
 
-void draw_points_on_img(Point **points, size_t height, size_t width, char *filename)
+void draw_points_on_img(Point **points, size_t height, size_t width,
+                        char *filename)
 {
     cairo_t *cr;
     cairo_surface_t *surface;

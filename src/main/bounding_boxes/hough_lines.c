@@ -348,8 +348,7 @@ void split_lines(Line **lines, size_t line_count, Line ***lines_1,
 }
 
 Point **extract_intersection_points(Line **lines, size_t line_count,
-                                                size_t *height_out,
-                                                size_t *width_out)
+                                    size_t *height_out, size_t *width_out)
 {
     if (lines == NULL)
         errx(EXIT_FAILURE, "The lines array is NULL");
@@ -369,8 +368,7 @@ Point **extract_intersection_points(Line **lines, size_t line_count,
     *height_out = lines_1_count;
     *width_out = lines_2_count;
 
-    Point **points =
-        malloc(lines_1_count * sizeof(Point *));
+    Point **points = malloc(lines_1_count * sizeof(Point *));
 
     if (points == NULL)
         errx(EXIT_FAILURE, "Memory allocation failed for points");
@@ -415,7 +413,8 @@ void print_points(Point **points, size_t height, size_t width)
     {
         for (size_t w = 0; w < width; w++)
         {
-            printf("Point (%zu, %zu) : (%i, %i)\n", h, w, points[h][w].x, points[h][w].y);
+            printf("Point (%zu, %zu) : (%i, %i)\n", h, w, points[h][w].x,
+                   points[h][w].y);
         }
     }
 }

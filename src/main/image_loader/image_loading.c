@@ -11,10 +11,20 @@
 /// @return A boolean indicating if the file was successfully saved.
 int save_pixbuf_to_png(GdkPixbuf *pixbuf, char *filename, GError **error)
 {
+    // Extract directory path
+    char *dir = g_path_get_dirname(filename);
+
+    // Create directory (recursively if needed)
+    g_mkdir_with_parents(dir, 0755);
+    g_free(dir);
+
     int success = gdk_pixbuf_save(pixbuf, filename, "png", error, NULL);
     if (!success)
     {
-        g_printerr("Error saving image: %s\n", (*error)->message);
+        if (error != NULL)
+            g_printerr("Error saving image: %s\n", (*error)->message);
+        else
+            g_printerr("Error saving image\n");
     }
     return success;
 }
