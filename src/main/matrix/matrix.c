@@ -595,7 +595,7 @@ Matrix *mat_map_with_indexes(const Matrix *m,
     return res;
 }
 
-void mat_print(const Matrix *m, int precision)
+void mat_print(const Matrix *m, unsigned int precision)
 {
     if (m == NULL)
     {
@@ -604,16 +604,16 @@ void mat_print(const Matrix *m, int precision)
     else
     {
         char fmt[16];
-        snprintf(fmt, sizeof(fmt), "%%.%df", precision);
+        snprintf(fmt, sizeof(fmt), "%%.%uf", precision);
 
         for (size_t h = 0; h < m->height; h++)
         {
-            for (size_t w = 0; w < m->width; w++)
+            for (size_t w = 0; w < m->width - 1; w++)
             {
                 printf(fmt, mat_coef(m, h, w));
-                if (w < m->width - 1)
-                    printf("  ");
+                printf("  ");
             }
+            printf(fmt, mat_coef(m, h, m->width - 1));
             printf("\n");
         }
     }

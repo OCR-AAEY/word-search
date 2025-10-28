@@ -264,6 +264,6 @@ Matrix *mat_map_with_indexes(const Matrix *m,
 /// @param[in] m Pointer to the matrix to print.
 /// @param[in] precision Number of decimal places to display for each element.
 /// @throw Terminates the program if the matrix pointer is NULL.
-void mat_print(const Matrix *m, int precision);
+void mat_print(const Matrix *m, unsigned int precision);
 
 #endif
