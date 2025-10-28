@@ -3,6 +3,17 @@
 #include "bounding_boxes/pretreatment.h"
 #include "bounding_boxes/visualization.h"
 
+void extract_grid_cells(Point **points, size_t height, size_t width)
+{
+    for (size_t h = 0; h < height - 1; h++)
+    {
+        for (size_t w = 0; w < width - 1; w++)
+        {
+            printf("(%i, %i) to (%i, %i)\n", points[h][w].x, points[h][w].y, points[h+1][w+1].x, points[h+1][w+1].y);
+        }
+    }
+}
+
 #ifndef UNIT_TEST
 
 int main()
@@ -54,17 +65,18 @@ int main()
     // mat_free(blured);
     mat_free(threshold);
 
-    print_lines(lines, nb_lines);
+    //print_lines(lines, nb_lines);
 
     draw_lines_on_img(lines, nb_lines, "result.png");
 
-    size_t nb_points;
-    Point **points = extract_intersection_points(lines, nb_lines, &nb_points);
+    size_t width_points, height_points;
+    Point **points = extract_intersection_points(lines, nb_lines, &height_points, &width_points);
 
-    draw_points_on_img(points, nb_points, "lines_result.png");
+    draw_points_on_img(points, height_points, width_points, "lines_result.png");
 
-    print_points(points, nb_points);
-    free_points(points, nb_points);
+    //print_points(points, nb_points);
+    extract_grid_cells(points, height_points, width_points);
+    free_points(points, height_points);
     free_lines(lines, nb_lines);
     return EXIT_SUCCESS;
 }
