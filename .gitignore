@@ -1,3 +1,7 @@
+# Tests
+venv/
+extracted_images/
+
 # Build
 /build
 
