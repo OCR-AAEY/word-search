@@ -5,92 +5,87 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <criterion/criterion.h>
 #include "bounding_boxes/pretreatment.h"
+#include "rotation-manual/rotation.h"
 #include "image_loader/image_loading.h"
 #include "matrix/matrix.h"
-#include "rotation-manual/rotation.h"
 
+#define MAX_DIFF 2
 
-int main(int argc, char **argv)
+int compare_images_with_tolerance(ImageData *a, ImageData *b)
 {
-    if (argc != 4)
+    if (a->width != b->width || a->height != b->height)
+        return 0;
+
+    for (size_t y = 0; y < a->height; y++)
     {
-        fprintf(stderr, "Usage: %s <input.png> <output.png> <angle>\n", argv[0]);
-        return EXIT_FAILURE;
-    }
-
-    gtk_init(&argc, &argv);
-
-    ImageData *img = load_image(argv[1]);
-    if (img == NULL)
-    {
-        fprintf(stderr, "Failed to load image: %s\n", argv[1]);
-        return EXIT_FAILURE;
-    }
-
-    Matrix *m = image_to_grayscale(img);
-    if (m == NULL)
-    {
-        fprintf(stderr, "Failed to convert to matrix\n");
-        free_image(img);
-        return EXIT_FAILURE;
-    }
-
-    Matrix *rot = rotate_matrix(m, strtod(argv[3], NULL));
-    if (rot == NULL)
-    {
-        fprintf(stderr, "Rotation failed\n");
-        mat_free(m);
-        free_image(img);
-        return EXIT_FAILURE;
-    }
-
-    ImageData *rot_img = pixel_matrix_to_image(rot);
-    if (rot_img == NULL)
-    {
-        fprintf(stderr, "Failed to convert rotated matrix to image\n");
-        mat_free(m);
-        mat_free(rot);
-        free_image(img);
-        return EXIT_FAILURE;
-    }
-
-    // Create pixbuf manually from ImageData pixels
-    GdkPixbuf *pixbuf = gdk_pixbuf_new(
-        GDK_COLORSPACE_RGB,
-        FALSE,      // no alpha
-        8,          // 8 bits per channel
-        rot_img->width,
-        rot_img->height
-    );
-
-    guchar *dest_pixels = gdk_pixbuf_get_pixels(pixbuf);
-    int rowstride = gdk_pixbuf_get_rowstride(pixbuf);
-
-    for (size_t y = 0; y < rot_img->height; y++)
-    {
-        for (size_t x = 0; x < rot_img->width; x++)
+        for (size_t x = 0; x < a->width; x++)
         {
-            Pixel *p = &rot_img->pixels[y * rot_img->width + x];
-            dest_pixels[y * rowstride + x * 3 + 0] = p->r;
-            dest_pixels[y * rowstride + x * 3 + 1] = p->g;
-            dest_pixels[y * rowstride + x * 3 + 2] = p->b;
+            Pixel *pa = &a->pixels[y * a->width + x];
+            Pixel *pb = &b->pixels[y * b->width + x];
+
+            if (abs(pa->r - pb->r) > MAX_DIFF ||
+                abs(pa->g - pb->g) > MAX_DIFF ||
+                abs(pa->b - pb->b) > MAX_DIFF)
+            {
+                return 0;
+            }
         }
     }
+    return 1;
+}
 
-    GError *error = NULL;
-    if (!gdk_pixbuf_save(pixbuf, argv[2], "png", &error, NULL))
-    {
-        fprintf(stderr, "Failed to save image: %s\n", error->message);
-        g_error_free(error);
-    }
+static void run_rotation_test(const char *file_path, double angle)
+{
+    ImageData *img = load_image(file_path);
+    cr_assert_not_null(img, "Failed to load image: %s", file_path);
+
+    Matrix *m = image_to_grayscale(img);
+    cr_assert_not_null(m, "Failed to convert to grayscale: %s", file_path);
+
+    Matrix *rot = rotate_matrix(m, angle);
+    cr_assert_not_null(rot, "Rotation failed: %s", file_path);
+
+    ImageData *rot_img = pixel_matrix_to_image(rot);
+    cr_assert_not_null(rot_img, "Failed to convert rotated matrix to image: %s", file_path);
+
+    // Reference path: same folder with "test_" prefix
+    char reference_path[1024];
+    snprintf(reference_path, sizeof(reference_path), "assets/test_images/test_%s", strrchr(file_path, '/') + 1);
+    ImageData *expected = load_image(reference_path);
+    cr_assert_not_null(expected, "Reference image missing: %s", reference_path);
+
+    // Compare with tolerance
+    cr_expect(compare_images_with_tolerance(rot_img, expected),
+              "Rotated image differs too much from reference: %s", file_path);
 
     mat_free(m);
     mat_free(rot);
     free_image(img);
     free_image(rot_img);
-    g_object_unref(pixbuf);
-
-    printf("Saved rotated image to %s\n", argv[2]);
-    return EXIT_SUCCESS;
+    free_image(expected);
 }
+
+// Individual test cases
+Test(rotation_tests, level_1_image_1)
+{
+    run_rotation_test("assets/sample_images/level_1_image_1.png", 45.0);
+}
+
+Test(rotation_tests, level_1_image_2)
+{
+    run_rotation_test("assets/sample_images/level_1_image_2.png", 45.0);
+}
+
+Test(rotation_tests, level_2_image_1)
+{
+    run_rotation_test("assets/sample_images/level_2_image_1.png", 45.0);
+}
+
+Test(rotation_tests, level_2_image_2)
+{
+    run_rotation_test("assets/sample_images/level_2_image_2.png", 45.0);
+}
+
+
