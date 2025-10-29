@@ -1,4 +1,5 @@
 #include <err.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,7 +32,8 @@ int main(int argc, char **argv)
 
     Matrix *input = mat_create_from_arr(2, 1, (double[]){a, b});
     Matrix *output = net_feed_forward(net, input, NULL, NULL);
-    mat_print(output, 3);
+    printf("%.4lf => %.0lf\n", mat_coef(output, 0, 0),
+           round(mat_coef(output, 0, 0)));
 
     mat_free(input);
     mat_free(output);
