@@ -13,12 +13,15 @@ void extract_grid_cells(Matrix *src, Point **points, size_t height,
     {
         for (size_t w = 0; w < width - 1; w++)
         {
-            size_t filename_size =
-                snprintf(NULL, 0, "%s/%s/(%zu_%zu).png", EXTRACT_DIR, GRID_DIR, h, w);
+            size_t filename_size = snprintf(NULL, 0, "%s/%s/(%zu_%zu).png",
+                                            EXTRACT_DIR, GRID_DIR, h, w);
             char filename[filename_size + 1];
-            sprintf(filename, "%s/%s/(%zu_%zu).png", EXTRACT_DIR, GRID_DIR, h, w);
-            // printf("%s (%i, %i) to (%i, %i)\n", filename, points[h][w].x, points[h][w].y,
-            //                   points[h + 1][w + 1].x, points[h + 1][w + 1].y);
+            sprintf(filename, "%s/%s/(%zu_%zu).png", EXTRACT_DIR, GRID_DIR, h,
+                    w);
+            // printf("%s (%i, %i) to (%i, %i)\n", filename, points[h][w].x,
+            // points[h][w].y,
+            //                   points[h + 1][w + 1].x, points[h + 1][w +
+            //                   1].y);
             save_image_region(src, filename, points[h][w].x, points[h][w].y,
                               points[h + 1][w + 1].x, points[h + 1][w + 1].y);
         }
@@ -99,11 +102,12 @@ int main()
 
     ImageData *result_img = pixel_matrix_to_image(threshold);
     GdkPixbuf *pixbuf_result = create_pixbuf_from_image_data(result_img);
-    
+
     GError *error;
     save_pixbuf_to_png(pixbuf_result, POSTTREATMENT_FILENAME, &error);
-    if (error) g_error_free(error);
-    
+    if (error)
+        g_error_free(error);
+
     g_object_unref(pixbuf_result);
     free_image(result_img);
 
@@ -113,13 +117,16 @@ int main()
 
     // print_lines(lines, nb_lines);
 
-    draw_lines_on_img(lines, nb_lines, POSTTREATMENT_FILENAME, HOUGHLINES_VISUALIZATION_FILENAME);
+    draw_lines_on_img(lines, nb_lines, POSTTREATMENT_FILENAME,
+                      HOUGHLINES_VISUALIZATION_FILENAME);
 
     size_t width_points, height_points;
     Point **points = extract_intersection_points(lines, nb_lines,
                                                  &height_points, &width_points);
 
-    draw_points_on_img(points, height_points, width_points, HOUGHLINES_VISUALIZATION_FILENAME, INTERSECTION_POINTS_FILENAME);
+    draw_points_on_img(points, height_points, width_points,
+                       HOUGHLINES_VISUALIZATION_FILENAME,
+                       INTERSECTION_POINTS_FILENAME);
 
     // print_points(points, nb_points);
     extract_grid_cells(threshold, points, height_points, width_points);

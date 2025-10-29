@@ -111,7 +111,8 @@ void draw_line(cairo_t *cr, Line *line, int width, int height)
     // printf("Draw (%.2f, %.2f) -> (%.2f, %.2f)\n", x[0], y[0], x[1], y[1]);
 }
 
-void draw_lines_on_img(Line **lines, size_t line_count, char *input_filename, char *output_filename)
+void draw_lines_on_img(Line **lines, size_t line_count, char *input_filename,
+                       char *output_filename)
 {
     cairo_t *cr;
     cairo_surface_t *surface;
