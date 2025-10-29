@@ -27,6 +27,20 @@ void extract_grid_cells(Matrix *src, Point **points, size_t height,
     }
 }
 
+BoundingBox *get_bounding_box_grid(Point **points, size_t height, size_t width)
+{
+    if (height == 0 && width == 0)
+        errx(EXIT_FAILURE,
+             "Cannot find grid if there is no intersection points");
+    BoundingBox *box = malloc(sizeof(BoundingBox));
+    // Point top_left = (Point) {.x = points[0][0].x, .y = points[0][0].y};
+    // Point bottom_right = (Point) {.x = points[height-1][width-1].x, .y =
+    // points[height-1][width-1].y};
+    box->tl = points[0][0];
+    box->br = points[height - 1][width - 1];
+    return box;
+}
+
 void cleanup_folders()
 {
     char cmd[255];
@@ -64,8 +78,8 @@ int main()
     setup_folders();
 
     // ImageData *img = load_image("assets/test_images/montgolfiere.jpg");
-    ImageData *img = load_image(LEVEL_1_IMG_1);
-    // ImageData *img = load_image(LEVEL_1_IMG_2);
+    // ImageData *img = load_image(LEVEL_1_IMG_1);
+    ImageData *img = load_image(LEVEL_1_IMG_2);
     // ImageData *img = load_image(LEVEL_2_IMG_1);
     // ImageData *img = load_image(LEVEL_2_IMG_2);
     // ImageData *img = load_image("untitled.png");
@@ -129,8 +143,15 @@ int main()
 
     // print_points(points, nb_points);
     extract_grid_cells(threshold, points, height_points, width_points);
-    mat_free(threshold);
+    BoundingBox *grid_box =
+        get_bounding_box_grid(points, height_points, width_points);
     free_points(points, height_points);
+
+    draw_boundingbox_on_img(grid_box, POSTTREATMENT_FILENAME,
+                            BOUNDING_BOXES_FILENAME);
+    free(grid_box);
+
+    mat_free(threshold);
     free_lines(lines, nb_lines);
     return EXIT_SUCCESS;
 }
