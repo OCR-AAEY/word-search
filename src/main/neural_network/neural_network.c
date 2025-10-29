@@ -557,7 +557,7 @@ void net_print(Neural_Network *net, unsigned int precision)
     printf("/---------[WEIGHTS]----------\n");
     for (size_t i = 1; i < net->layer_number; i++)
     {
-        mat_print(net->weights[i], 2);
+        mat_print(net->weights[i], precision);
         if (i != net->layer_number - 1)
             printf("\n");
     }
@@ -565,7 +565,7 @@ void net_print(Neural_Network *net, unsigned int precision)
     printf("/---------[BIASES ]----------\n");
     for (size_t i = 1; i < net->layer_number; i++)
     {
-        mat_print(net->biases[i], 2);
+        mat_print(net->biases[i], precision);
         if (i != net->layer_number - 1)
             printf("\n");
     }
