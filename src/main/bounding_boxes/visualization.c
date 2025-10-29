@@ -11,11 +11,11 @@ void draw_point(cairo_t *cr, double x, double y, double radius)
 }
 
 void draw_points_on_img(Point **points, size_t height, size_t width,
-                        char *filename)
+                        char *input_filename, char *output_filename)
 {
     cairo_t *cr;
     cairo_surface_t *surface;
-    surface = cairo_image_surface_create_from_png(filename);
+    surface = cairo_image_surface_create_from_png(input_filename);
     if (cairo_surface_status(surface) != CAIRO_STATUS_SUCCESS)
         errx(EXIT_FAILURE, "Failed to load the image with cairo");
     cr = cairo_create(surface);
@@ -29,10 +29,7 @@ void draw_points_on_img(Point **points, size_t height, size_t width,
         }
     }
 
-    char *result_filename = malloc(128 * sizeof(char));
-    sprintf(result_filename, "points_%s", filename);
-    cairo_surface_write_to_png(surface, result_filename);
-    free(result_filename);
+    cairo_surface_write_to_png(surface, output_filename);
     cairo_destroy(cr);
     cairo_surface_destroy(surface);
 }
@@ -114,11 +111,11 @@ void draw_line(cairo_t *cr, Line *line, int width, int height)
     // printf("Draw (%.2f, %.2f) -> (%.2f, %.2f)\n", x[0], y[0], x[1], y[1]);
 }
 
-void draw_lines_on_img(Line **lines, size_t line_count, char *filename)
+void draw_lines_on_img(Line **lines, size_t line_count, char *input_filename, char *output_filename)
 {
     cairo_t *cr;
     cairo_surface_t *surface;
-    surface = cairo_image_surface_create_from_png(filename);
+    surface = cairo_image_surface_create_from_png(input_filename);
     if (cairo_surface_status(surface) != CAIRO_STATUS_SUCCESS)
         errx(EXIT_FAILURE, "Failed to load the image with cairo");
     cr = cairo_create(surface);
@@ -133,10 +130,7 @@ void draw_lines_on_img(Line **lines, size_t line_count, char *filename)
         draw_line(cr, lines[i], width, height);
     }
 
-    char *result_filename = malloc(128 * sizeof(char));
-    sprintf(result_filename, "lines_%s", filename);
-    cairo_surface_write_to_png(surface, result_filename);
-    free(result_filename);
+    cairo_surface_write_to_png(surface, output_filename);
     cairo_destroy(cr);
     cairo_surface_destroy(surface);
 }

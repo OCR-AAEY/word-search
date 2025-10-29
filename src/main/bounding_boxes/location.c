@@ -3,6 +3,7 @@
 #include "bounding_boxes/pretreatment.h"
 #include "bounding_boxes/visualization.h"
 #include "extract_char/extract_char.h"
+#include "utils/utils.h"
 #include <stdio.h>
 
 void extract_grid_cells(Matrix *src, Point **points, size_t height,
@@ -13,9 +14,11 @@ void extract_grid_cells(Matrix *src, Point **points, size_t height,
         for (size_t w = 0; w < width - 1; w++)
         {
             size_t filename_size =
-                snprintf(NULL, 0, "extracted_images/(%zu_%zu).png", h, w);
+                snprintf(NULL, 0, "%s/%s/(%zu_%zu).png", EXTRACT_DIR, GRID_DIR, h, w);
             char filename[filename_size + 1];
-            sprintf(filename, "extracted_images/(%zu_%zu).png", h, w);
+            sprintf(filename, "%s/%s/(%zu_%zu).png", EXTRACT_DIR, GRID_DIR, h, w);
+            // printf("%s (%i, %i) to (%i, %i)\n", filename, points[h][w].x, points[h][w].y,
+            //                   points[h + 1][w + 1].x, points[h + 1][w + 1].y);
             save_image_region(src, filename, points[h][w].x, points[h][w].y,
                               points[h + 1][w + 1].x, points[h + 1][w + 1].y);
         }
@@ -59,10 +62,10 @@ int main()
     setup_folders();
 
     // ImageData *img = load_image("assets/test_images/montgolfiere.jpg");
-    ImageData *img = load_image("assets/sample_images/level_1_image_1.png");
-    // ImageData *img = load_image("assets/sample_images/level_1_image_2.png");
-    // ImageData *img = load_image("assets/sample_images/level_2_image_1.png");
-    // ImageData *img = load_image("assets/sample_images/level_2_image_2.png");
+    ImageData *img = load_image(LEVEL_1_IMG_1);
+    // ImageData *img = load_image(LEVEL_1_IMG_2);
+    // ImageData *img = load_image(LEVEL_2_IMG_1);
+    // ImageData *img = load_image(LEVEL_2_IMG_2);
     // ImageData *img = load_image("untitled.png");
 
     Matrix *gray = image_to_grayscale(img);
@@ -96,7 +99,7 @@ int main()
 
     ImageData *result_img = pixel_matrix_to_image(threshold);
     GdkPixbuf *pixbuf_result = create_pixbuf_from_image_data(result_img);
-    save_pixbuf_to_png(pixbuf_result, "result.png", NULL);
+    save_pixbuf_to_png(pixbuf_result, POSTTREATMENT_FILENAME, NULL);
     g_object_unref(pixbuf_result);
     free_image(result_img);
 
@@ -106,13 +109,13 @@ int main()
 
     // print_lines(lines, nb_lines);
 
-    draw_lines_on_img(lines, nb_lines, "result.png");
+    draw_lines_on_img(lines, nb_lines, POSTTREATMENT_FILENAME, HOUGHLINES_VISUALIZATION_FILENAME);
 
     size_t width_points, height_points;
     Point **points = extract_intersection_points(lines, nb_lines,
                                                  &height_points, &width_points);
 
-    draw_points_on_img(points, height_points, width_points, "lines_result.png");
+    draw_points_on_img(points, height_points, width_points, HOUGHLINES_VISUALIZATION_FILENAME, INTERSECTION_POINTS_FILENAME);
 
     // print_points(points, nb_points);
     extract_grid_cells(threshold, points, height_points, width_points);
