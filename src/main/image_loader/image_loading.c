@@ -5,12 +5,14 @@
 /// @brief Saves the Pixbuf object as a PNG file.
 /// @param[in] pixbuf A pointer to the GdkPixbuf to save.
 /// @param[in] filename The string filename with extension (.png).
-/// @param[out] error (Optional) Return location for a GError, or NULL.
+/// @param[out] error Return location for a GError.
 ///  If not NULL and an error occurs, the error will be set.
 ///  The caller is responsible for freeing it with g_error_free().
 /// @return A boolean indicating if the file was successfully saved.
 int save_pixbuf_to_png(GdkPixbuf *pixbuf, char *filename, GError **error)
 {
+    if (error == NULL)
+        errx(EXIT_FAILURE, "You must provide a GError to save the pixbuf");
     // Extract directory path
     char *dir = g_path_get_dirname(filename);
 
@@ -21,10 +23,7 @@ int save_pixbuf_to_png(GdkPixbuf *pixbuf, char *filename, GError **error)
     int success = gdk_pixbuf_save(pixbuf, filename, "png", error, NULL);
     if (!success)
     {
-        if (error != NULL)
-            g_printerr("Error saving image: %s\n", (*error)->message);
-        else
-            g_printerr("Error saving image\n");
+        g_printerr("Error saving image: %s\n", (*error)->message);
     }
     return success;
 }

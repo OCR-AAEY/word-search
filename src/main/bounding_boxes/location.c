@@ -99,7 +99,11 @@ int main()
 
     ImageData *result_img = pixel_matrix_to_image(threshold);
     GdkPixbuf *pixbuf_result = create_pixbuf_from_image_data(result_img);
-    save_pixbuf_to_png(pixbuf_result, POSTTREATMENT_FILENAME, NULL);
+    
+    GError *error;
+    save_pixbuf_to_png(pixbuf_result, POSTTREATMENT_FILENAME, &error);
+    if (error) g_error_free(error);
+    
     g_object_unref(pixbuf_result);
     free_image(result_img);
 
