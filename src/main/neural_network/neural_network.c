@@ -374,9 +374,9 @@ Matrix *net_feed_forward(const Neural_Network *net, Matrix *input,
         else
         {
             mat_inplace_sigmoid(curr_activation);
-            mat_free(prev_activation);
         }
-
+        
+        mat_free(prev_activation);
         prev_activation = curr_activation;
     }
 
