@@ -551,3 +551,23 @@ void net_train(Neural_Network *net, Training_Data **training_data,
         }
     }
 }
+
+void net_print(Neural_Network *net, unsigned int precision)
+{
+    printf("/---------[WEIGHTS]----------\n");
+    for (size_t i = 1; i < net->layer_number; i++)
+    {
+        mat_print(net->weights[i], 2);
+        if (i != net->layer_number - 1)
+            printf("\n");
+    }
+    printf("\\---------[WEIGHTS]----------\n");
+    printf("/---------[BIASES ]----------\n");
+    for (size_t i = 1; i < net->layer_number; i++)
+    {
+        mat_print(net->biases[i], 2);
+        if (i != net->layer_number - 1)
+            printf("\n");
+    }
+    printf("\\---------[BIASES ]----------\n");
+}
