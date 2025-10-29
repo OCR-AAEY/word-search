@@ -13,11 +13,10 @@ void extract_grid_cells(Matrix *src, Point **points, size_t height,
     {
         for (size_t w = 0; w < width - 1; w++)
         {
-            size_t filename_size = snprintf(NULL, 0, "%s/%s/(%zu_%zu).png",
-                                            EXTRACT_DIR, GRID_DIR, h, w);
+            size_t filename_size =
+                snprintf(NULL, 0, "%s/(%zu_%zu).png", GRID_DIR, h, w);
             char filename[filename_size + 1];
-            sprintf(filename, "%s/%s/(%zu_%zu).png", EXTRACT_DIR, GRID_DIR, h,
-                    w);
+            sprintf(filename, "%s/(%zu_%zu).png", GRID_DIR, h, w);
             // printf("%s (%i, %i) to (%i, %i)\n", filename, points[h][w].x,
             // points[h][w].y,
             //                   points[h + 1][w + 1].x, points[h + 1][w +
