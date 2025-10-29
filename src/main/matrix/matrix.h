@@ -34,12 +34,22 @@ Matrix *mat_create_empty(size_t height, size_t width);
 /// fails.
 Matrix *mat_create_from_arr(size_t height, size_t width, double *content);
 
-/// @brief Creates a new matrix with random uniformly distributed elements.
-/// @param[in] height Number of rows in the matrix (must be non-zero).
-/// @param[in] width Number of columns in the matrix (must be non-zero).
-/// @return A pointer to a new matrix initialized with uniform random values.
-/// @throw Terminates the program if allocation fails or dimensions are invalid.
-Matrix *mat_create_uniform_random(size_t height, size_t width);
+/// @brief Creates a new matrix filled with uniformly distributed random values.
+/// Allocates a new matrix of size @p height × @p width, where each element is
+/// independently sampled from a uniform distribution in the range [`min`,
+/// `max`].
+/// @param[in] height The number of rows in the matrix. Must be non-zero.
+/// @param[in] width The number of columns in the matrix. Must be non-zero.
+/// @param[in] min The lower bound (inclusive) of the uniform distribution.
+/// @param[in] max The upper bound (inclusive) of the uniform distribution.
+/// @return [out] A pointer to the newly allocated Matrix structure containing
+/// the generated random values.
+/// @throw Terminates the program with an error message if `height` or `width`
+/// is zero or memory allocation fails for the matrix or its contents.
+/// @note The caller is responsible for freeing the returned matrix using
+/// `mat_free()` when it is no longer needed.
+Matrix *mat_create_uniform_random(size_t height, size_t width, double min,
+                                  double max);
 
 /// @brief Creates a new matrix with random Gaussian-distributed elements.
 /// @param[in] height Number of rows in the matrix (must be non-zero).
@@ -47,6 +57,24 @@ Matrix *mat_create_uniform_random(size_t height, size_t width);
 /// @return A pointer to a new matrix initialized with Gaussian random values.
 /// @throw Terminates the program if allocation fails or dimensions are invalid.
 Matrix *mat_create_gaussian_random(size_t height, size_t width);
+
+/// @brief Creates a new matrix filled with normally distributed random values.
+/// This function allocates and initializes a new matrix of size `height ×
+/// width`, where each element is drawn from a normal (Gaussian) distribution
+/// with the specified mean and standard deviation.
+/// @param[in] height The number of rows in the matrix. Must be non-zero.
+/// @param[in] width The number of columns in the matrix. Must be non-zero.
+/// @param[in] mean The mean (μ) of the normal distribution used for random
+/// generation.
+/// @param[in] stddev The standard deviation (σ) of the normal distribution.
+/// @return [out] A pointer to a newly allocated `Matrix` structure filled with
+/// random values following N(mean, stddev²).
+/// @throw The program terminates with `errx(1, ...)` if `height == 0` or `width
+/// == 0` or memory allocation for the matrix or its content fails.
+/// @note The caller is responsible for freeing the returned matrix using
+/// `mat_free()`.
+Matrix *mat_create_normal_random(size_t height, size_t width, double mean,
+                                 double stddev);
 
 /// @brief Frees a matrix and its associated memory.
 /// @param[in] matrix Pointer to the matrix to be freed.
