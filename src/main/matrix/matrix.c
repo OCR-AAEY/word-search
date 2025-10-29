@@ -266,16 +266,14 @@ Matrix *mat_addition(const Matrix *a, const Matrix *b)
         errx(1, "Matrix addition failed: mismatched widths (%zu vs %zu).",
              a->width, b->width);
 
-    double *content = calloc(a->height * a->width, sizeof(double));
-    if (content == NULL)
-        errx(1, "Failed to allocate memory for matrix addition result.");
+    Matrix *res = mat_deepcopy(a);
 
-    for (size_t i = 0; i < a->height * a->width; i++)
+    for (size_t i = 0; i < res->height * res->width; i++)
     {
-        *(content + i) = *(a->content + i) + *(b->content + i);
+        *(res->content + i) += *(b->content + i);
     }
 
-    return mat_create_from_arr(a->height, a->width, content);
+    return res;
 }
 
 void mat_inplace_addition(Matrix *a, const Matrix *b)
@@ -302,16 +300,14 @@ Matrix *mat_substraction(const Matrix *a, const Matrix *b)
         errx(1, "Matrix substraction failed: mismatched widths (%zu vs %zu).",
              a->width, b->width);
 
-    double *content = calloc(a->height * a->width, sizeof(double));
-    if (content == NULL)
-        errx(1, "Failed to allocate memory for matrix substraction result.");
+    Matrix *res = mat_deepcopy(a);
 
-    for (size_t i = 0; i < a->height * a->width; i++)
+    for (size_t i = 0; i < res->height * res->width; i++)
     {
-        *(content + i) = *(a->content + i) - *(b->content + i);
+        *(res->content + i) -= *(b->content + i);
     }
 
-    return mat_create_from_arr(a->height, a->width, content);
+    return res;
 }
 
 void mat_inplace_substraction(Matrix *a, const Matrix *b)

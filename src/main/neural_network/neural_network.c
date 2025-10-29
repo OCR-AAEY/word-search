@@ -174,6 +174,7 @@ Neural_Network *net_load_from_file(char *filename)
         }
 
         net->weights[i] = mat_create_from_arr(height, width, content);
+        free(content);
     }
 
     // Read the biases.
@@ -211,6 +212,7 @@ Neural_Network *net_load_from_file(char *filename)
         }
 
         net->biases[i] = mat_create_from_arr(height, width, content);
+        free(content);
     }
 
     fclose(file_stream);
