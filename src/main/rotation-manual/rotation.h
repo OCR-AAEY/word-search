@@ -4,6 +4,6 @@
 #include "../image_loader/image_loading.h"
 
 // Rotate an ImageData by the given angle (in degrees)
-ImageData *rotate_image(ImageData *src, double angle);
-
+Matrix *rotate_matrix(const Matrix *src, double angle);
+ImageData *rotate_image(ImageData *img, double angle);
 #endif
