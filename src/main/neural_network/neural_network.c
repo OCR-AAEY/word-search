@@ -428,7 +428,7 @@ void net_back_propagation(Neural_Network *net, Matrix *expected,
 
     // Compute the error column matrix for each layer i starting from the
     // penultimate layer to the first one (excluding the input layer).
-    for (long i = (long)net->layer_number - 2; i > 0; i--)
+    for (size_t i = net->layer_number - 2; i > 0; i--)
     {
         // delta = ((net.weights[i + 1])^T × delta) ⊙ σ'(res[i])
         a = mat_transpose(net->weights[i + 1]);
