@@ -1,7 +1,7 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <err.h>
 #include "utils/utils.h"
+#include <err.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 int execute_command(const char *cmd)
 {

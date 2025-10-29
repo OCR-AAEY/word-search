@@ -2,4 +2,5 @@
 
 void draw_points_on_img(Point **points, size_t height, size_t width,
                         char *input_filename, char *output_filename);
-void draw_lines_on_img(Line **lines, size_t line_count, char *input_filename, char *output_filename);
+void draw_lines_on_img(Line **lines, size_t line_count, char *input_filename,
+                       char *output_filename);

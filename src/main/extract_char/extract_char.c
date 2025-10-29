@@ -51,7 +51,8 @@ void save_image_region(const Matrix *matrix, char *name, size_t x0, size_t y0,
     GError *error;
     save_pixbuf_to_png(pixbuf, name, &error);
 
-    if (error) g_error_free(error);
+    if (error)
+        g_error_free(error);
 
     g_object_unref(pixbuf);
 }
