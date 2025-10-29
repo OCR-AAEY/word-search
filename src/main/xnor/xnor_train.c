@@ -49,7 +49,7 @@ int main()
 
     net_train(net, training_data, 4, 10000, 1, 1.0);
 
-    net_save_to_file(net, "xor.net");
+    net_save_to_file(net, "xnor.net");
 
     free_training_data(training_data);
     net_free(net);

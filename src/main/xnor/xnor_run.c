@@ -27,7 +27,7 @@ int main(int argc, char **argv)
     else
         errx(1, "Parameter b at position 1 is neither 0 not 1.");
 
-    Neural_Network *net = net_load_from_file("xor.net");
+    Neural_Network *net = net_load_from_file("xnor.net");
 
     Matrix *input = mat_create_from_arr(2, 1, (double[]){a, b});
     Matrix *output = net_feed_forward(net, input, NULL, NULL);
