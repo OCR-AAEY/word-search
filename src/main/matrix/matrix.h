@@ -33,6 +33,4 @@ Matrix *mat_sigmoid(const Matrix *m);
 
 void mat_print(const Matrix *m, int precision);
 
-void mat_print(Matrix *m, int precision);
-
 #endif
