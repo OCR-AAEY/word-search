@@ -5,7 +5,16 @@
 
 #include "matrix.h"
 
-
+/// @brief A 2D matrix of double-precision floating point numbers.
+struct Matrix
+{
+    /// @brief Number of rows (height) of the matrix.
+    size_t height;
+    /// @brief Number of columns (width) of the matrix.
+    size_t width;
+    /// @brief The matrix elements stored in a contiguous row-major array.
+    double *content;
+};
 
 /// @brief Returns the height (number of rows) of the given matrix.
 /// @param m Pointer to the matrix.
