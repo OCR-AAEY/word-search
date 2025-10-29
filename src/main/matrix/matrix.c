@@ -5,22 +5,8 @@
 
 #include "matrix.h"
 
-/// @brief A 2D matrix of double-precision floating point numbers.
-struct Matrix
-{
-    /// @brief Number of rows (height) of the matrix.
-    size_t height;
-    /// @brief Number of columns (width) of the matrix.
-    size_t width;
-    /// @brief The matrix elements stored in a contiguous row-major array.
-    double *content;
-};
 
-<<<<<<< HEAD
-size_t mat_height(const Matrix *m) { return m->height; }
 
-size_t mat_width(const Matrix *m) { return m->width; }
-=======
 /// @brief Returns the height (number of rows) of the given matrix.
 /// @param m Pointer to the matrix.
 /// @return The number of rows in the matrix.
@@ -30,7 +16,6 @@ inline size_t mat_height(const Matrix *m) { return m->height; }
 /// @param m Pointer to the matrix.
 /// @return The number of columns in the matrix.
 inline size_t mat_width(const Matrix *m) { return m->width; }
->>>>>>> origin/bounding-boxes
 
 /// @brief Creates an empty matrix (initialized with zeros) on the heap.
 /// @param height Number of rows in the new matrix (must be non-zero).
@@ -63,13 +48,6 @@ Matrix *mat_create_empty(size_t height, size_t width)
     return m;
 }
 
-<<<<<<< HEAD
-/// @brief
-/// @param height
-/// @param width
-/// @param content allocated on the heap
-/// @return
-=======
 /// @brief Creates a new matrix using an existing array as its content.
 /// @param height Number of rows in the matrix (must be non-zero).
 /// @param width Number of columns in the matrix (must be non-zero).
@@ -78,7 +56,6 @@ Matrix *mat_create_empty(size_t height, size_t width)
 /// @return A pointer to the new matrix structure.
 /// @throw Terminates the program if memory allocation for the Matrix structure
 /// fails.
->>>>>>> origin/bounding-boxes
 Matrix *mat_create_from_arr(size_t height, size_t width, double *content)
 {
     Matrix *m = malloc(sizeof(Matrix));
@@ -118,19 +95,11 @@ Matrix *mat_deepcopy(const Matrix *m)
     return new_m;
 }
 
-<<<<<<< HEAD
-double *mat_internal_coef_addr(const Matrix *m, size_t h, size_t w);
-
-/// @brief For internal use. More efficient because it does not check for valid
-/// parameters.
-inline double *mat_internal_coef_addr(const Matrix *m, size_t h, size_t w)
-=======
 double *mat_unsafe_coef_addr(const Matrix *m, size_t h, size_t w);
 
 /// @brief For internal use. More efficient because it does not check for valid
 /// parameters.
 inline double *mat_unsafe_coef_addr(const Matrix *m, size_t h, size_t w)
->>>>>>> origin/bounding-boxes
 {
     return m->content + h * m->width + w;
 }
@@ -148,27 +117,7 @@ inline double *mat_coef_addr(const Matrix *m, size_t h, size_t w)
     if (w >= m->width)
         errx(1, "Invalid width given. Expected < %zu and got %zu.", m->width,
              w);
-<<<<<<< HEAD
-    return mat_internal_coef_addr(m, h, w);
-}
-
-/// @brief Returns the coefficient at position (h, w).
-/// @param m Pointer to the matrix.
-/// @param h Row index (0 ≤ h < height).
-/// @param w Column index (0 ≤ w < width).
-/// @return The value of the coefficient at position (h, w).
-inline double mat_coef(const Matrix *m, size_t h, size_t w)
-{
-    if (h >= m->height)
-        errx(1, "Invalid height given. Expected < %zu and got %zu.", m->height,
-             h);
-    if (w >= m->width)
-        errx(1, "Invalid width given. Expected < %zu and got %zu.", m->width,
-             w);
-    return *mat_internal_coef_addr(m, h, w);
-=======
     return mat_unsafe_coef_addr(m, h, w);
->>>>>>> origin/bounding-boxes
 }
 
 /// @brief Returns the coefficient at position (h, w).

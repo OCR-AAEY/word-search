@@ -21,8 +21,6 @@ double *mat_coef_addr(const Matrix *m, size_t h, size_t w);
 
 double mat_coef(const Matrix *m, size_t h, size_t w);
 
-double mat_coef(const Matrix *m, size_t h, size_t w);
-
 Matrix *mat_addition(const Matrix *a, const Matrix *b);
 
 Matrix *mat_scalar_multiplication(Matrix *mat, double a);
