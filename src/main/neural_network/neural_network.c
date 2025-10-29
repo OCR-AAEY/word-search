@@ -375,7 +375,7 @@ Matrix *net_feed_forward(const Neural_Network *net, Matrix *input,
         {
             mat_inplace_sigmoid(curr_activation);
         }
-        
+
         mat_free(prev_activation);
         prev_activation = curr_activation;
     }
@@ -470,7 +470,7 @@ void net_update(Neural_Network *net, Matrix **nabla_w, Matrix **nabla_b,
 
 void net_train(Neural_Network *net, Training_Data **training_data,
                size_t training_data_size, size_t epochs, size_t batch_size,
-               double learning_rate, Print_Flags flags)
+               double learning_rate)
 {
     for (size_t epoch = 0; epoch < epochs; epoch++)
     {
@@ -526,30 +526,23 @@ void net_train(Neural_Network *net, Training_Data **training_data,
             mat_free_matrix_array(nabla_b, net->layer_number);
         }
 
-        if (flags & Print_Epochs)
+        if ((epoch + 1) % 100 == 0)
         {
-            if (flags & Print_Epoch_Result)
+            size_t successes = 0;
+            for (size_t i = 0; i < training_data_size; i++)
             {
-                size_t successes = 0;
-                for (size_t i = 0; i < training_data_size; i++)
-                {
-                    Matrix *output = net_feed_forward(
-                        net, training_data[i]->input, NULL, NULL);
-                    mat_inplace_map(output, round);
-                    if (mat_eq(output, training_data[i]->expected))
-                        successes++;
-                    mat_free(output);
-                }
-                printf("Epoch %zu / %zu completed with accuracy %.2lf%% (%zu / "
-                       "%zu).\n",
-                       epoch + 1, epochs,
-                       100.0 * (double)successes / (double)training_data_size,
-                       successes, training_data_size);
+                Matrix *output =
+                    net_feed_forward(net, training_data[i]->input, NULL, NULL);
+                mat_inplace_map(output, round);
+                if (mat_eq(output, training_data[i]->expected))
+                    successes++;
+                mat_free(output);
             }
-            else
-            {
-                printf("Epoch %zu / %zu completed.\n", epoch + 1, epochs);
-            }
+            printf("Epoch %zu / %zu completed with accuracy %.2lf%% (%zu / "
+                   "%zu).\n",
+                   epoch + 1, epochs,
+                   100.0 * (double)successes / (double)training_data_size,
+                   successes, training_data_size);
         }
     }
 }

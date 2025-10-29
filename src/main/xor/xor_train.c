@@ -47,7 +47,7 @@ int main()
     Neural_Network *net = net_create_empty(3, layers);
     Training_Data **training_data = generate_training_data();
 
-    net_train(net, training_data, 4, 10000, 1, 1.0, Print_Epoch_Result);
+    net_train(net, training_data, 4, 10000, 1, 1.0);
 
     net_save_to_file(net, "xor.net");
 
