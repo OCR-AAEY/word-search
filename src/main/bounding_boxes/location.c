@@ -41,6 +41,82 @@ BoundingBox *get_bounding_box_grid(Point **points, size_t height, size_t width)
     return box;
 }
 
+BoundingBox *find_biggest_remaining_area(BoundingBox *grid_box,
+                                         size_t src_height, size_t src_width)
+{
+    if ((int)src_height < grid_box->br.y || (int)src_width < grid_box->br.x)
+        errx(EXIT_FAILURE,
+             "The given bounding box is outside of the bounds of the src");
+
+    size_t top_space = grid_box->tl.y;
+    size_t bottom_space = src_height - grid_box->br.y;
+    size_t right_space = src_width - grid_box->br.x;
+    size_t left_space = grid_box->tl.x;
+
+    BoundingBox *remaining_area = malloc(sizeof(BoundingBox));
+    Point tl = {};
+    Point br = {};
+    size_t maxi = MAX(top_space, MAX(bottom_space, MAX(left_space, right_space)));
+
+    if (maxi == left_space)
+    {
+        // printf("Bigger is left\n");
+        tl.x = 0;
+        tl.y = 0;
+        br.y = src_height - 1;
+        br.x = grid_box->tl.x - 1;
+        if (br.x < 0)
+        {
+            free(remaining_area);
+            errx(EXIT_FAILURE, "There is no remaining space");
+        }
+    }
+    else if(maxi == right_space)
+    {
+        // printf("Bigger is right\n");
+        tl.x = grid_box->br.x + 1;
+        tl.y = 0;
+        if (tl.x >= (int)src_width)
+        {
+            free(remaining_area);
+            errx(EXIT_FAILURE, "There is no remaining space");
+        }
+        br.x = src_width - 1;
+        br.y = src_height - 1;
+    }
+    else if (maxi == top_space)
+    {
+        // printf("Bigger is top\n");
+        tl.x = 0;
+        tl.y = 0;
+        br.x = src_width - 1;
+        br.y = grid_box->tl.y - 1;
+        if (tl.y < 0)
+        {
+            free(remaining_area);
+            errx(EXIT_FAILURE, "There is no remaining space");
+        }
+    }
+    else
+    {
+        // printf("Bigger is bottom\n");
+        tl.x = 0;
+        tl.y = grid_box->br.y + 1;
+        if (tl.y >= (int)src_height)
+        {
+            free(remaining_area);
+            errx(EXIT_FAILURE, "There is no remaining space");
+        }
+        br.x = src_width - 1;
+        br.y = src_height - 1;
+    }
+
+    remaining_area->tl = tl;
+    remaining_area->br = br;
+    // printf("Remaining area : (%i, %i) to (%i, %i)\n", remaining_area->tl.x, remaining_area->tl.y, remaining_area->br.x, remaining_area->br.y);
+    return remaining_area;
+}
+
 void cleanup_folders()
 {
     char cmd[255];
@@ -149,6 +225,12 @@ int main()
 
     draw_boundingbox_on_img(grid_box, POSTTREATMENT_FILENAME,
                             BOUNDING_BOXES_FILENAME);
+    BoundingBox *remaining_box = find_biggest_remaining_area(
+        grid_box, mat_height(threshold), mat_width(threshold));
+    
+    draw_boundingbox_on_img(remaining_box, BOUNDING_BOXES_FILENAME,
+                            BOUNDING_BOXES_FILENAME);
+    free(remaining_box);
     free(grid_box);
 
     mat_free(threshold);
