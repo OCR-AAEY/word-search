@@ -65,8 +65,8 @@ OBJ_TEST          = $(SRC_TEST:$(TEST_DIR)/%.c=$(BUILD_DIR)/test/%.o)
 # Executables
 BIN_SOLVER       = $(BUILD_DIR)/solver
 BIN_IMAGE_LOADER = $(BUILD_DIR)/image_loader
-BIN_XOR_TRAIN    = $(BUILD_DIR)/xor_train
-BIN_XOR_RUN      = $(BUILD_DIR)/xor_run
+BIN_XNOR_TRAIN    = $(BUILD_DIR)/xnor_train
+BIN_XNOR_RUN      = $(BUILD_DIR)/xnor_run
 # BIN_APP          = $(BUILD_DIR)/app
 BIN_TEST         = $(BUILD_DIR)/run_tests
 
@@ -84,13 +84,13 @@ $(BIN_IMAGE_LOADER): $(filter $(BUILD_DIR)/main/image_loader/%.o,$(OBJ_MAIN))
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 
-# XOR neural network training target
-$(BIN_XOR_TRAIN): $(BUILD_DIR)/main/xor/xor_train.o $(filter $(BUILD_DIR)/main/neural_network/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/matrix/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/utils/%.o,$(OBJ_MAIN))
+# XNOR neural network training target
+$(BIN_XNOR_TRAIN): $(BUILD_DIR)/main/xnor/xnor_train.o $(filter $(BUILD_DIR)/main/neural_network/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/matrix/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/utils/%.o,$(OBJ_MAIN))
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 
-# XOR neural network running target
-$(BIN_XOR_RUN): $(BUILD_DIR)/main/xor/xor_run.o $(filter $(BUILD_DIR)/main/neural_network/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/matrix/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/utils/%.o,$(OBJ_MAIN))
+# XNOR neural network running target
+$(BIN_XNOR_RUN): $(BUILD_DIR)/main/xnor/xnor_run.o $(filter $(BUILD_DIR)/main/neural_network/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/matrix/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/utils/%.o,$(OBJ_MAIN))
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 
@@ -127,7 +127,7 @@ $(BUILD_DIR)/test/%.o: $(TEST_DIR)/%.c
 #           PHONY            #
 ##############################
 
-all: $(BIN_SOLVER) $(BIN_IMAGE_LOADER) $(BIN_XOR_TRAIN) $(BIN_XOR_RUN) #$(BIN_APP)
+all: $(BIN_SOLVER) $(BIN_IMAGE_LOADER) $(BIN_XNOR_TRAIN) $(BIN_XNOR_RUN) #$(BIN_APP)
 
 #run: $(BIN_APP)
 #	@echo "Running app..."
