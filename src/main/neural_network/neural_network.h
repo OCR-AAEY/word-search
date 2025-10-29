@@ -140,4 +140,16 @@ void net_train(Neural_Network *net, Training_Data **training_data,
                size_t training_data_size, size_t epochs, size_t batch_size,
                double learning_rate, Print_Flags flags);
 
+/// @brief Prints all weights and biases of the given neural network. Displays
+/// each weight and bias matrix in a readable format using `mat_print()`. The
+/// output is grouped and labeled for clarity.
+/// @param[in] net Pointer to the neural network to print. Must not be NULL.
+/// @param[in] precision The number of decimal digits to display for each matrix
+/// element.
+/// @return void
+/// @throw Terminates the program if `net` or any of its matrices are invalid.
+/// @note This function is intended for debugging or inspection purposes only.
+/// The printed format is human-readable, not machine-parsable.
+void net_print(Neural_Network *net, unsigned int precision);
+
 #endif
