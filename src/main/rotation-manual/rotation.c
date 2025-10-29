@@ -1,9 +1,8 @@
 #include "../image_loader/image_loading.h"
 #include "../matrix/matrix.h"
+#include <err.h>
 #include <math.h>
 #include <stdlib.h>
-#include <err.h>
-
 
 Matrix *rotate_matrix(const Matrix *src, double angle)
 {
@@ -15,7 +14,6 @@ Matrix *rotate_matrix(const Matrix *src, double angle)
 
     double rad = angle * M_PI / 180.0;
 
-
     // new height and width to scale if rotation means pixels loss
     // it reduces the image
     int nw = (int)(fabs(w * cos(rad)) + fabs(h * sin(rad)) + 0.5);
@@ -24,8 +22,10 @@ Matrix *rotate_matrix(const Matrix *src, double angle)
     Matrix *rotated = mat_create_empty(nh, nw);
 
     // make a white background
-    for (int y = 0; y < nh; y++) {
-        for (int x = 0; x < nw; x++) {
+    for (int y = 0; y < nh; y++)
+    {
+        for (int x = 0; x < nw; x++)
+        {
             *mat_coef_addr(rotated, y, x) = 255.0;
         }
     }
@@ -40,10 +40,12 @@ Matrix *rotate_matrix(const Matrix *src, double angle)
         for (int x = 0; x < nw; x++)
         {
 
-
             // formula for pixels is :
-            // original_x = (rotated_x - new_center_x) x cos(angle_in_radians) - (rotated_y - new_center_y) x sin(angle_in_radians) + original_center_x
-            // original_y = (rotated_x - new_center_x) × sin(angle_in_radians) + (rotated_y - new_center_y) × cos(angle_in_radians) + original_center_y
+            // original_x = (rotated_x - new_center_x) x cos(angle_in_radians) -
+            // (rotated_y - new_center_y) x sin(angle_in_radians) +
+            // original_center_x original_y = (rotated_x - new_center_x) ×
+            // sin(angle_in_radians) + (rotated_y - new_center_y) ×
+            // cos(angle_in_radians) + original_center_y
 
             double tx = (x - ncx) * cos(rad) - (y - ncy) * sin(rad) + cx;
             double ty = (x - ncx) * sin(rad) + (y - ncy) * cos(rad) + cy;
@@ -61,10 +63,6 @@ Matrix *rotate_matrix(const Matrix *src, double angle)
     return rotated;
 }
 
-
-
-
-
 ImageData *rotate_image(ImageData *img, double angle)
 {
     int w = img->width;
@@ -72,7 +70,6 @@ ImageData *rotate_image(ImageData *img, double angle)
     Pixel *p = img->pixels;
 
     double rad = angle * M_PI / 180.0;
-
 
     // new height and width to scale if rotation means pixels loss
     // it reduces the image
@@ -105,8 +102,11 @@ ImageData *rotate_image(ImageData *img, double angle)
         {
 
             // formula for pixels is :
-            // original_x = (rotated_x - new_center_x) x cos(angle_in_radians) - (rotated_y - new_center_y) x sin(angle_in_radians) + original_center_x
-            // original_y = (rotated_x - new_center_x) × sin(angle_in_radians) + (rotated_y - new_center_y) × cos(angle_in_radians) + original_center_y
+            // original_x = (rotated_x - new_center_x) x cos(angle_in_radians) -
+            // (rotated_y - new_center_y) x sin(angle_in_radians) +
+            // original_center_x original_y = (rotated_x - new_center_x) ×
+            // sin(angle_in_radians) + (rotated_y - new_center_y) ×
+            // cos(angle_in_radians) + original_center_y
 
             double tx = (x - ncx) * cos(rad) - (y - ncy) * sin(rad) + cx;
             double ty = (x - ncx) * sin(rad) + (y - ncy) * cos(rad) + cy;
