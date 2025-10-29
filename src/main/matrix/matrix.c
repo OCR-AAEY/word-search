@@ -1,4 +1,5 @@
 #include <err.h>
+#include <math.h>
 #include <stdio.h>
 
 #include "matrix.h"
