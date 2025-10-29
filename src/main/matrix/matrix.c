@@ -47,7 +47,7 @@ Matrix *mat_create_empty(size_t height, size_t width)
     return m;
 }
 
-Matrix *mat_create_from_arr(size_t height, size_t width, double *content)
+Matrix *mat_create_from_arr(size_t height, size_t width, const double *content)
 {
     if (height == 0)
         errx(1,
@@ -64,7 +64,16 @@ Matrix *mat_create_from_arr(size_t height, size_t width, double *content)
     if (m == NULL)
         errx(1, "Failed to allocate memory for matrix struct.");
 
-    *m = (Matrix){.height = height, .width = width, .content = content};
+    double *content_copy = calloc(height * width, sizeof(double));
+    if (content_copy == NULL)
+        errx(1, "Failed to allocate memory for matrix struct's content.");
+
+    for (size_t i = 0; i < height * width; i++)
+    {
+        content_copy[i] = content[i];
+    }
+
+    *m = (Matrix){.height = height, .width = width, .content = content_copy};
     return m;
 }
 

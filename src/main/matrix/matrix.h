@@ -27,12 +27,12 @@ Matrix *mat_create_empty(size_t height, size_t width);
 /// @brief Creates a new matrix using an existing array as its content.
 /// @param[in] height Number of rows in the matrix (must be non-zero).
 /// @param[in] width Number of columns in the matrix (must be non-zero).
-/// @param[in,out] content Pointer to a heap-allocated, row-major array of size
-/// height * width.
+/// @param[in] content Pointer to a row-major array of size height * width. It
+/// is copied into the struct and not directly used.
 /// @return A pointer to the new matrix structure.
 /// @throw Terminates the program if memory allocation for the Matrix structure
 /// fails.
-Matrix *mat_create_from_arr(size_t height, size_t width, double *content);
+Matrix *mat_create_from_arr(size_t height, size_t width, const double *content);
 
 /// @brief Creates a new matrix filled with uniformly distributed random values.
 /// Allocates a new matrix of size @p height × @p width, where each element is
