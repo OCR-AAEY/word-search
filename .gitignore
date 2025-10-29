@@ -1,6 +1,6 @@
 # Tests
 venv/
-extracted_images/
+extracted/
 
 # Build
 /build

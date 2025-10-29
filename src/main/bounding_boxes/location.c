@@ -22,10 +22,42 @@ void extract_grid_cells(Matrix *src, Point **points, size_t height,
     }
 }
 
+void cleanup_folders()
+{
+    char cmd[255];
+    sprintf(cmd, "rm -rf %s", EXTRACT_DIR);
+    execute_command(cmd);
+}
+
+void setup_folders()
+{
+    char cmd[255];
+    int status;
+    sprintf(cmd, "mkdir %s", EXTRACT_DIR);
+    status = execute_command(cmd);
+    if (status == EXIT_FAILURE)
+        errx(EXIT_FAILURE, "Command create extract dir failed");
+    sprintf(cmd, "mkdir %s", WORDS_DIR);
+    status = execute_command(cmd);
+    if (status == EXIT_FAILURE)
+        errx(EXIT_FAILURE, "Command create words dir failed");
+    sprintf(cmd, "mkdir %s", GRID_DIR);
+    status = execute_command(cmd);
+    if (status == EXIT_FAILURE)
+        errx(EXIT_FAILURE, "Command create grid dir failed");
+    sprintf(cmd, "mkdir %s", EXAMPLES_DIR);
+    status = execute_command(cmd);
+    if (status == EXIT_FAILURE)
+        errx(EXIT_FAILURE, "Command create examples failed failed");
+}
+
 #ifndef UNIT_TEST
 
 int main()
 {
+    cleanup_folders();
+    setup_folders();
+
     // ImageData *img = load_image("assets/test_images/montgolfiere.jpg");
     ImageData *img = load_image("assets/sample_images/level_1_image_1.png");
     // ImageData *img = load_image("assets/sample_images/level_1_image_2.png");
