@@ -19,6 +19,16 @@ struct Training_Data
 /// @brief Represents a single training example for a neural network.
 typedef struct Training_Data Training_Data;
 
+enum Print_Flags
+{
+    None = 0,
+    Print_Epochs = 1,
+    Print_Epoch_Result = 2 | 1,
+    Print_Weights = 4,
+    Print_Biases = 8
+};
+typedef enum Print_Flags Print_Flags;
+
 /// @brief Retrieves the number of layers in a neural network.
 /// @param[in] net Pointer to the Neural_Network structure.
 /// @return The number of layers in the network.
@@ -71,7 +81,9 @@ void net_save_to_file(const Neural_Network *net, char *filename);
 /// @param[in] input Column matrix representing the input; it is not freed by
 /// this function.
 /// @param[out] layers_results Optional array to store the pre-activation
-/// results for each layer (can be NULL).
+/// results for each layer (can be NULL). Note that the first element is always
+/// NULL because the input itself is the first post-activation column matrix and
+/// therefore the first pre-activation column matrix is unknown.
 /// @param[out] layers_activations Optional array to store the post-activation
 /// values for each layer (can be NULL).
 /// @return A newly allocated, normalized column matrix representing the network
@@ -85,16 +97,16 @@ Matrix *net_feed_forward(const Neural_Network *net, Matrix *input,
 
 /// @brief Performs backpropagation on a neural network, computing the gradients
 /// of the cost function.
-/// @param[in, out] net Pointer to the Neural_Network to update.
+/// @param[in] net Pointer to the Neural_Network to update.
 /// @param[in] expected Column matrix of expected output values for the current
 /// input.
 /// @param[in] layers_results Array of pre-activation results for each layer.
 /// @param[in] layers_activations Array of post-activation values for each
 /// layer.
 /// @param[out] delta_nabla_w Array to store the gradients of the weights for
-/// each layer.
+/// each layer. The first element of delta_nabla_w is always NULL.
 /// @param[out] delta_nabla_b Array to store the gradients of the biases for
-/// each layer.
+/// each layer. The first element of delta_nabla_w is always NULL.
 /// @throw Exits the program if delta_nabla_w or delta_nabla_b arrays are NULL.
 void net_back_propagation(Neural_Network *net, Matrix *expected,
                           Matrix *layers_results[net_layer_number(net)],
@@ -109,9 +121,9 @@ void net_back_propagation(Neural_Network *net, Matrix *expected,
 /// @param[in] nabla_b Array of bias gradients for each layer.
 /// @param[in] learning_rate Scalar value to scale the gradients during the
 /// update.
-/// @throws None. Assumes all matrices are properly allocated.
+/// @throw None. Assumes all matrices are properly allocated.
 void net_update(Neural_Network *net, Matrix **nabla_w, Matrix **nabla_b,
-                double learning_rate);
+                size_t batch_size, double learning_rate);
 
 /// @brief Trains a neural network using mini-batch stochastic gradient descent.
 /// @param[in, out] net Pointer to the Neural_Network to train; its weights and
@@ -123,9 +135,9 @@ void net_update(Neural_Network *net, Matrix **nabla_w, Matrix **nabla_b,
 /// dataset.
 /// @param[in] batch_size Number of samples per mini-batch.
 /// @param[in] learning_rate Scalar to scale the gradient updates.
-/// @throws Exits the program if any memory allocation fails during training.
+/// @throw Exits the program if any memory allocation fails during training.
 void net_train(Neural_Network *net, Training_Data **training_data,
                size_t training_data_size, size_t epochs, size_t batch_size,
-               double learning_rate);
+               double learning_rate, Print_Flags flags);
 
 #endif

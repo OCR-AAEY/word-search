@@ -339,18 +339,19 @@ Matrix *net_feed_forward(const Neural_Network *net, Matrix *input,
         errx(1, "TODO");
     }
 
+    // Whether layers_results and layers_activations should be filled.
     int out_params = layers_results != NULL;
     if (out_params)
     {
         layers_results[0] = NULL;
-        layers_activations[0] = NULL;
+        layers_activations[0] = mat_deepcopy(input);
     }
 
     Matrix *prev_activation = mat_deepcopy(input);
 
     for (size_t i = 1; i < net->layer_number; i++)
     {
-        // Computes the result between layer i and i + 1.
+        // Compute the result between layer i and i + 1.
 
         // The activation vector (column matrix) after the ith layer.
         Matrix *curr_activation =
@@ -359,8 +360,13 @@ Matrix *net_feed_forward(const Neural_Network *net, Matrix *input,
 
         if (out_params)
         {
+            // Store the result column matrix before the application of the
+            // activation function.
             layers_results[i] = mat_deepcopy(curr_activation);
+
             mat_inplace_sigmoid(curr_activation);
+
+            // Store the activation column matrix.
             layers_activations[i] = mat_deepcopy(curr_activation);
         }
         else
@@ -372,10 +378,15 @@ Matrix *net_feed_forward(const Neural_Network *net, Matrix *input,
         prev_activation = curr_activation;
     }
 
+    /*
     // Makes the result a probability distribution: the sum of the coefficient
     // of all classes is equal to 1. The result of the neural network can
     // therefore be seen as probabilities rather than activation coefficients.
-    mat_normalize(prev_activation);
+    // Avoids to normalize a bit output (matrix of 1 by 1) which would always
+    // result in 1 as output.
+    if (mat_height(prev_activation) > 1 || mat_width(prev_activation) > 1)
+        mat_inplace_normalize(prev_activation);
+    */
 
     return prev_activation;
 }
@@ -413,9 +424,9 @@ void net_back_propagation(Neural_Network *net, Matrix *expected,
     // delta_nabla_b = delta
     delta_nabla_b[net->layer_number - 1] = delta;
 
-    // Compute the error column matrix for each layer starting from the
+    // Compute the error column matrix for each layer i starting from the
     // penultimate layer to the first one (excluding the input layer).
-    for (size_t i = net->layer_number - 2; i >= 1; i--)
+    for (long i = (long)net->layer_number - 2; i > 0; i--)
     {
         // delta = ((net.weights[i + 1])^T × delta) ⊙ σ'(res[i])
         a = mat_transpose(net->weights[i + 1]);
@@ -423,7 +434,6 @@ void net_back_propagation(Neural_Network *net, Matrix *expected,
         mat_free(a);
         a = b;
         b = mat_sigmoid_derivative(layers_results[i]);
-        mat_free(delta);
         delta = mat_hadamard(a, b);
         mat_free(a);
         mat_free(b);
@@ -442,21 +452,23 @@ void net_back_propagation(Neural_Network *net, Matrix *expected,
 }
 
 void net_update(Neural_Network *net, Matrix **nabla_w, Matrix **nabla_b,
-                double learning_rate)
+                size_t batch_size, double learning_rate)
 {
     for (size_t i = 1; i < net->layer_number; i++)
     {
-        mat_inplace_scalar_multiplication(nabla_w[i], learning_rate);
-        mat_inplace_scalar_multiplication(nabla_b[i], learning_rate);
+        mat_inplace_scalar_multiplication(nabla_w[i],
+                                          learning_rate / (double)batch_size);
+        mat_inplace_scalar_multiplication(nabla_b[i],
+                                          learning_rate / (double)batch_size);
 
-        mat_inplace_addition(net->weights[i], nabla_w[i]);
-        mat_inplace_addition(net->biases[i], nabla_b[i]);
+        mat_inplace_substraction(net->weights[i], nabla_w[i]);
+        mat_inplace_substraction(net->biases[i], nabla_b[i]);
     }
 }
 
 void net_train(Neural_Network *net, Training_Data **training_data,
                size_t training_data_size, size_t epochs, size_t batch_size,
-               double learning_rate)
+               double learning_rate, Print_Flags flags)
 {
     for (size_t epoch = 0; epoch < epochs; epoch++)
     {
@@ -494,12 +506,47 @@ void net_train(Neural_Network *net, Training_Data **training_data,
                                      layers_activations, delta_nabla_w,
                                      delta_nabla_b);
 
-                net_update(net, nabla_w, nabla_b, learning_rate);
+                for (size_t j = 1; j < net->layer_number; j++)
+                {
+                    mat_inplace_addition(nabla_w[j], delta_nabla_w[j]);
+                    mat_inplace_addition(nabla_b[j], delta_nabla_b[j]);
+                }
 
                 mat_free_matrix_array(layers_results, net->layer_number);
                 mat_free_matrix_array(layers_activations, net->layer_number);
                 mat_free_matrix_array(delta_nabla_w, net->layer_number);
                 mat_free_matrix_array(delta_nabla_b, net->layer_number);
+            }
+
+            net_update(net, nabla_w, nabla_b, batch_size, learning_rate);
+
+            mat_free_matrix_array(nabla_w, net->layer_number);
+            mat_free_matrix_array(nabla_b, net->layer_number);
+        }
+
+        if (flags & Print_Epochs)
+        {
+            if (flags & Print_Epoch_Result)
+            {
+                size_t successes = 0;
+                for (size_t i = 0; i < training_data_size; i++)
+                {
+                    Matrix *output = net_feed_forward(
+                        net, training_data[i]->input, NULL, NULL);
+                    mat_inplace_map(output, round);
+                    if (mat_eq(output, training_data[i]->expected))
+                        successes++;
+                    mat_free(output);
+                }
+                printf("Epoch %zu / %zu completed with accuracy %.2lf%% (%zu / "
+                       "%zu).\n",
+                       epoch + 1, epochs,
+                       100.0 * (double)successes / (double)training_data_size,
+                       successes, training_data_size);
+            }
+            else
+            {
+                printf("Epoch %zu / %zu completed.\n", epoch + 1, epochs);
             }
         }
     }
