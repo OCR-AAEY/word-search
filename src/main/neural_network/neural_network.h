@@ -19,16 +19,6 @@ struct Training_Data
 /// @brief Represents a single training example for a neural network.
 typedef struct Training_Data Training_Data;
 
-enum Print_Flags
-{
-    None = 0,
-    Print_Epochs = 1,
-    Print_Epoch_Result = 2 | 1,
-    Print_Weights = 4,
-    Print_Biases = 8
-};
-typedef enum Print_Flags Print_Flags;
-
 /// @brief Retrieves the number of layers in a neural network.
 /// @param[in] net Pointer to the Neural_Network structure.
 /// @return The number of layers in the network.
@@ -138,7 +128,7 @@ void net_update(Neural_Network *net, Matrix **nabla_w, Matrix **nabla_b,
 /// @throw Exits the program if any memory allocation fails during training.
 void net_train(Neural_Network *net, Training_Data **training_data,
                size_t training_data_size, size_t epochs, size_t batch_size,
-               double learning_rate, Print_Flags flags);
+               double learning_rate);
 
 /// @brief Prints all weights and biases of the given neural network. Displays
 /// each weight and bias matrix in a readable format using `mat_print()`. The
