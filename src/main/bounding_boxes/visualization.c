@@ -1,5 +1,4 @@
 #include "bounding_boxes/visualization.h"
-#include <cairo.h>
 #include <err.h>
 #include <gtk/gtk.h>
 #include <math.h>
@@ -130,6 +129,50 @@ void draw_lines_on_img(Line **lines, size_t line_count, char *input_filename,
     {
         draw_line(cr, lines[i], width, height);
     }
+
+    cairo_surface_write_to_png(surface, output_filename);
+    cairo_destroy(cr);
+    cairo_surface_destroy(surface);
+}
+
+void draw_line_cartesian(cairo_t *cr, int x0, int y0, int x1, int y1)
+{
+    if (cr == NULL)
+        errx(EXIT_FAILURE, "Cairo context is NULL, impossible to draw");
+    cairo_move_to(cr, x0, y0);
+    cairo_line_to(cr, x1, y1);
+    cairo_stroke(cr);
+}
+
+void draw_boundingbox_on_img(BoundingBox *box, const char *input_filename,
+                             const char *output_filename)
+{
+    if (box == NULL)
+        errx(EXIT_FAILURE, "Box is NULL, impossible to draw it");
+    cairo_t *cr;
+    cairo_surface_t *surface;
+    surface = cairo_image_surface_create_from_png(input_filename);
+    if (cairo_surface_status(surface) != CAIRO_STATUS_SUCCESS)
+        errx(EXIT_FAILURE, "Failed to load the image with cairo");
+    cr = cairo_create(surface);
+
+    cairo_set_source_rgb(cr, 1, 0, 0.8);
+    cairo_set_line_width(cr, 5);
+
+    size_t height = box->br.y - box->tl.y + 1;
+    size_t width = box->br.x - box->tl.x + 1;
+
+    // top line
+    draw_line_cartesian(cr, box->tl.x, box->tl.y, box->tl.x + width, box->tl.y);
+    // left line
+    draw_line_cartesian(cr, box->tl.x, box->tl.y, box->tl.x,
+                        box->tl.y + height);
+    // right line
+    draw_line_cartesian(cr, box->tl.x + width, box->tl.y, box->tl.x + width,
+                        box->tl.y + height);
+    // bottom line
+    draw_line_cartesian(cr, box->tl.x, box->tl.y + height, box->tl.x + width,
+                        box->tl.y + height);
 
     cairo_surface_write_to_png(surface, output_filename);
     cairo_destroy(cr);
