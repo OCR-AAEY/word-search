@@ -205,7 +205,7 @@ Matrix *morph_transformation_1d(const Matrix *src, size_t kernel_size,
         for (size_t y = 0; y < width; y++)
         {
             double *dst_pixel = mat_coef_addr(dst, x, y);
-            double extreme_val = transform == Erosion ? 255 : 0;
+            double extreme_val = transform == Erosion ? 0 : 255;
             for (int i = -anchor; i < (int)kernel_size - anchor; i++)
             {
                 // clamp will treat indexes out of bound to stay at the last
@@ -228,12 +228,12 @@ Matrix *morph_transformation_1d(const Matrix *src, size_t kernel_size,
                 // of the kernel vector
                 switch (transform)
                 {
-                case Erosion:
+                case Dilation:
                     if (image_pixel < extreme_val)
                         extreme_val = image_pixel;
                     break;
 
-                case Dilation:
+                case Erosion:
                     if (image_pixel > extreme_val)
                         extreme_val = image_pixel;
                     break;
