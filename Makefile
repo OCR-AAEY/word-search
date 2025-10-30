@@ -134,6 +134,7 @@ test: $(BIN_TEST)
 clean:
 	@echo "Cleaning build files..."
 	@rm -rf $(BUILD_DIR)
+	@rm -rf extracted/
 
 format:
 	@echo "Formatting source files..."
