@@ -50,6 +50,8 @@ void draw_lines_on_img(Line **lines, size_t line_count, char *input_filename,
 /// @throw Exits the program if the Cairo context is NULL.
 void draw_line_cartesian(cairo_t *cr, int x0, int y0, int x1, int y1);
 
+void draw_boundingbox(cairo_t *cr, BoundingBox *box);
+
 /// @brief Draws a bounding box on an input image and saves the result as a new
 /// PNG file.
 /// @param[in] box Pointer to the BoundingBox structure defining the top-left
@@ -60,3 +62,14 @@ void draw_line_cartesian(cairo_t *cr, int x0, int y0, int x1, int y1);
 /// @throw Exits the program if the box is NULL or if the image fails to load.
 void draw_boundingbox_on_img(BoundingBox *box, const char *input_filename,
                              const char *output_filename);
+
+void draw_boundingboxes(cairo_t *cr, BoundingBox **boxes, size_t nb_boxes);
+
+void draw_boundingboxes_on_img(BoundingBox **boxes, size_t nb_boxes,
+                               const char *input_filename,
+                               const char *output_filename);
+
+void draw_2d_boundingboxes_on_img(BoundingBox ***boxes, size_t nb_boxes,
+                                  size_t *size_array,
+                                  const char *input_filename,
+                                  const char *output_filename);

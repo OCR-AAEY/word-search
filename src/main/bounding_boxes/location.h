@@ -60,4 +60,31 @@ void cleanup_folders();
 /// @throw Exits the program if any directory creation command fails.
 void setup_folders();
 
+void setup_words_folders(size_t nb_words);
+void free_bboxes(BoundingBox **boxes, size_t size);
+void extract_words(Matrix *src, BoundingBox **words_boxes, size_t nb_words);
+void extract_letters(Matrix *src, BoundingBox ***letter_boxes, size_t nb_words,
+                     size_t *words_nb_letters);
+void extract_boundingbox_to_png(Matrix *src, BoundingBox *box,
+                                const char *filename);
+BoundingBox ***get_bounding_box_letters(Matrix *src, BoundingBox **words_boxes,
+                                        size_t nb_words, size_t threshold,
+                                        size_t **size_out);
+BoundingBox **find_letters_histogram_threshold(BoundingBox *area,
+                                               size_t *histogram, size_t size,
+                                               size_t threshold,
+                                               size_t *size_out);
+size_t *histogram_vertical(Matrix *src, BoundingBox *area, size_t *size_out);
+BoundingBox **get_bounding_box_words(Matrix *src, BoundingBox *area,
+                                     size_t threshold, size_t area_padding,
+                                     size_t word_margin, size_t *size_out);
+BoundingBox **find_words_histogram_threshold(BoundingBox *area,
+                                             size_t *histogram, size_t size,
+                                             size_t threshold,
+                                             size_t *size_out);
+void margin_bounding_box(BoundingBox *box, size_t top, size_t bottom,
+                         size_t right, size_t left);
+void pad_bounding_box(BoundingBox *box, size_t top, size_t bottom, size_t right,
+                      size_t left);
+size_t *histogram_horizontal(Matrix *src, BoundingBox *area, size_t *size_out);
 #endif
