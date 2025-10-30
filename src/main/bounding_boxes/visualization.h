@@ -77,7 +77,6 @@ void draw_2d_boundingboxes_on_img(BoundingBox ***boxes, size_t nb_boxes,
 
 void export_matrix(Matrix *src, const char *filename);
 
-
 /// @brief Converts a grayscale matrix to an RGB image.
 /// @param[in] matrix Pointer to the input grayscale matrix (values 0.0–255.0).
 /// @return Pointer to a newly allocated ImageData containing RGB pixels.

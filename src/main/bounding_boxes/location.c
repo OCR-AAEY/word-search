@@ -538,24 +538,23 @@ int main(int argc, char **argv)
     Matrix *gray = image_to_grayscale(img);
     export_matrix(gray, GRAYSCALED_FILENAME);
     free_image(img);
-    
+
     Matrix *threshold = adaptative_gaussian_thresholding(gray, 255, 11, 10, 5);
     mat_free(gray);
     export_matrix(threshold, THRESHOLDED_FILENAME);
-    
+
     Matrix *opening = morph_transform(threshold, 2, Opening);
     export_matrix(opening, OPENING_FILENAME);
-    
+
     Matrix *closing = morph_transform(opening, 2, Closing);
     export_matrix(closing, CLOSING_FILENAME);
     export_matrix(closing, POSTTREATMENT_FILENAME);
-    
+
     mat_free(opening);
-    
+
     size_t nb_lines;
     Line **lines = hough_transform_lines(threshold, 1, 5, 1, &nb_lines);
     mat_free(threshold);
-    
 
     draw_lines_on_img(lines, nb_lines, POSTTREATMENT_FILENAME,
                       HOUGHLINES_VISUALIZATION_FILENAME);

@@ -247,7 +247,6 @@ void draw_2d_boundingboxes_on_img(BoundingBox ***boxes, size_t nb_boxes,
     cairo_surface_destroy(surface);
 }
 
-
 ImageData *pixel_matrix_to_image(Matrix *matrix)
 {
     ImageData *img = malloc(sizeof(ImageData));
@@ -297,7 +296,8 @@ void export_matrix(Matrix *src, const char *filename)
     GdkPixbuf *pixbuf = create_pixbuf_from_image_data(img);
     GError *error;
     save_pixbuf_to_png(pixbuf, (char *)filename, &error);
-    if (error != NULL) g_error_free(error);
+    if (error != NULL)
+        g_error_free(error);
     g_object_unref(pixbuf);
     free_image(img);
 }
