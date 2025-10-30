@@ -1,15 +1,15 @@
 #ifndef ROTATION_H
 #define ROTATION_H
 
+#include "bounding_boxes/pretreatment.h"
 #include "image_loader/image_loading.h"
 #include "matrix/matrix.h"
-#include "bounding_boxes/pretreatment.h"
 
 /**
  * @brief Rotates a grayscale matrix by a specified angle.
  *
- * This function rotates the given source matrix by the specified angle in degrees.
- * The resulting matrix represents the rotated image in grayscale.
+ * This function rotates the given source matrix by the specified angle in
+ * degrees. The resulting matrix represents the rotated image in grayscale.
  *
  * @param src Pointer to the source Matrix to rotate.
  * @param angle Rotation angle in degrees. Positive values rotate clockwise.
@@ -21,8 +21,9 @@ Matrix *rotate_matrix(const Matrix *src, double angle);
 /**
  * @brief Rotates a full color image by a specified angle.
  *
- * This function rotates the given ImageData structure by the specified angle in degrees.
- * The resulting ImageData is a newly allocated image containing the rotated pixels.
+ * This function rotates the given ImageData structure by the specified angle in
+ * degrees. The resulting ImageData is a newly allocated image containing the
+ * rotated pixels.
  *
  * @param img Pointer to the source ImageData to rotate.
  * @param angle Rotation angle in degrees. Positive values rotate clockwise.

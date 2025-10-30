@@ -1,7 +1,7 @@
+#include "rotation.h"
 #include <err.h>
 #include <math.h>
 #include <stdlib.h>
-#include "rotation.h"
 
 Matrix *rotate_matrix(const Matrix *src, double angle)
 {
@@ -15,8 +15,10 @@ Matrix *rotate_matrix(const Matrix *src, double angle)
 
     double rad = angle * M_PI / 180.0;
 
-    size_t nw = (size_t)(fabs((double)w * cos(rad)) + fabs((double)h * sin(rad)) + 0.5);
-    size_t nh = (size_t)(fabs((double)h * cos(rad)) + fabs((double)w * sin(rad)) + 0.5);
+    size_t nw =
+        (size_t)(fabs((double)w * cos(rad)) + fabs((double)h * sin(rad)) + 0.5);
+    size_t nh =
+        (size_t)(fabs((double)h * cos(rad)) + fabs((double)w * sin(rad)) + 0.5);
 
     Matrix *rotated = mat_create_empty(nh, nw);
 
@@ -111,12 +113,10 @@ ImageData *rotate_image(ImageData *img, double angle)
     return out;
 }
 
-
-
 #ifndef UNIT_TEST
 
-#include <gtk/gtk.h>
 #include "bounding_boxes/pretreatment.h"
+#include <gtk/gtk.h>
 
 typedef struct
 {
@@ -193,7 +193,6 @@ static void on_rotate_clicked(GtkButton *button, gpointer user_data)
     free_image(img_end);
 }
 
-
 static void activate(GtkApplication *app, gpointer user_data)
 {
     (void)user_data;
@@ -212,7 +211,9 @@ static void activate(GtkApplication *app, gpointer user_data)
 
     GtkWidget *path_label = gtk_label_new("Image Path:");
     widgets->path_entry = GTK_ENTRY(gtk_entry_new());
-    gtk_entry_set_placeholder_text(GTK_ENTRY(widgets->path_entry), "ex: assets/sample_images/level_2_image_1.png");
+    gtk_entry_set_placeholder_text(
+        GTK_ENTRY(widgets->path_entry),
+        "ex: assets/sample_images/level_2_image_1.png");
 
     GtkWidget *angle_label = gtk_label_new("Angle:");
     widgets->angle_entry = GTK_ENTRY(gtk_entry_new());
@@ -221,9 +222,11 @@ static void activate(GtkApplication *app, gpointer user_data)
     GtkWidget *rotate_button = gtk_button_new_with_label("Rotate");
 
     gtk_box_pack_start(GTK_BOX(input_box), path_label, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(input_box), GTK_WIDGET(widgets->path_entry), TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(input_box), GTK_WIDGET(widgets->path_entry),
+                       TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(input_box), angle_label, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(input_box), GTK_WIDGET(widgets->angle_entry), FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(input_box), GTK_WIDGET(widgets->angle_entry),
+                       FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(input_box), rotate_button, FALSE, FALSE, 0);
 
     GtkWidget *images_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
@@ -232,17 +235,21 @@ static void activate(GtkApplication *app, gpointer user_data)
     widgets->original_image = GTK_IMAGE(gtk_image_new());
     widgets->rotated_image = GTK_IMAGE(gtk_image_new());
 
-    gtk_box_pack_start(GTK_BOX(images_box), GTK_WIDGET(widgets->original_image), TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(images_box), GTK_WIDGET(widgets->rotated_image), TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(images_box), GTK_WIDGET(widgets->original_image),
+                       TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(images_box), GTK_WIDGET(widgets->rotated_image),
+                       TRUE, TRUE, 0);
 
-    g_signal_connect(rotate_button, "clicked", G_CALLBACK(on_rotate_clicked), widgets);
+    g_signal_connect(rotate_button, "clicked", G_CALLBACK(on_rotate_clicked),
+                     widgets);
 
     gtk_widget_show_all(window);
 }
 
 int main(int argc, char **argv)
 {
-    GtkApplication *app = gtk_application_new("com.example.rotationtool", G_APPLICATION_FLAGS_NONE);
+    GtkApplication *app = gtk_application_new("com.example.rotationtool",
+                                              G_APPLICATION_FLAGS_NONE);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
     int status = g_application_run(G_APPLICATION(app), argc, argv);
     g_object_unref(app);
