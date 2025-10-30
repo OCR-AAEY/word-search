@@ -24,49 +24,6 @@ Matrix *image_to_grayscale(ImageData *img)
     return grayscaled_pixels;
 }
 
-ImageData *pixel_matrix_to_image(Matrix *matrix)
-{
-    ImageData *img = malloc(sizeof(ImageData));
-    if (img == NULL)
-        errx(EXIT_FAILURE, "Failed to allocate the ImageData struct");
-
-    size_t height = mat_height(matrix);
-    size_t width = mat_width(matrix);
-    Pixel *pixels = malloc(height * width * sizeof(Pixel));
-
-    if (pixels == NULL)
-    {
-        free_image(img);
-        errx(EXIT_FAILURE, "Failed to allocate the pixels array");
-    }
-
-    for (size_t h = 0; h < height; h++)
-    {
-        for (size_t w = 0; w < width; w++)
-        {
-            double gray_scaled_pixel = mat_coef(matrix, h, w);
-
-            if (gray_scaled_pixel < 0 || gray_scaled_pixel > 255)
-            {
-                free_image(img);
-                free(pixels);
-                errx(EXIT_FAILURE, "Matrix values must be between 0 and 255");
-            }
-
-            Pixel *pixel = &pixels[h * width + w];
-            // Convert the grayscale double to a uint8_t (with rounding)
-            uint8_t gray = (uint8_t)floor(gray_scaled_pixel + 0.5);
-            pixel->r = gray;
-            pixel->g = gray;
-            pixel->b = gray;
-        }
-    }
-    img->height = height;
-    img->width = width;
-    img->pixels = pixels;
-    return img;
-}
-
 double gaussian_function(int x, double sigma)
 {
     return exp(-(x * x) / (2.0 * sigma * sigma));
