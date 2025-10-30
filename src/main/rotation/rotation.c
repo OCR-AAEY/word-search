@@ -165,7 +165,6 @@ static void on_rotate_clicked(GtkButton *button, gpointer user_data)
     {
         g_warning("Failed to rotate matrix");
         free_image(img);
-        free_image(m);
         return;
     }
 
@@ -174,8 +173,6 @@ static void on_rotate_clicked(GtkButton *button, gpointer user_data)
     {
         g_warning("Failed to convert rotated matrix to image");
         free_image(img);
-        free_image(m);
-        free_image(rot);
         return;
     }
 
@@ -188,8 +185,6 @@ static void on_rotate_clicked(GtkButton *button, gpointer user_data)
     g_object_unref(pix_orig);
     g_object_unref(pix_rot);
     free_image(img);
-    free_image(m);
-    free_image(rot);
     free_image(img_end);
 }
 
