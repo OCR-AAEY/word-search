@@ -52,6 +52,4 @@ double sind(double degrees);
 /// @return Cosine of the angle.
 double cosd(double degrees);
 
-
-
 #endif
