@@ -1,4 +1,6 @@
 #include "pretreatment.h"
+#include "bounding_boxes/visualization.h"
+#include "utils/utils.h"
 #include <err.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <math.h>
@@ -160,6 +162,7 @@ Matrix *adaptative_gaussian_thresholding(const Matrix *src, double max_value,
         errx(EXIT_FAILURE, "The source matrix is NULL");
 
     Matrix *blurred = gaussian_blur(src, sigma, kernel_size);
+    export_matrix(blurred, GAUSSIAN_BLURRED_FILENAME);
     size_t height = mat_height(src);
     size_t width = mat_width(src);
     Matrix *dest = mat_create_empty(height, width);
