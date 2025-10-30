@@ -511,7 +511,7 @@ int main(int argc, char **argv)
                argv[0]);
         exit(EXIT_SUCCESS);
     }
-    if (argc < 5)
+    if (argc < 4)
         errx(EXIT_FAILURE, "Missing arguments. For help use --help");
     char *level_arg = argv[1];
     int level = atoi(level_arg);
