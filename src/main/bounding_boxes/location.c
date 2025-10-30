@@ -492,63 +492,70 @@ void setup_words_folders(size_t nb_words)
 
 #ifndef UNIT_TEST
 
-int main()
+int main(int argc, char **argv)
 {
+    if (argc < 3)
+        errx(EXIT_FAILURE, "Missing arguments. For help use --help");
+
+    char *level_arg = argv[1];
+    int level = atoi(level_arg);
+    if (level != 1 && level != 2)
+        errx(EXIT_FAILURE, "The level argument must be either 1 or 2");
+    char *image_arg = argv[2];
+    int image = atoi(image_arg);
+    if (image != 1 && image != 2)
+        errx(EXIT_FAILURE, "The image argument must be either 1 or 2");
+
+    char image_path[255];
+    if (level == 1)
+    {
+        if (image == 1)
+        {
+            sprintf(image_path, LEVEL_1_IMG_1);
+        }
+        else
+        {
+            sprintf(image_path, LEVEL_1_IMG_2);
+        }
+    }
+    else
+    {
+        if (image == 1)
+        {
+            sprintf(image_path, LEVEL_2_IMG_1);
+        }
+        else
+        {
+            sprintf(image_path, LEVEL_2_IMG_1);
+        }
+    }
+
     cleanup_folders();
     setup_folders();
 
-    // ImageData *img = load_image("assets/test_images/montgolfiere.jpg");
-    // ImageData *img = load_image(LEVEL_1_IMG_1);
-    ImageData *img = load_image(LEVEL_1_IMG_2);
-    // ImageData *img = load_image(LEVEL_2_IMG_1);
-    // ImageData *img = load_image(LEVEL_2_IMG_2);
-    // ImageData *img = load_image("untitled.png");
+    ImageData *img = load_image(image_path);
 
     Matrix *gray = image_to_grayscale(img);
-    // ImageData *gray_img = pixel_matrix_to_image(gray);
-    // GdkPixbuf *pixbuf_gray = create_pixbuf_from_image_data(gray_img);
-    // save_pixbuf_to_png(pixbuf_gray, "gray.png", NULL);
-    // g_object_unref(pixbuf_gray);
-    // free_image(gray_img);
-
-    // Matrix *blured = gaussian_blur(gray, 10, 11);
-    //  ImageData *blured_img = pixel_matrix_to_image(blured);
-    //  GdkPixbuf *pixbuf_blur = create_pixbuf_from_image_data(blured_img);
-    //  save_pixbuf_to_png(pixbuf_blur, "blured.png", NULL);
-    //  g_object_unref(pixbuf_blur);
-    //  free_image(blured_img);
-
+    export_matrix(gray, GRAYSCALED_FILENAME);
+    free_image(img);
+    
     Matrix *threshold = adaptative_gaussian_thresholding(gray, 255, 11, 10, 5);
     mat_free(gray);
-
+    export_matrix(threshold, THRESHOLDED_FILENAME);
+    
     Matrix *opening = morph_transform(threshold, 2, Opening);
-    mat_free(threshold);
-
+    export_matrix(opening, OPENING_FILENAME);
+    
     Matrix *closing = morph_transform(opening, 2, Closing);
+    export_matrix(closing, CLOSING_FILENAME);
+    export_matrix(closing, POSTTREATMENT_FILENAME);
+    
     mat_free(opening);
-
-    // size_t offset =
-    //     (size_t)round(sqrt(mat_height(closing) * mat_height(closing) +
-    //                        mat_width(closing) * mat_width(closing)));
+    
     size_t nb_lines;
-    Line **lines = hough_transform_lines(closing, 1, 5, 1, &nb_lines);
-
-    ImageData *result_img = pixel_matrix_to_image(closing);
-    GdkPixbuf *pixbuf_result = create_pixbuf_from_image_data(result_img);
-
-    GError *error;
-    save_pixbuf_to_png(pixbuf_result, POSTTREATMENT_FILENAME, &error);
-    if (error)
-        g_error_free(error);
-
-    g_object_unref(pixbuf_result);
-    free_image(result_img);
-
-    free_image(img);
-
-    // mat_free(blured);
-
-    // print_lines(lines, nb_lines);
+    Line **lines = hough_transform_lines(threshold, 1, 5, 1, &nb_lines);
+    mat_free(threshold);
+    
 
     draw_lines_on_img(lines, nb_lines, POSTTREATMENT_FILENAME,
                       HOUGHLINES_VISUALIZATION_FILENAME);
@@ -561,7 +568,6 @@ int main()
                        HOUGHLINES_VISUALIZATION_FILENAME,
                        INTERSECTION_POINTS_FILENAME);
 
-    // print_points(points, nb_points);
     extract_grid_cells(closing, points, height_points, width_points);
     BoundingBox *grid_box =
         get_bounding_box_grid(points, height_points, width_points);

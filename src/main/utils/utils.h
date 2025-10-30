@@ -10,13 +10,18 @@
 #define EXAMPLES_DIR EXTRACT_DIR "/examples"
 
 // OUTPUT FILES CONSTANTS
-#define POSTTREATMENT_FILENAME EXAMPLES_DIR "/treated_image.png"
-#define HOUGHLINES_VISUALIZATION_FILENAME EXAMPLES_DIR "/hough_lines.png"
-#define INTERSECTION_POINTS_FILENAME EXAMPLES_DIR "/intersection_points.png"
-#define GRID_BOUNDING_BOXES_FILENAME EXAMPLES_DIR "/grid_bounding_boxes.png"
-#define WORDS_BOUNDING_BOXES_FILENAME EXAMPLES_DIR "/words_bounding_boxes.png"
+#define GRAYSCALED_FILENAME EXAMPLES_DIR "/01_grayscaled.png"
+#define GAUSSIAN_BLURRED_FILENAME EXAMPLES_DIR "/02_gaussian_blurred.png"
+#define THRESHOLDED_FILENAME EXAMPLES_DIR "/03_thresholded.png"
+#define OPENING_FILENAME EXAMPLES_DIR "/04_opening.png"
+#define CLOSING_FILENAME EXAMPLES_DIR "/05_closing.png"
+#define POSTTREATMENT_FILENAME EXAMPLES_DIR "/06_post_treatment.png"
+#define HOUGHLINES_VISUALIZATION_FILENAME EXAMPLES_DIR "/07_hough_lines.png"
+#define INTERSECTION_POINTS_FILENAME EXAMPLES_DIR "/08_intersection_points.png"
+#define GRID_BOUNDING_BOXES_FILENAME EXAMPLES_DIR "/09_grid_bounding_boxes.png"
+#define WORDS_BOUNDING_BOXES_FILENAME EXAMPLES_DIR "/10_words_bounding_boxes.png"
 #define LETTERS_BOUNDING_BOXES_FILENAME                                        \
-    EXAMPLES_DIR "/letters_bounding_boxes.png"
+    EXAMPLES_DIR "/11_letters_bounding_boxes.png"
 
 // SAMPLE IMAGES PATH
 #define LEVEL_1_IMG_1 "assets/sample_images/level_1_image_1.png"
