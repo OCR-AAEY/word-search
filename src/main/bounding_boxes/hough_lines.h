@@ -1,13 +1,7 @@
-#ifndef M_PI
-#define M_PI 3.14159265358979323846 /* pi */
-#endif
-
 #ifndef HOUGH_LINES_H
 #define HOUGH_LINES_H
 
 #include "matrix/matrix.h"
-
-#define DEG2RAD(deg) ((deg) * M_PI / 180.0)
 
 /// @brief Represents a line in polar coordinates.
 typedef struct Line
@@ -64,16 +58,6 @@ Point **extract_intersection_points(Line **lines, size_t line_count,
                                     size_t *height_out, size_t *width_out);
 
 /// ============= internal functions ===============
-
-/// @brief Computes sine of an angle in degrees.
-/// @param[in] degrees Angle in degrees.
-/// @return Sine of the angle.
-double sind(double degrees);
-
-/// @brief Computes cosine of an angle in degrees.
-/// @param[in] degrees Angle in degrees.
-/// @return Cosine of the angle.
-double cosd(double degrees);
 
 /// @brief Creates an empty Hough accumulator matrix.
 ///
