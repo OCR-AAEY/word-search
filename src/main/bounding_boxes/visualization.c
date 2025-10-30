@@ -246,3 +246,58 @@ void draw_2d_boundingboxes_on_img(BoundingBox ***boxes, size_t nb_boxes,
     cairo_destroy(cr);
     cairo_surface_destroy(surface);
 }
+
+
+ImageData *pixel_matrix_to_image(Matrix *matrix)
+{
+    ImageData *img = malloc(sizeof(ImageData));
+    if (img == NULL)
+        errx(EXIT_FAILURE, "Failed to allocate the ImageData struct");
+
+    size_t height = mat_height(matrix);
+    size_t width = mat_width(matrix);
+    Pixel *pixels = malloc(height * width * sizeof(Pixel));
+
+    if (pixels == NULL)
+    {
+        free(img);
+        errx(EXIT_FAILURE, "Failed to allocate the pixels array");
+    }
+
+    for (size_t h = 0; h < height; h++)
+    {
+        for (size_t w = 0; w < width; w++)
+        {
+            double gray_scaled_pixel = mat_coef(matrix, h, w);
+
+            if ((int)gray_scaled_pixel < 0 || (int)gray_scaled_pixel > 255)
+            {
+                free(img);
+                free(pixels);
+                errx(EXIT_FAILURE, "Matrix values must be between 0 and 255");
+            }
+
+            Pixel *pixel = &pixels[h * width + w];
+            // Convert the grayscale double to a uint8_t (with rounding)
+            uint8_t gray = (uint8_t)floor(gray_scaled_pixel + 0.5);
+            pixel->r = gray;
+            pixel->g = gray;
+            pixel->b = gray;
+        }
+    }
+    img->height = height;
+    img->width = width;
+    img->pixels = pixels;
+    return img;
+}
+
+void export_matrix(Matrix *src, const char *filename)
+{
+    ImageData *img = pixel_matrix_to_image(src);
+    GdkPixbuf *pixbuf = create_pixbuf_from_image_data(img);
+    GError *error;
+    save_pixbuf_to_png(pixbuf, (char *)filename, &error);
+    if (error != NULL) g_error_free(error);
+    g_object_unref(pixbuf);
+    free_image(img);
+}
