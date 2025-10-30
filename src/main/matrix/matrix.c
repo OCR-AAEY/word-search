@@ -5,7 +5,7 @@
 
 #include "matrix.h"
 
-/// @brief A 2D matrix of double-precision floating point numbers.
+/// @brief A 2D mXatrix of double-precision floating point numbers.
 struct Matrix
 {
     /// @brief Number of rows (height) of the matrix.

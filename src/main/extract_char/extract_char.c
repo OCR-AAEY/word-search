@@ -35,6 +35,7 @@ void save_image_region(const Matrix *matrix, char *name, size_t x0, size_t y0,
             p[3 * i + 2] = value;
         }
     }
+    // GError *error;
     save_pixbuf_to_png(pixbuf, name, NULL);
 
     g_object_unref(pixbuf);
