@@ -5,6 +5,7 @@
 #include "extract_char/extract_char.h"
 #include "utils/utils.h"
 #include <stdio.h>
+#include <string.h>
 
 void extract_grid_cells(Matrix *src, Point **points, size_t height,
                         size_t width)
@@ -495,9 +496,23 @@ void setup_words_folders(size_t nb_words)
 
 int main(int argc, char **argv)
 {
-    if (argc < 3)
+    if (argc < 2)
         errx(EXIT_FAILURE, "Missing arguments. For help use --help");
 
+    if (strcmp(argv[1], "--help") == 0)
+    {
+        printf("\n============= WORD SEARCH LOCATION =============\n\n"
+               "Usage: %s [LVL] [IMG] [ANGLE]\n"
+               "- LVL : The level of the image to load (1 or 2).\n"
+               "- IMG : The number of the image to load (1 or 2).\n"
+               "- ANGLE : The rotation angle in degrees to apply to the loaded "
+               "image.\n"
+               "NOTE: If ANGLE is not a number, it is considered as 0.\n\n",
+               argv[0]);
+        exit(EXIT_SUCCESS);
+    }
+    if (argc < 5)
+        errx(EXIT_FAILURE, "Missing arguments. For help use --help");
     char *level_arg = argv[1];
     int level = atoi(level_arg);
     if (level != 1 && level != 2)
@@ -506,6 +521,11 @@ int main(int argc, char **argv)
     int image = atoi(image_arg);
     if (image != 1 && image != 2)
         errx(EXIT_FAILURE, "The image argument must be either 1 or 2");
+    char *angle_arg = argv[3];
+    int angle = atoi(angle_arg);
+    if (ABS(angle) > 180)
+        errx(EXIT_FAILURE,
+             "The angle argument must be and integer between -180 and 180");
 
     char image_path[255];
     if (level == 1)
