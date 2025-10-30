@@ -1,7 +1,7 @@
 #include "bounding_boxes/pretreatment.h"
 #include "image_loader/image_loading.h"
 #include "matrix/matrix.h"
-#include "rotation-manual/rotation.h"
+#include "rotation/rotation.h"
 #include <criterion/criterion.h>
 #include <err.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
