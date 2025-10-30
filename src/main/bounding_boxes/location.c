@@ -244,7 +244,8 @@ BoundingBox **get_bounding_box_words(Matrix *src, BoundingBox *area,
 
     pad_bounding_box(area, area_padding, area_padding, area_padding,
                      area_padding);
-    draw_boundingbox_on_img(area, POSTTREATMENT_FILENAME, "padding.png");
+    draw_boundingbox_on_img(area, POSTTREATMENT_FILENAME,
+                            REMAINING_SPACE_PADDING);
 
     size_t histo_size;
     size_t *histogram_horiz = histogram_horizontal(src, area, &histo_size);
