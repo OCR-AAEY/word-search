@@ -2,6 +2,7 @@
 #include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 int execute_command(const char *cmd)
 {
@@ -30,3 +31,7 @@ int execute_command(const char *cmd)
         errx(EXIT_FAILURE, "Command %s failed", cmd);
     }
 }
+
+double sind(double degrees) { return sin(DEG2RAD(degrees)); }
+
+double cosd(double degrees) { return cos(DEG2RAD(degrees)); }

@@ -85,14 +85,22 @@ $(BIN_IMAGE_LOADER): $(filter $(BUILD_DIR)/main/image_loader/%.o,$(OBJ_MAIN))
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 
 # Location target
-$(BIN_LOCATION): $(filter $(BUILD_DIR)/main/bounding_boxes/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/image_loader/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/matrix/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/extract_char/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/utils/%.o,$(OBJ_MAIN))
+$(BIN_LOCATION): $(filter $(BUILD_DIR)/main/bounding_boxes/%.o,$(OBJ_MAIN)) \
+					$(filter $(BUILD_DIR)/main/image_loader/%.o,$(OBJ_MAIN)) \
+					$(filter $(BUILD_DIR)/main/matrix/%.o,$(OBJ_MAIN)) \
+					$(filter $(BUILD_DIR)/main/extract_char/%.o,$(OBJ_MAIN)) \
+					$(filter $(BUILD_DIR)/main/utils/%.o,$(OBJ_MAIN)) \
+					$(BUILD_DIR)/main/rotation/rotation.o
+
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 
 $(BIN_ROTATION): $(filter $(BUILD_DIR)/main/image_loader/%.o,$(OBJ_MAIN)) \
                       $(filter $(BUILD_DIR)/main/matrix/%.o,$(OBJ_MAIN)) \
-                      $(filter $(BUILD_DIR)/main/bounding_boxes/pretreatment.o,$(OBJ_MAIN)) \
-                      src/main/rotation/rotation.c
+						$(BUILD_DIR)/main/bounding_boxes/pretreatment.o \
+						$(BUILD_DIR)/main/bounding_boxes/visualization.o \
+					  $(filter $(BUILD_DIR)/main/utils/%.o,$(OBJ_MAIN)) \
+                      $(filter $(BUILD_DIR)/main/rotation/%.o,$(OBJ_MAIN))
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 

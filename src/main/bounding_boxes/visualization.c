@@ -1,4 +1,5 @@
 #include "bounding_boxes/visualization.h"
+#include "utils/utils.h"
 #include <err.h>
 #include <gtk/gtk.h>
 #include <math.h>
