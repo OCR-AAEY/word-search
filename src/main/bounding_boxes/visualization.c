@@ -144,6 +144,26 @@ void draw_line_cartesian(cairo_t *cr, int x0, int y0, int x1, int y1)
     cairo_stroke(cr);
 }
 
+void draw_boundingbox(cairo_t *cr, BoundingBox *box)
+{
+    if (box == NULL)
+        errx(EXIT_FAILURE, "Box is NULL, impossible to draw it");
+    size_t height = box->br.y - box->tl.y + 1;
+    size_t width = box->br.x - box->tl.x + 1;
+
+    // top line
+    draw_line_cartesian(cr, box->tl.x, box->tl.y, box->tl.x + width, box->tl.y);
+    // left line
+    draw_line_cartesian(cr, box->tl.x, box->tl.y, box->tl.x,
+                        box->tl.y + height);
+    // right line
+    draw_line_cartesian(cr, box->tl.x + width, box->tl.y, box->tl.x + width,
+                        box->tl.y + height);
+    // bottom line
+    draw_line_cartesian(cr, box->tl.x, box->tl.y + height, box->tl.x + width,
+                        box->tl.y + height);
+}
+
 void draw_boundingbox_on_img(BoundingBox *box, const char *input_filename,
                              const char *output_filename)
 {
@@ -159,20 +179,68 @@ void draw_boundingbox_on_img(BoundingBox *box, const char *input_filename,
     cairo_set_source_rgb(cr, 1, 0, 0.8);
     cairo_set_line_width(cr, 5);
 
-    size_t height = box->br.y - box->tl.y + 1;
-    size_t width = box->br.x - box->tl.x + 1;
+    draw_boundingbox(cr, box);
 
-    // top line
-    draw_line_cartesian(cr, box->tl.x, box->tl.y, box->tl.x + width, box->tl.y);
-    // left line
-    draw_line_cartesian(cr, box->tl.x, box->tl.y, box->tl.x,
-                        box->tl.y + height);
-    // right line
-    draw_line_cartesian(cr, box->tl.x + width, box->tl.y, box->tl.x + width,
-                        box->tl.y + height);
-    // bottom line
-    draw_line_cartesian(cr, box->tl.x, box->tl.y + height, box->tl.x + width,
-                        box->tl.y + height);
+    cairo_surface_write_to_png(surface, output_filename);
+    cairo_destroy(cr);
+    cairo_surface_destroy(surface);
+}
+
+void draw_boundingboxes(cairo_t *cr, BoundingBox **boxes, size_t nb_boxes)
+{
+    for (size_t i = 0; i < nb_boxes; i++)
+    {
+        draw_boundingbox(cr, boxes[i]);
+    }
+}
+
+void draw_boundingboxes_on_img(BoundingBox **boxes, size_t nb_boxes,
+                               const char *input_filename,
+                               const char *output_filename)
+{
+    if (boxes == NULL)
+        errx(EXIT_FAILURE, "Boxes is NULL, impossible to draw them");
+    cairo_t *cr;
+    cairo_surface_t *surface;
+    surface = cairo_image_surface_create_from_png(input_filename);
+    if (cairo_surface_status(surface) != CAIRO_STATUS_SUCCESS)
+        errx(EXIT_FAILURE, "Failed to load the image with cairo");
+    cr = cairo_create(surface);
+
+    cairo_set_source_rgb(cr, 0, 0, 1);
+    cairo_set_line_width(cr, 2);
+
+    draw_boundingboxes(cr, boxes, nb_boxes);
+
+    cairo_surface_write_to_png(surface, output_filename);
+    cairo_destroy(cr);
+    cairo_surface_destroy(surface);
+}
+
+void draw_2d_boundingboxes_on_img(BoundingBox ***boxes, size_t nb_boxes,
+                                  size_t *size_array,
+                                  const char *input_filename,
+                                  const char *output_filename)
+{
+    if (boxes == NULL)
+        errx(EXIT_FAILURE, "Boxes is NULL, impossible to draw them");
+    cairo_t *cr;
+    cairo_surface_t *surface;
+    surface = cairo_image_surface_create_from_png(input_filename);
+    if (cairo_surface_status(surface) != CAIRO_STATUS_SUCCESS)
+        errx(EXIT_FAILURE, "Failed to load the image with cairo");
+    cr = cairo_create(surface);
+
+    cairo_set_source_rgb(cr, 0, 0, 1);
+    cairo_set_line_width(cr, 2);
+
+    for (size_t i = 0; i < nb_boxes; i++)
+    {
+        if (boxes[i] == NULL)
+            errx(EXIT_FAILURE,
+                 "The current array of boxes is NULL, impossible to draw them");
+        draw_boundingboxes(cr, boxes[i], size_array[i]);
+    }
 
     cairo_surface_write_to_png(surface, output_filename);
     cairo_destroy(cr);
