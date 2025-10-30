@@ -19,7 +19,8 @@
 #define HOUGHLINES_VISUALIZATION_FILENAME EXAMPLES_DIR "/07_hough_lines.png"
 #define INTERSECTION_POINTS_FILENAME EXAMPLES_DIR "/08_intersection_points.png"
 #define GRID_BOUNDING_BOXES_FILENAME EXAMPLES_DIR "/09_grid_bounding_boxes.png"
-#define WORDS_BOUNDING_BOXES_FILENAME EXAMPLES_DIR "/10_words_bounding_boxes.png"
+#define WORDS_BOUNDING_BOXES_FILENAME                                          \
+    EXAMPLES_DIR "/10_words_bounding_boxes.png"
 #define LETTERS_BOUNDING_BOXES_FILENAME                                        \
     EXAMPLES_DIR "/11_letters_bounding_boxes.png"
 
