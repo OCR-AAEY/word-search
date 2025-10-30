@@ -1,7 +1,7 @@
 #include "extract_char.h"
 
-void save_image_region(const Matrix *matrix, char *name, size_t x0, size_t y0,
-                       size_t x1, size_t y1)
+void save_image_region(const Matrix *matrix, const char *name, size_t x0,
+                       size_t y0, size_t x1, size_t y1)
 {
 
     // Matrix check
@@ -49,7 +49,7 @@ void save_image_region(const Matrix *matrix, char *name, size_t x0, size_t y0,
         }
     }
     GError *error;
-    save_pixbuf_to_png(pixbuf, name, &error);
+    save_pixbuf_to_png(pixbuf, (char *)name, &error);
 
     if (error)
         g_error_free(error);
