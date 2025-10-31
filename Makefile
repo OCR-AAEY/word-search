@@ -162,6 +162,7 @@ clean:
 	@echo "Cleaning build files..."
 	@rm -rf $(BUILD_DIR)
 	@rm -rf extracted/
+	@rm -rf xnor.net
 
 format:
 	@echo "Formatting source files..."
