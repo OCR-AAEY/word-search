@@ -74,7 +74,7 @@ void populate_hough_lines(Matrix *src, Matrix *accumulator,
                 size_t r_index = (size_t)round(r + (double)r_max);
 
                 double *accumulator_cell =
-                    mat_coef_addr(accumulator, r_index, theta_index);
+                    mat_coef_ptr(accumulator, r_index, theta_index);
                 (*accumulator_cell)++;
 
                 // we keep track of the maximum value of the accumulator
