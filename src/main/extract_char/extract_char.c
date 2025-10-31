@@ -1,13 +1,26 @@
 #include "extract_char.h"
 
-void save_image_region(const Matrix *matrix, char *name, size_t x0, size_t y0,
-                       size_t x1, size_t y1)
+void save_image_region(const Matrix *matrix, const char *name, size_t x0,
+                       size_t y0, size_t x1, size_t y1)
 {
 
     // Matrix check
     if (matrix == NULL)
     {
         errx(EXIT_FAILURE, "The matrix is NULL");
+    }
+    size_t tmp;
+    if (x1 < x0)
+    {
+        tmp = x0;
+        x0 = x1;
+        x1 = tmp;
+    }
+    if (y1 < y0)
+    {
+        tmp = y0;
+        y0 = y1;
+        y1 = tmp;
     }
     size_t width = 1 + x1 - x0;
     size_t height = 1 + y1 - y0;
@@ -35,7 +48,11 @@ void save_image_region(const Matrix *matrix, char *name, size_t x0, size_t y0,
             p[3 * i + 2] = value;
         }
     }
-    save_pixbuf_to_png(pixbuf, name, NULL);
+    GError *error;
+    save_pixbuf_to_png(pixbuf, (char *)name, &error);
+
+    if (error)
+        g_error_free(error);
 
     g_object_unref(pixbuf);
 }
