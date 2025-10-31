@@ -1,4 +1,4 @@
-#include "image_loader/image_loading.h"
+#include "image_loading.h"
 #include <err.h>
 #include <stdio.h>
 

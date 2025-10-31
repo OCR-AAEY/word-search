@@ -36,39 +36,41 @@
 VERBOSE ?= 0
 
 # Directories
-SRC_DIR     := src
-MAIN_DIR    := $(SRC_DIR)/main
-TEST_DIR    := $(SRC_DIR)/test
-BUILD_DIR   := build
+SRC_DIR     = src
+MAIN_DIR    = $(SRC_DIR)/main
+TEST_DIR    = $(SRC_DIR)/test
+BUILD_DIR   = build
 
 # Compiler and flags
 ifeq ($(VERBOSE),0)
-CC          := @gcc
+CC          = @gcc
 else
-CC          := gcc
+CC          = gcc
 endif
-CFLAGS      := -Wall -Wextra -fsanitize=address -I$(MAIN_DIR)
-XCFLAGS     :=
-TEST_FLAGS  := -DUNIT_TEST -fsanitize=address $(shell pkg-config --cflags --libs criterion)
-GTK_FLAGS   := $(shell pkg-config --cflags --libs gtk+-3.0)
-LIB_FLAGS   := -lm $(GTK_FLAGS)
+CFLAGS      = -Wall -Wextra -fsanitize=address -I$(MAIN_DIR)
+XCFLAGS     =
+TEST_FLAGS  = -DUNIT_TEST $(shell pkg-config --cflags --libs criterion)
+GTK_FLAGS   = $(shell pkg-config --cflags --libs gtk+-3.0)
+LIB_FLAGS   = -lm $(GTK_FLAGS)
 
 # Source files
-SRC_MAIN    := $(shell find $(MAIN_DIR) -name '*.c')
-SRC_TEST    := $(shell find $(TEST_DIR) -name '*.c')
+SRC_MAIN    = $(shell find $(MAIN_DIR) -name '*.c')
+SRC_TEST    = $(shell find $(TEST_DIR) -name '*.c')
 
 # Object files
-OBJ_MAIN          := $(SRC_MAIN:$(MAIN_DIR)/%.c=$(BUILD_DIR)/main/%.o)
-OBJ_MAIN_FOR_TEST := $(SRC_MAIN:$(MAIN_DIR)/%.c=$(BUILD_DIR)/main_for_test/%.o)
-OBJ_TEST          := $(SRC_TEST:$(TEST_DIR)/%.c=$(BUILD_DIR)/test/%.o)
+OBJ_MAIN          = $(SRC_MAIN:$(MAIN_DIR)/%.c=$(BUILD_DIR)/main/%.o)
+OBJ_MAIN_FOR_TEST = $(SRC_MAIN:$(MAIN_DIR)/%.c=$(BUILD_DIR)/main_for_test/%.o)
+OBJ_TEST          = $(SRC_TEST:$(TEST_DIR)/%.c=$(BUILD_DIR)/test/%.o)
 
 # Executables
-BIN_SOLVER       := $(BUILD_DIR)/solver
-BIN_IMAGE_LOADER := $(BUILD_DIR)/image_loader
-BIN_LOCATION 	 := $(BUILD_DIR)/location
-BIN_ROTATION     := $(BUILD_DIR)/rotation
-# BIN_APP          := $(BUILD_DIR)/app
-BIN_TEST         := $(BUILD_DIR)/run_tests
+BIN_SOLVER       = $(BUILD_DIR)/solver
+BIN_IMAGE_LOADER = $(BUILD_DIR)/image_loader
+BIN_XNOR_TRAIN   = $(BUILD_DIR)/xnor_train
+BIN_XNOR_RUN     = $(BUILD_DIR)/xnor_run
+BIN_LOCATION 	 = $(BUILD_DIR)/location
+BIN_ROTATION     = $(BUILD_DIR)/rotation
+# BIN_APP         = $(BUILD_DIR)/app
+BIN_TEST         = $(BUILD_DIR)/run_tests
 
 ##############################
 #          TARGETS           #
@@ -84,6 +86,16 @@ $(BIN_IMAGE_LOADER): $(filter $(BUILD_DIR)/main/image_loader/%.o,$(OBJ_MAIN))
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 
+# XNOR neural network training target
+$(BIN_XNOR_TRAIN): $(BUILD_DIR)/main/xnor/xnor_train.o $(filter $(BUILD_DIR)/main/neural_network/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/matrix/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/utils/%.o,$(OBJ_MAIN))
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+
+# XNOR neural network running target
+$(BIN_XNOR_RUN): $(BUILD_DIR)/main/xnor/xnor_run.o $(filter $(BUILD_DIR)/main/neural_network/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/matrix/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/utils/%.o,$(OBJ_MAIN))
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+
 # Location target
 $(BIN_LOCATION): $(filter $(BUILD_DIR)/main/bounding_boxes/%.o,$(OBJ_MAIN)) \
 					$(filter $(BUILD_DIR)/main/image_loader/%.o,$(OBJ_MAIN)) \
@@ -91,7 +103,6 @@ $(BIN_LOCATION): $(filter $(BUILD_DIR)/main/bounding_boxes/%.o,$(OBJ_MAIN)) \
 					$(filter $(BUILD_DIR)/main/extract_char/%.o,$(OBJ_MAIN)) \
 					$(filter $(BUILD_DIR)/main/utils/%.o,$(OBJ_MAIN)) \
 					$(BUILD_DIR)/main/rotation/rotation.o
-
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 
@@ -103,7 +114,6 @@ $(BIN_ROTATION): $(filter $(BUILD_DIR)/main/image_loader/%.o,$(OBJ_MAIN)) \
                       $(filter $(BUILD_DIR)/main/rotation/%.o,$(OBJ_MAIN))
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-
 
 ## App target
 #$(BIN_APP): $(filter %app/%.o,$(OBJ_MAIN))
@@ -138,7 +148,7 @@ $(BUILD_DIR)/test/%.o: $(TEST_DIR)/%.c
 #           PHONY            #
 ##############################
 
-all: $(BIN_SOLVER) $(BIN_ROTATION) #$(BIN_IMAGE_LOADER) #$(BIN_APP)
+all: $(BIN_SOLVER) $(BIN_XNOR_TRAIN) $(BIN_XNOR_RUN) $(BIN_ROTATION) $(BIN_LOCATION) #$(BIN_APP)
 
 #run: $(BIN_APP)
 #	@echo "Running app..."
@@ -152,6 +162,7 @@ clean:
 	@echo "Cleaning build files..."
 	@rm -rf $(BUILD_DIR)
 	@rm -rf extracted/
+	@rm -rf xnor.net
 
 format:
 	@echo "Formatting source files..."

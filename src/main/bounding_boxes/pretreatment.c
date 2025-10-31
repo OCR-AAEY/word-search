@@ -19,7 +19,7 @@ Matrix *image_to_grayscale(ImageData *img)
     {
         for (size_t w = 0; w < img->width; w++)
         {
-            double *gray_scaled_pixel = mat_coef_addr(grayscaled_pixels, h, w);
+            double *gray_scaled_pixel = mat_coef_ptr(grayscaled_pixels, h, w);
             *gray_scaled_pixel = pixel_to_grayscale(get_pixel(img, h, w));
         }
     }
@@ -79,7 +79,7 @@ Matrix *convolve_horizontally(const Matrix *src, const double *kernel,
     for (size_t x = 0; x < height; x++)
         for (size_t y = 0; y < width; y++)
         {
-            double *dst_pixel = mat_coef_addr(dst, x, y);
+            double *dst_pixel = mat_coef_ptr(dst, x, y);
             for (int i = -m; i <= m; i++)
             {
                 // clamp will treat indexes out of bound to stay at the last
@@ -114,7 +114,7 @@ Matrix *convolve_vertically(const Matrix *src, const double *kernel,
     for (size_t x = 0; x < height; x++)
         for (size_t y = 0; y < width; y++)
         {
-            double *dst_pixel = mat_coef_addr(dst, x, y);
+            double *dst_pixel = mat_coef_ptr(dst, x, y);
             for (int i = -m; i <= m; i++)
             {
                 // clamp will treat indexes out of bound to stay at the last
@@ -171,7 +171,7 @@ Matrix *adaptative_gaussian_thresholding(const Matrix *src, double max_value,
     {
         for (size_t w = 0; w < width; w++)
         {
-            double *pixel = mat_coef_addr(dest, h, w);
+            double *pixel = mat_coef_ptr(dest, h, w);
             double blurred_pixel = mat_coef(blurred, h, w);
             double src_pixel = mat_coef(src, h, w);
             double T = blurred_pixel - c;
@@ -204,7 +204,7 @@ Matrix *morph_transformation_1d(const Matrix *src, size_t kernel_size,
     for (size_t x = 0; x < height; x++)
         for (size_t y = 0; y < width; y++)
         {
-            double *dst_pixel = mat_coef_addr(dst, x, y);
+            double *dst_pixel = mat_coef_ptr(dst, x, y);
             double extreme_val = transform == Erosion ? 0 : 255;
             for (int i = -anchor; i < (int)kernel_size - anchor; i++)
             {

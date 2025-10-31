@@ -4,6 +4,7 @@ extracted/
 
 # Build
 /build
+xnor.net
 
 # IDEs
 .idea/

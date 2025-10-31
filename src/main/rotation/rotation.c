@@ -27,7 +27,7 @@ Matrix *rotate_matrix(const Matrix *src, double angle)
     {
         for (size_t x = 0; x < nw; x++)
         {
-            *mat_coef_addr(rotated, y, x) = 255.0;
+            *mat_coef_ptr(rotated, y, x) = 255.0;
         }
     }
 
@@ -48,7 +48,7 @@ Matrix *rotate_matrix(const Matrix *src, double angle)
                 int ix = (int)tx;
                 int iy = (int)ty;
                 double val = mat_coef(src, iy, ix);
-                *mat_coef_addr(rotated, y, x) = val;
+                *mat_coef_ptr(rotated, y, x) = val;
             }
         }
     }
