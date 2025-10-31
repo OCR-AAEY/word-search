@@ -502,17 +502,26 @@ int main(int argc, char **argv)
 
     if (strcmp(argv[1], "--help") == 0)
     {
+        // printf("\n============= WORD SEARCH LOCATION =============\n\n"
+        //        "Usage: %s [LVL] [IMG] [ANGLE]\n"
+        //        "- LVL : The level of the image to load (1 or 2).\n"
+        //        "- IMG : The number of the image to load (1 or 2).\n"
+        //        "- ANGLE : The rotation angle in degrees to apply to the
+        //        loaded " "image between -180 and 180. Positive values rotate
+        //        clockwise.\n" "NOTE: If ANGLE is not a number, it is
+        //        considered as 0.\n\n", argv[0]);
+
         printf("\n============= WORD SEARCH LOCATION =============\n\n"
-               "Usage: %s [LVL] [IMG] [ANGLE]\n"
+               "Usage: %s [LVL] [IMG]\n"
                "- LVL : The level of the image to load (1 or 2).\n"
-               "- IMG : The number of the image to load (1 or 2).\n"
-               "- ANGLE : The rotation angle in degrees to apply to the loaded "
-               "image between -180 and 180. Positive values rotate clockwise.\n"
-               "NOTE: If ANGLE is not a number, it is considered as 0.\n\n",
+               "- IMG : The number of the image to load (1 or 2).\n",
                argv[0]);
         exit(EXIT_SUCCESS);
     }
-    if (argc < 4)
+    // if (argc < 4)
+    //     errx(EXIT_FAILURE, "Missing arguments. For help use --help");
+
+    if (argc < 3)
         errx(EXIT_FAILURE, "Missing arguments. For help use --help");
 
     char *level_arg = argv[1];
@@ -525,11 +534,12 @@ int main(int argc, char **argv)
     if (image != 1 && image != 2)
         errx(EXIT_FAILURE, "The image argument must be either 1 or 2");
 
-    char *angle_arg = argv[3];
-    double angle = atof(angle_arg);
-    if (ABS(angle) > 180)
-        errx(EXIT_FAILURE,
-             "The angle argument must be a float between -180 and 180");
+    double angle;
+    // char *angle_arg = argv[3];
+    // double angle = atof(angle_arg);
+    // if (ABS(angle) > 180)
+    //     errx(EXIT_FAILURE,
+    //          "The angle argument must be a float between -180 and 180");
 
     char image_path[255];
     if (level == 1)
@@ -537,10 +547,12 @@ int main(int argc, char **argv)
         if (image == 1)
         {
             sprintf(image_path, LEVEL_1_IMG_1);
+            angle = 0;
         }
         else
         {
             sprintf(image_path, LEVEL_1_IMG_2);
+            angle = 0;
         }
     }
     else
@@ -548,10 +560,12 @@ int main(int argc, char **argv)
         if (image == 1)
         {
             sprintf(image_path, LEVEL_2_IMG_1);
+            angle = 25;
         }
         else
         {
             sprintf(image_path, LEVEL_2_IMG_2);
+            angle = -4;
         }
     }
 
@@ -563,9 +577,10 @@ int main(int argc, char **argv)
     export_matrix(gray, GRAYSCALED_FILENAME);
     free_image(img);
 
-    Matrix *rotated = rotate_matrix(gray, angle);
+    Matrix *rotated = angle != 0 ? rotate_matrix(gray, angle) : gray;
     export_matrix(rotated, ROTATED_FILENAME);
-    mat_free(gray);
+    if (angle != 0)
+        mat_free(gray);
 
     Matrix *threshold =
         adaptative_gaussian_thresholding(rotated, 255, 11, 10, 5);
@@ -582,7 +597,7 @@ int main(int argc, char **argv)
     mat_free(closing);
 
     size_t nb_lines;
-    Line **lines = hough_transform_lines(threshold, 1, 5, 1, &nb_lines);
+    Line **lines = hough_transform_lines(threshold, 90, 5, 1, &nb_lines);
     mat_free(threshold);
 
     draw_lines_on_img(lines, nb_lines, POSTTREATMENT_FILENAME,
