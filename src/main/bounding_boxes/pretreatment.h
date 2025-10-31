@@ -46,13 +46,6 @@ typedef enum MorphTransform
 /// @see pixel_to_grayscale
 Matrix *image_to_grayscale(ImageData *img);
 
-/// @brief Converts a grayscale matrix to an RGB image.
-/// @param[in] matrix Pointer to the input grayscale matrix (values 0.0–255.0).
-/// @return Pointer to a newly allocated ImageData containing RGB pixels.
-/// @throw Throws if allocations failed or the values in the matrix are not
-/// valid
-ImageData *pixel_matrix_to_image(Matrix *matrix);
-
 /// @brief Applies a Gaussian blur to an input image using separable
 /// convolution.
 ///

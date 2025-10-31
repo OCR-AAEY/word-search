@@ -1,4 +1,5 @@
 #include "bounding_boxes/pretreatment.h"
+#include "bounding_boxes/visualization.h"
 #include "image_loader/image_loading.h"
 #include "matrix/matrix.h"
 #include "rotation/rotation.h"
