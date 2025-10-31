@@ -5,6 +5,16 @@ extracted/
 # Build
 /build
 xnor.net
+/solver
+
+# Executables
+/image_loader
+/xnor_train
+/xnor_run
+/location
+/rotation
+/app
+/run_tests
 
 # IDEs
 .idea/

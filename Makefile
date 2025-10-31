@@ -60,17 +60,17 @@ SRC_TEST    = $(shell find $(TEST_DIR) -name '*.c')
 # Object files
 OBJ_MAIN          = $(SRC_MAIN:$(MAIN_DIR)/%.c=$(BUILD_DIR)/main/%.o)
 OBJ_MAIN_FOR_TEST = $(SRC_MAIN:$(MAIN_DIR)/%.c=$(BUILD_DIR)/main_for_test/%.o)
-OBJ_TEST          = $(SRC_TEST:$(TEST_DIR)/%.c=$(BUILD_DIR)/test/%.o)
+OBJ_TEST_FOR_TEST          = $(SRC_TEST:$(TEST_DIR)/%.c=$(BUILD_DIR)/test/%.o)
 
 # Executables
-BIN_SOLVER       = $(BUILD_DIR)/solver
-BIN_IMAGE_LOADER = $(BUILD_DIR)/image_loader
-BIN_XNOR_TRAIN   = $(BUILD_DIR)/xnor_train
-BIN_XNOR_RUN     = $(BUILD_DIR)/xnor_run
-BIN_LOCATION 	 = $(BUILD_DIR)/location
-BIN_ROTATION     = $(BUILD_DIR)/rotation
-# BIN_APP         = $(BUILD_DIR)/app
-BIN_TEST         = $(BUILD_DIR)/run_tests
+BIN_SOLVER       = solver
+BIN_IMAGE_LOADER = image_loader
+BIN_XNOR_TRAIN   = xnor_train
+BIN_XNOR_RUN     = xnor_run
+BIN_LOCATION 	 = location
+BIN_ROTATION     = rotation
+# BIN_APP         = app
+BIN_TEST         = run_tests
 
 ##############################
 #          TARGETS           #
@@ -78,22 +78,18 @@ BIN_TEST         = $(BUILD_DIR)/run_tests
 
 # Solver target
 $(BIN_SOLVER): $(filter $(BUILD_DIR)/main/solver/%.o,$(OBJ_MAIN))
-	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 
 # Image loader target
 $(BIN_IMAGE_LOADER): $(filter $(BUILD_DIR)/main/image_loader/%.o,$(OBJ_MAIN))
-	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 
 # XNOR neural network training target
 $(BIN_XNOR_TRAIN): $(BUILD_DIR)/main/xnor/xnor_train.o $(filter $(BUILD_DIR)/main/neural_network/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/matrix/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/utils/%.o,$(OBJ_MAIN))
-	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 
 # XNOR neural network running target
 $(BIN_XNOR_RUN): $(BUILD_DIR)/main/xnor/xnor_run.o $(filter $(BUILD_DIR)/main/neural_network/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/matrix/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/utils/%.o,$(OBJ_MAIN))
-	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 
 # Location target
@@ -103,26 +99,22 @@ $(BIN_LOCATION): $(filter $(BUILD_DIR)/main/bounding_boxes/%.o,$(OBJ_MAIN)) \
 					$(filter $(BUILD_DIR)/main/extract_char/%.o,$(OBJ_MAIN)) \
 					$(filter $(BUILD_DIR)/main/utils/%.o,$(OBJ_MAIN)) \
 					$(BUILD_DIR)/main/rotation/rotation.o
-	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 
 $(BIN_ROTATION): $(filter $(BUILD_DIR)/main/image_loader/%.o,$(OBJ_MAIN)) \
-                      $(filter $(BUILD_DIR)/main/matrix/%.o,$(OBJ_MAIN)) \
-						$(BUILD_DIR)/main/bounding_boxes/pretreatment.o \
-						$(BUILD_DIR)/main/bounding_boxes/visualization.o \
-					  $(filter $(BUILD_DIR)/main/utils/%.o,$(OBJ_MAIN)) \
-                      $(filter $(BUILD_DIR)/main/rotation/%.o,$(OBJ_MAIN))
-	@mkdir -p $(@D)
+					$(filter $(BUILD_DIR)/main/matrix/%.o,$(OBJ_MAIN)) \
+					$(BUILD_DIR)/main/bounding_boxes/pretreatment.o \
+					$(BUILD_DIR)/main/bounding_boxes/visualization.o \
+					$(filter $(BUILD_DIR)/main/utils/%.o,$(OBJ_MAIN)) \
+					$(filter $(BUILD_DIR)/main/rotation/%.o,$(OBJ_MAIN))
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 
 ## App target
 #$(BIN_APP): $(filter %app/%.o,$(OBJ_MAIN))
-#	@mkdir -p $(@D)
 #	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 
 # Test binary
-$(BIN_TEST): $(OBJ_MAIN_FOR_TEST) $(OBJ_TEST)
-	@mkdir -p $(@D)
+$(BIN_TEST): $(OBJ_MAIN_FOR_TEST) $(OBJ_TEST_FOR_TEST)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(TEST_FLAGS) $(LIB_FLAGS)
 
 ##############################
@@ -161,10 +153,18 @@ test: $(BIN_TEST)
 clean:
 	@echo "Cleaning build files..."
 	@rm -rf $(BUILD_DIR)
+	@echo "Cleaning executables..."
+	@rm -rf $(BIN_SOLVER)
+	@rm -rf $(BIN_IMAGE_LOADER)
+	@rm -rf $(BIN_XNOR_TRAIN)
+	@rm -rf $(BIN_XNOR_RUN)
+	@rm -rf $(BIN_LOCATION)
+	@rm -rf $(BIN_ROTATION)
+	@rm -rf $(BIN_TEST)
+	@echo "Cleaning misc files..."
 	@rm -rf extracted/
 	@rm -rf xnor.net
 	@rm -rf grid
-	@rm -rf solver
 
 format:
 	@echo "Formatting source files..."
