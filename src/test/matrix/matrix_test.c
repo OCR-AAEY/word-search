@@ -20,7 +20,7 @@ Test(matrix, mat_create_empty_1)
 
 Test(matrix, mat_create_from_arr_1)
 {
-    Matrix *m = mat_create_from_arr(3, 2, (double[]){0,1,2,3,4,5});
+    Matrix *m = mat_create_from_arr(3, 2, (double[]){0, 1, 2, 3, 4, 5});
     cr_assert_eq(mat_height(m), 3);
     cr_assert_eq(mat_width(m), 2);
     for (size_t h = 0; h < mat_height(m); h++)
@@ -37,8 +37,10 @@ Test(matrix, mat_create_from_arr_1)
 
 Test(matrix, mat_addition_1)
 {
-    Matrix *m1 = mat_create_from_arr(3, 2, (double[]){5.5,0.1,8.7,9.2,3.6,2.0});
-    Matrix *m2 = mat_create_from_arr(3, 2, (double[]){3.4,5.7,1.2,1.1,7.6,0.8});
+    Matrix *m1 =
+        mat_create_from_arr(3, 2, (double[]){5.5, 0.1, 8.7, 9.2, 3.6, 2.0});
+    Matrix *m2 =
+        mat_create_from_arr(3, 2, (double[]){3.4, 5.7, 1.2, 1.1, 7.6, 0.8});
     Matrix *res = mat_addition(m1, m2);
     for (size_t h = 0; h < mat_height(res); h++)
     {
@@ -77,7 +79,6 @@ Test(matrix, mat_addition_2)
                                mat_coef(m1, h, w) + mat_coef(m2, h, w), 1E-3);
         }
     }
-
 
     mat_free(m1);
     mat_free(m2);
