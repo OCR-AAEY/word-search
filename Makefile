@@ -163,6 +163,8 @@ clean:
 	@rm -rf $(BUILD_DIR)
 	@rm -rf extracted/
 	@rm -rf xnor.net
+	@rm -rf grid
+	@rm -rf solver
 
 format:
 	@echo "Formatting source files..."
