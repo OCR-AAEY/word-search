@@ -1,3 +1,7 @@
+# Tests
+venv/
+extracted/
+
 # Build
 /build
 xnor.net
