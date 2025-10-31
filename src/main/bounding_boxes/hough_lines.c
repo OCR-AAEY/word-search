@@ -1,13 +1,10 @@
 #include "bounding_boxes/hough_lines.h"
+#include "utils/utils.h"
 #include <err.h>
 #include <glib.h>
 #include <math.h>
 #include <stddef.h>
 #include <stdio.h>
-
-double sind(double degrees) { return sin(DEG2RAD(degrees)); }
-
-double cosd(double degrees) { return cos(DEG2RAD(degrees)); }
 
 Matrix *create_hough_accumulator(size_t height, size_t width,
                                  float theta_precision)
@@ -345,6 +342,8 @@ void split_lines(Line **lines, size_t line_count, Line ***lines_1,
             }
         }
     }
+    // printf("theta1 = %f, theta2 = %f\n",
+    //                    (*lines_1)[0]->theta, (*lines_2)[0]->theta);
 }
 
 Point **extract_intersection_points(Line **lines, size_t line_count,

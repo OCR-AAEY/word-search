@@ -1,4 +1,6 @@
 #include "pretreatment.h"
+#include "bounding_boxes/visualization.h"
+#include "utils/utils.h"
 #include <err.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <math.h>
@@ -22,49 +24,6 @@ Matrix *image_to_grayscale(ImageData *img)
         }
     }
     return grayscaled_pixels;
-}
-
-ImageData *pixel_matrix_to_image(Matrix *matrix)
-{
-    ImageData *img = malloc(sizeof(ImageData));
-    if (img == NULL)
-        errx(EXIT_FAILURE, "Failed to allocate the ImageData struct");
-
-    size_t height = mat_height(matrix);
-    size_t width = mat_width(matrix);
-    Pixel *pixels = malloc(height * width * sizeof(Pixel));
-
-    if (pixels == NULL)
-    {
-        free_image(img);
-        errx(EXIT_FAILURE, "Failed to allocate the pixels array");
-    }
-
-    for (size_t h = 0; h < height; h++)
-    {
-        for (size_t w = 0; w < width; w++)
-        {
-            double gray_scaled_pixel = mat_coef(matrix, h, w);
-
-            if (gray_scaled_pixel < 0 || gray_scaled_pixel > 255)
-            {
-                free_image(img);
-                free(pixels);
-                errx(EXIT_FAILURE, "Matrix values must be between 0 and 255");
-            }
-
-            Pixel *pixel = &pixels[h * width + w];
-            // Convert the grayscale double to a uint8_t (with rounding)
-            uint8_t gray = (uint8_t)floor(gray_scaled_pixel + 0.5);
-            pixel->r = gray;
-            pixel->g = gray;
-            pixel->b = gray;
-        }
-    }
-    img->height = height;
-    img->width = width;
-    img->pixels = pixels;
-    return img;
 }
 
 double gaussian_function(int x, double sigma)
@@ -203,6 +162,7 @@ Matrix *adaptative_gaussian_thresholding(const Matrix *src, double max_value,
         errx(EXIT_FAILURE, "The source matrix is NULL");
 
     Matrix *blurred = gaussian_blur(src, sigma, kernel_size);
+    export_matrix(blurred, GAUSSIAN_BLURRED_FILENAME);
     size_t height = mat_height(src);
     size_t width = mat_width(src);
     Matrix *dest = mat_create_empty(height, width);
@@ -245,7 +205,7 @@ Matrix *morph_transformation_1d(const Matrix *src, size_t kernel_size,
         for (size_t y = 0; y < width; y++)
         {
             double *dst_pixel = mat_coef_addr(dst, x, y);
-            double extreme_val = transform == Erosion ? 255 : 0;
+            double extreme_val = transform == Erosion ? 0 : 255;
             for (int i = -anchor; i < (int)kernel_size - anchor; i++)
             {
                 // clamp will treat indexes out of bound to stay at the last
@@ -268,12 +228,12 @@ Matrix *morph_transformation_1d(const Matrix *src, size_t kernel_size,
                 // of the kernel vector
                 switch (transform)
                 {
-                case Erosion:
+                case Dilation:
                     if (image_pixel < extreme_val)
                         extreme_val = image_pixel;
                     break;
 
-                case Dilation:
+                case Erosion:
                     if (image_pixel > extreme_val)
                         extreme_val = image_pixel;
                     break;
