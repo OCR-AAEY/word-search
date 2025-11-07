@@ -484,9 +484,9 @@ void net_train(Neural_Network *net, Training_Data **training_data,
             for (size_t i = 1; i < net->layer_number; i++)
             {
                 nabla_w[i] = mat_create_zero(mat_height(net->weights[i]),
-                                              mat_width(net->weights[i]));
+                                             mat_width(net->weights[i]));
                 nabla_b[i] = mat_create_zero(mat_height(net->biases[i]),
-                                              mat_width(net->biases[i]));
+                                             mat_width(net->biases[i]));
             }
 
             for (size_t i = 0; i < batch_size; i++)
