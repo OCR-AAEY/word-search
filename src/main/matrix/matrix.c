@@ -319,13 +319,13 @@ void mat_inplace_addition(Matrix *a, const Matrix *b)
     }
 }
 
-Matrix *mat_substraction(const Matrix *a, const Matrix *b)
+Matrix *mat_subtraction(const Matrix *a, const Matrix *b)
 {
     if (a->height != b->height)
-        errx(1, "Matrix substraction failed: mismatched heights (%zu vs %zu).",
+        errx(1, "Matrix subtraction failed: mismatched heights (%zu vs %zu).",
              a->height, b->height);
     if (a->width != b->width)
-        errx(1, "Matrix substraction failed: mismatched widths (%zu vs %zu).",
+        errx(1, "Matrix subtraction failed: mismatched widths (%zu vs %zu).",
              a->width, b->width);
 
     Matrix *res = mat_deepcopy(a);
@@ -338,13 +338,13 @@ Matrix *mat_substraction(const Matrix *a, const Matrix *b)
     return res;
 }
 
-void mat_inplace_substraction(Matrix *a, const Matrix *b)
+void mat_inplace_subtraction(Matrix *a, const Matrix *b)
 {
     if (a->height != b->height)
-        errx(1, "Matrix substraction failed: mismatched heights (%zu vs %zu).",
+        errx(1, "Matrix subtraction failed: mismatched heights (%zu vs %zu).",
              a->height, b->height);
     if (a->width != b->width)
-        errx(1, "Matrix substraction failed: mismatched widths (%zu vs %zu).",
+        errx(1, "Matrix subtraction failed: mismatched widths (%zu vs %zu).",
              a->width, b->width);
 
     for (size_t i = 0; i < a->height * a->width; i++)
