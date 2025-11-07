@@ -49,7 +49,7 @@ CC          = gcc
 endif
 CFLAGS      = -Wall -Wextra -fsanitize=address -I$(MAIN_DIR)
 XCFLAGS     =
-TEST_FLAGS  = -DUNIT_TEST $(shell pkg-config --cflags --libs criterion)
+TEST_FLAGS  = -DUNIT_TEST -I$(TEST_DIR) $(shell pkg-config --cflags --libs criterion)
 GTK_FLAGS   = $(shell pkg-config --cflags --libs gtk+-3.0)
 LIB_FLAGS   = -lm $(GTK_FLAGS)
 
