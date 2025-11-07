@@ -157,12 +157,12 @@ void mat_inplace_addition(Matrix *a, const Matrix *b);
 /// @param[in] a Pointer to the first Matrix (minuend).
 /// @param[in] b Pointer to the second Matrix (subtrahend).
 /// @return Pointer to a newly allocated Matrix containing the result of a - b.
-Matrix *mat_substraction(const Matrix *a, const Matrix *b);
+Matrix *mat_subtraction(const Matrix *a, const Matrix *b);
 
 /// @brief Performs element-wise subtraction of matrix b from matrix a in-place.
 /// @param[in, out] a Pointer to the Matrix that will be modified (minuend).
 /// @param[in] b Pointer to the Matrix to subtract (subtrahend).
-void mat_inplace_substraction(Matrix *a, const Matrix *b);
+void mat_inplace_subtraction(Matrix *a, const Matrix *b);
 
 /// @brief Multiplies a matrix by a scalar value and returns the result.
 /// @param[in] m Pointer to the input matrix.

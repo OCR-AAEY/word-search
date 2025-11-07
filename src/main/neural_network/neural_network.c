@@ -412,7 +412,7 @@ void net_back_propagation(Neural_Network *net, Matrix *expected,
     // Compute the error column matrix for the last layer.
 
     // delta = (act[L - 1] - expected) ⊙ σ'(res[L - 1])
-    a = mat_substraction(layers_activations[net->layer_number - 1], expected);
+    a = mat_subtraction(layers_activations[net->layer_number - 1], expected);
     b = mat_sigmoid_derivative(layers_results[net->layer_number - 1]);
     delta = mat_hadamard(a, b);
     mat_free(a);
@@ -463,8 +463,8 @@ void net_update(Neural_Network *net, Matrix **nabla_w, Matrix **nabla_b,
         mat_inplace_scalar_multiplication(nabla_b[i],
                                           learning_rate / (double)batch_size);
 
-        mat_inplace_substraction(net->weights[i], nabla_w[i]);
-        mat_inplace_substraction(net->biases[i], nabla_b[i]);
+        mat_inplace_subtraction(net->weights[i], nabla_w[i]);
+        mat_inplace_subtraction(net->biases[i], nabla_b[i]);
     }
 }
 
