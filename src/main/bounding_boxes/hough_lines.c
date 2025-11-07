@@ -24,7 +24,7 @@ Matrix *create_hough_accumulator(size_t height, size_t width,
     size_t acc_width = (size_t)round(180.0 / theta_precision);
 
     // columns are the theta values, and lines are the r values
-    Matrix *accumulator = mat_create_empty(acc_height, acc_width);
+    Matrix *accumulator = mat_create_zero(acc_height, acc_width);
 
     return accumulator;
 }
