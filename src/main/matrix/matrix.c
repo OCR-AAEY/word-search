@@ -125,7 +125,7 @@ Matrix *mat_create_uniform_random(size_t height, size_t width, double min,
 
     for (size_t i = 0; i < height * width; i++)
     {
-        *(content + i) = rand_d_uniform_nm(min, max);
+        content[i] = rand_d_uniform_nm(min, max);
     }
 
     Matrix *m = malloc(sizeof(Matrix));
@@ -158,7 +158,7 @@ Matrix *mat_create_gaussian_random(size_t height, size_t width)
 
     for (size_t i = 0; i < height * width; i++)
     {
-        *(content + i) = rand_d_gaussian();
+        content[i] = rand_d_gaussian();
     }
 
     Matrix *m = malloc(sizeof(Matrix));
@@ -192,7 +192,7 @@ Matrix *mat_create_normal_random(size_t height, size_t width, double mean,
 
     for (size_t i = 0; i < height * width; i++)
     {
-        *(content + i) = rand_d_normal(mean, stddev);
+        content[i] = rand_d_normal(mean, stddev);
     }
 
     Matrix *m = malloc(sizeof(Matrix));
@@ -247,7 +247,7 @@ Matrix *mat_deepcopy(const Matrix *m)
         errx(1, "Failed to allocate memory for deepcopy content.");
 
     for (size_t i = 0; i < m->height * m->width; i++)
-        *(content + i) = *(m->content + i);
+        content[i] = m->content[i];
 
     Matrix *new_m = malloc(sizeof(Matrix));
     if (new_m == NULL)
@@ -298,7 +298,7 @@ Matrix *mat_addition(const Matrix *a, const Matrix *b)
 
     for (size_t i = 0; i < res->height * res->width; i++)
     {
-        *(res->content + i) += *(b->content + i);
+        res->content[i] += b->content[i];
     }
 
     return res;
@@ -315,7 +315,7 @@ void mat_inplace_addition(Matrix *a, const Matrix *b)
 
     for (size_t i = 0; i < a->height * a->width; i++)
     {
-        *(a->content + i) += *(b->content + i);
+        a->content[i] += b->content[i];
     }
 }
 
@@ -332,7 +332,7 @@ Matrix *mat_subtraction(const Matrix *a, const Matrix *b)
 
     for (size_t i = 0; i < res->height * res->width; i++)
     {
-        *(res->content + i) -= *(b->content + i);
+        res->content[i] -= b->content[i];
     }
 
     return res;
@@ -349,7 +349,7 @@ void mat_inplace_subtraction(Matrix *a, const Matrix *b)
 
     for (size_t i = 0; i < a->height * a->width; i++)
     {
-        *(a->content + i) -= *(b->content + i);
+        a->content[i] -= b->content[i];
     }
 }
 
@@ -359,7 +359,7 @@ Matrix *mat_scalar_multiplication(const Matrix *m, double a)
 
     for (size_t i = 0; i < m->height * m->width; i++)
     {
-        *(res->content + i) = *(m->content + i) * a;
+        res->content[i] = m->content[i] * a;
     }
 
     return res;
@@ -369,7 +369,7 @@ void mat_inplace_scalar_multiplication(Matrix *m, double a)
 {
     for (size_t i = 0; i < m->height * m->width; i++)
     {
-        *(m->content + i) *= a;
+        m->content[i] *= a;
     }
 }
 
@@ -567,7 +567,7 @@ Matrix *mat_vertical_flatten(const Matrix *m)
 
     for (size_t i = 0; i < m->height * m->width; i++)
     {
-        *(res->content + i) = *(m->content + i);
+        res->content[i] = m->content[i];
     }
 
     return res;
@@ -585,7 +585,7 @@ Matrix *mat_horizontal_flatten(const Matrix *m)
 
     for (size_t i = 0; i < m->height * m->width; i++)
     {
-        *(res->content + i) = *(m->content + i);
+        res->content[i] = m->content[i];
     }
 
     return res;
@@ -605,7 +605,7 @@ Matrix *mat_normalize(const Matrix *m)
 
     for (size_t i = 0; i < m->height * m->width; i++)
     {
-        sum += *(m->content + i);
+        sum += m->content[i];
     }
 
     if (sum == 0.0)
@@ -613,7 +613,7 @@ Matrix *mat_normalize(const Matrix *m)
 
     for (size_t i = 0; i < m->height * m->width; i++)
     {
-        *(res->content + i) = *(m->content + i) / sum;
+        res->content[i] = m->content[i] / sum;
     }
 
     return res;
@@ -625,7 +625,7 @@ void mat_inplace_normalize(Matrix *m)
 
     for (size_t i = 0; i < m->height * m->width; i++)
     {
-        sum += *(m->content + i);
+        sum += m->content[i];
     }
 
     if (sum == 0.0)
@@ -633,7 +633,7 @@ void mat_inplace_normalize(Matrix *m)
 
     for (size_t i = 0; i < m->height * m->width; i++)
     {
-        *(m->content + i) /= sum;
+        m->content[i] /= sum;
     }
 }
 
@@ -643,7 +643,7 @@ Matrix *mat_map(const Matrix *m, double (*f)(double))
 
     for (size_t i = 0; i < m->height * m->width; i++)
     {
-        *(res->content + i) = f(*(m->content + i));
+        res->content[i] = f(m->content[i]);
     }
 
     return res;
@@ -653,7 +653,7 @@ void mat_inplace_map(Matrix *m, double (*f)(double))
 {
     for (size_t i = 0; i < m->height * m->width; i++)
     {
-        *(m->content + i) = f(*(m->content + i));
+        m->content[i] = f(m->content[i]);
     }
 }
 
