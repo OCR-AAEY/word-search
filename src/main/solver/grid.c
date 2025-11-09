@@ -306,9 +306,9 @@ int grid_solve(Grid *grid, char *word, int *start_height, int *start_width,
             }
             // Check backward.
             i = 0;
-            while (
-                *(reversed_word + i) != '\0' &&
-                ci_char_cmp(*(reversed_word + i), grid_char(grid, h + i, w + i)))
+            while (*(reversed_word + i) != '\0' &&
+                   ci_char_cmp(*(reversed_word + i),
+                               grid_char(grid, h + i, w + i)))
             {
                 i++;
             }
@@ -349,9 +349,9 @@ int grid_solve(Grid *grid, char *word, int *start_height, int *start_width,
             }
             // Check backward.
             i = 0;
-            while (
-                *(reversed_word + i) != '\0' &&
-                ci_char_cmp(*(reversed_word + i), grid_char(grid, h + i, w - i)))
+            while (*(reversed_word + i) != '\0' &&
+                   ci_char_cmp(*(reversed_word + i),
+                               grid_char(grid, h + i, w - i)))
             {
                 i++;
             }
