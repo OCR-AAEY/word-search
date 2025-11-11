@@ -1,5 +1,5 @@
-#include "bounding_boxes/visualization.h"
-#include "utils/utils.h"
+#include "pretreatment/visualization.h"
+#include "utils/math/trigo.h"
 #include <err.h>
 #include <gtk/gtk.h>
 #include <math.h>

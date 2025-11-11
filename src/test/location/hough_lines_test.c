@@ -1,7 +1,7 @@
 #include <criterion/criterion.h>
 
-#include "bounding_boxes/hough_lines.h"
-#include "bounding_boxes/pretreatment.h"
+#include "location/hough_lines.h"
+#include "pretreatment/pretreatment.h"
 #include <math.h>
 
 Test(hough_lines, level_2_image_1)

@@ -1,5 +1,5 @@
-#include "bounding_boxes/hough_lines.h"
-#include "utils/utils.h"
+#include "location/hough_lines.h"
+#include "utils/math/trigo.h"
 #include <err.h>
 #include <glib.h>
 #include <math.h>

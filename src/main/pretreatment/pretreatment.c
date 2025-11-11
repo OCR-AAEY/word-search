@@ -1,5 +1,5 @@
 #include "pretreatment.h"
-#include "bounding_boxes/visualization.h"
+#include "pretreatment/visualization.h"
 #include "utils/utils.h"
 #include <err.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>

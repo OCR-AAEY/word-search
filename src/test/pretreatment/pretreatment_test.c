@@ -1,7 +1,6 @@
 #include <criterion/criterion.h>
 
-#include "bounding_boxes/pretreatment.h"
-#include <math.h>
+#include "pretreatment/pretreatment.h"
 
 Test(pretreatment, pixel_to_grayscale)
 {
