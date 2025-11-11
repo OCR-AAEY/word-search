@@ -1,8 +1,8 @@
-#include "bounding_boxes/location.h"
-#include "bounding_boxes/hough_lines.h"
-#include "bounding_boxes/pretreatment.h"
-#include "bounding_boxes/visualization.h"
+#include "location/location.h"
 #include "extract_char/extract_char.h"
+#include "location/hough_lines.h"
+#include "pretreatment/pretreatment.h"
+#include "pretreatment/visualization.h"
 #include "rotation/rotation.h"
 #include "utils/utils.h"
 #include <stdio.h>

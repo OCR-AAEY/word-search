@@ -2,7 +2,7 @@
 #ifndef LOCATION_H
 #define LOCATION_H
 
-#include "bounding_boxes/hough_lines.h"
+#include "location/hough_lines.h"
 
 /// @brief Represents a Bounding box by the top left and bottom right corner.
 typedef struct BoundingBox
