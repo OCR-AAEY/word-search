@@ -2,52 +2,74 @@
 #include <stdio.h>
 
 #include "matrix/matrix.h"
+#include "test_settings.h"
 
-Test(matrix, mat_create_empty_1)
+Test(matrix, mat_create_test)
 {
-    Matrix *m = mat_create_empty(3, 2);
-    cr_assert_eq(mat_height(m), 3);
-    cr_assert_eq(mat_width(m), 2);
-    for (size_t h = 0; h < mat_height(m); h++)
+    Matrix *m = mat_create(16, 32, 6.626E-34);
+    cr_assert_eq(mat_height(m), 16);
+    cr_assert_eq(mat_width(m), 32);
+
+    double *content = mat_unsafe_coef_ptr(m, 0, 0);
+    for (size_t i = 0; i < mat_height(m) * mat_width(m); i++)
     {
-        for (size_t w = 0; w < mat_width(m); w++)
-        {
-            cr_expect_eq(mat_coef(m, h, w), 0);
-        }
+        cr_expect_float_eq(content[i], 6.626E-34, EPSILON);
     }
+
     mat_free(m);
 }
 
-Test(matrix, mat_create_from_arr_1)
+Test(matrix, mat_create_zero_test)
+{
+    Matrix *m = mat_create_zero(45, 90);
+    cr_assert_eq(mat_height(m), 45);
+    cr_assert_eq(mat_width(m), 90);
+
+    double *content = mat_unsafe_coef_ptr(m, 0, 0);
+    for (size_t i = 0; i < mat_height(m) * mat_width(m); i++)
+    {
+        cr_expect_eq(content[i], 0);
+    }
+
+    mat_free(m);
+}
+
+Test(matrix, mat_create_from_arr_test)
 {
     Matrix *m = mat_create_from_arr(3, 2, (double[]){0, 1, 2, 3, 4, 5});
     cr_assert_eq(mat_height(m), 3);
     cr_assert_eq(mat_width(m), 2);
+
     for (size_t h = 0; h < mat_height(m); h++)
     {
         for (size_t w = 0; w < mat_width(m); w++)
         {
-            cr_expect_float_eq(mat_coef(m, h, w), (double)(2 * h + w), 1E-3,
-                               "(%zu:%zu) %lf != %lf", h, w, mat_coef(m, h, w),
-                               (double)(2 * h + w));
+            cr_expect_eq(mat_coef(m, h, w), (double)(2 * h + w));
         }
     }
+
     mat_free(m);
 }
 
-Test(matrix, mat_addition_1)
+Test(matrix, mat_addition_test)
 {
     Matrix *m1 =
         mat_create_from_arr(3, 2, (double[]){5.5, 0.1, 8.7, 9.2, 3.6, 2.0});
     Matrix *m2 =
         mat_create_from_arr(3, 2, (double[]){3.4, 5.7, 1.2, 1.1, 7.6, 0.8});
+
     Matrix *res = mat_addition(m1, m2);
+
+    cr_assert_eq(mat_height(res), 3);
+    cr_assert_eq(mat_width(res), 2);
+
     for (size_t h = 0; h < mat_height(res); h++)
     {
         for (size_t w = 0; w < mat_width(res); w++)
         {
             cr_expect_float_eq(mat_coef(res, h, w),
-                               mat_coef(m1, h, w) + mat_coef(m2, h, w), 1E-3);
+                               mat_coef(m1, h, w) + mat_coef(m2, h, w),
+                               EPSILON);
         }
     }
     mat_free(m1);
@@ -55,79 +77,134 @@ Test(matrix, mat_addition_1)
     mat_free(res);
 }
 
-Test(matrix, mat_addition_2)
+Test(matrix, mat_addition_random_test)
 {
-    size_t height = rand() % 1000L;
-    size_t width = rand() % 1000L;
-    double *content1 = calloc(height * width, sizeof(double));
-    double *content2 = calloc(height * width, sizeof(double));
-    for (size_t i = 0; i < height * width; i++)
+    REPEAT
     {
-        *(content1 + i) = (double)rand() / 10;
-        *(content2 + i) = (double)rand() / 10;
-    }
-    Matrix *m1 = mat_create_from_arr(height, width, content1);
-    Matrix *m2 = mat_create_from_arr(height, width, content2);
-    free(content1);
-    free(content2);
-    Matrix *res = mat_addition(m1, m2);
-    for (size_t h = 0; h < mat_height(res); h++)
-    {
-        for (size_t w = 0; w < mat_width(res); w++)
+        size_t height = rand() % 1000L + 500L;
+        size_t width = rand() % 1000L + 500L;
+
+        Matrix *m1 = mat_create_uniform_random(height, width, -1E100, 1E100);
+        Matrix *m2 = mat_create_uniform_random(height, width, -1E100, 1E100);
+
+        Matrix *res = mat_addition(m1, m2);
+
+        cr_assert_eq(mat_height(res), height);
+        cr_assert_eq(mat_width(res), width);
+
+        for (size_t h = 0; h < mat_height(res); h++)
         {
-            cr_expect_float_eq(mat_coef(res, h, w),
-                               mat_coef(m1, h, w) + mat_coef(m2, h, w), 1E-3);
+            for (size_t w = 0; w < mat_width(res); w++)
+            {
+                cr_expect_float_eq(mat_coef(res, h, w),
+                                   mat_coef(m1, h, w) + mat_coef(m2, h, w),
+                                   EPSILON);
+            }
         }
-    }
 
-    mat_free(m1);
-    mat_free(m2);
-    mat_free(res);
+        mat_free(m1);
+        mat_free(m2);
+        mat_free(res);
+    }
 }
 
-Test(matrix, mat_normalize_1)
+Test(matrix, mat_subtraction_random_test)
 {
-    Matrix *m = mat_create_empty(2, 1);
-    *mat_coef_ptr(m, 0, 0) = 3.0;
-    *mat_coef_ptr(m, 1, 0) = 1.0;
-
-    mat_inplace_normalize(m);
-
-    double sum = 0.0;
-    for (size_t h = 0; h < mat_height(m); h++)
+    REPEAT
     {
-        for (size_t w = 0; w < mat_width(m); w++)
+        size_t height = rand() % 1000L + 500L;
+        size_t width = rand() % 1000L + 500L;
+
+        Matrix *m1 = mat_create_uniform_random(height, width, -1E100, 1E100);
+        Matrix *m2 = mat_create_uniform_random(height, width, -1E100, 1E100);
+
+        Matrix *res = mat_subtraction(m1, m2);
+
+        cr_assert_eq(mat_height(res), height);
+        cr_assert_eq(mat_width(res), width);
+
+        for (size_t h = 0; h < mat_height(res); h++)
         {
-            double coef = mat_coef(m, h, w);
-            cr_expect(0.0 <= coef && coef <= 1.0,
-                      "Coef %lf at (h:%zu,w:%zu) is not between 0 and 1.", coef,
-                      h, w);
-            sum += coef;
+            for (size_t w = 0; w < mat_width(res); w++)
+            {
+                cr_expect_float_eq(mat_coef(res, h, w),
+                                   mat_coef(m1, h, w) - mat_coef(m2, h, w),
+                                   EPSILON);
+            }
         }
+
+        mat_free(m1);
+        mat_free(m2);
+        mat_free(res);
     }
-
-    cr_expect_float_eq(sum, 1.0, 1E-3);
-
-    mat_free(m);
 }
 
-Test(matrix, mat_normalize_2)
+Test(matrix, mat_hadamard_random_test)
 {
-    Matrix *m = mat_create_empty(2, 1);
-    *mat_coef_ptr(m, 0, 0) = 3.0;
-    *mat_coef_ptr(m, 1, 0) = 1.0;
+    REPEAT
+    {
+        size_t height = rand() % 1000L + 500L;
+        size_t width = rand() % 1000L + 500L;
+
+        Matrix *m1 = mat_create_uniform_random(height, width, -1E100, 1E100);
+        Matrix *m2 = mat_create_uniform_random(height, width, -1E100, 1E100);
+
+        Matrix *res = mat_hadamard(m1, m2);
+
+        cr_assert_eq(mat_height(res), height);
+        cr_assert_eq(mat_width(res), width);
+
+        for (size_t h = 0; h < mat_height(res); h++)
+        {
+            for (size_t w = 0; w < mat_width(res); w++)
+            {
+                cr_expect_float_eq(mat_coef(res, h, w),
+                                   mat_coef(m1, h, w) * mat_coef(m2, h, w),
+                                   EPSILON);
+            }
+        }
+
+        mat_free(m1);
+        mat_free(m2);
+        mat_free(res);
+    }
+}
+
+Test(matrix, mat_normalize_random_test)
+{
+    REPEAT
+    {
+        size_t height = rand() % 1000L + 500L;
+        size_t width = rand() % 1000L + 500L;
+
+        Matrix *m = mat_create_uniform_random(height, width, -1E100, 1E100);
+
+        mat_inplace_normalize(m);
+
+        cr_assert_eq(mat_height(m), height);
+        cr_assert_eq(mat_width(m), width);
+
+        double sum = 0.0;
+
+        for (size_t h = 0; h < mat_height(m); h++)
+        {
+            for (size_t w = 0; w < mat_width(m); w++)
+            {
+                sum += mat_coef(m, h, w);
+            }
+        }
+
+        cr_expect_float_eq(sum, 1.0, EPSILON);
+
+        mat_free(m);
+    }
+}
+
+Test(matrix, mat_normalize_failure, .exit_code = 1)
+{
+    Matrix *m = mat_create_zero(4, 6);
 
     mat_inplace_normalize(m);
 
-    cr_expect_float_eq(mat_coef(m, 0, 0), 3.0 / 4.0, 1E-6);
-    cr_expect_float_eq(mat_coef(m, 1, 0), 1.0 / 4.0, 1E-6);
-
-    mat_free(m);
-}
-
-Test(matrix, mat_normalize_3, .exit_code = 1)
-{
-    Matrix *m = mat_create_empty(4, 6);
-    mat_inplace_normalize(m);
     mat_free(m);
 }
