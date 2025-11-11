@@ -493,6 +493,7 @@ void setup_words_folders(size_t nb_words)
     }
 }
 
+/*
 #ifndef UNIT_TEST
 
 int main(int argc, char **argv)
@@ -653,3 +654,4 @@ int main(int argc, char **argv)
 }
 
 #endif
+*/
