@@ -1,5 +1,5 @@
 #include "rotation.h"
-#include "bounding_boxes/visualization.h"
+#include "pretreatment/visualization.h"
 #include <err.h>
 #include <math.h>
 #include <stdlib.h>

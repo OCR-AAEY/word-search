@@ -1,9 +1,9 @@
 #ifndef ROTATION_H
 #define ROTATION_H
 
-#include "bounding_boxes/pretreatment.h"
 #include "image_loader/image_loading.h"
 #include "matrix/matrix.h"
+#include "pretreatment/pretreatment.h"
 
 /**
  * @brief Rotates a grayscale matrix by a specified angle.

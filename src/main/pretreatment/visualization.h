@@ -1,6 +1,6 @@
-#include "bounding_boxes/hough_lines.h"
-#include "bounding_boxes/location.h"
 #include "image_loader/image_loading.h"
+#include "location/hough_lines.h"
+#include "location/location.h"
 #include <cairo.h>
 
 /// @brief Draws a filled circular point on a Cairo surface.
