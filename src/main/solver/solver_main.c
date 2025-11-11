@@ -33,15 +33,15 @@ int main(int argc, char **argv)
 {
     if (argc < 2)
     {
-        errx(1, "Missing arguments grid and word.");
+        errx(EXIT_FAILURE, "Missing arguments grid and word.");
     }
     if (argc < 3)
     {
-        errx(1, "Missing argument word.");
+        errx(EXIT_FAILURE, "Missing argument word.");
     }
     if (argc > 3)
     {
-        errx(1, "Too many arguments.");
+        errx(EXIT_FAILURE, "Too many arguments.");
     }
 
     // Extract arguments.

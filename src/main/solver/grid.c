@@ -77,14 +77,14 @@ Grid *grid_load_from_file(char *file_name)
 
     if (file_stream == NULL)
     {
-        errx(1, "Failed to open file: %s", file_name);
+        errx(EXIT_FAILURE, "Failed to open file: %s", file_name);
     }
 
     // 25 is the minimum number of cells (5×5).
     char *array = malloc(25 * sizeof(char));
     if (array == NULL)
     {
-        errx(1, "Failed to allocate necessary memory.");
+        errx(EXIT_FAILURE, "Failed to allocate necessary memory.");
     }
 
     size_t array_length = 25;
@@ -106,7 +106,7 @@ Grid *grid_load_from_file(char *file_name)
             }
             else if (row_length != width)
             {
-                errx(1,
+                errx(EXIT_FAILURE,
                      "Line %i is not of same length as the first line. "
                      "Expected %i and got %i",
                      height + 1, width, row_length);
@@ -124,7 +124,7 @@ Grid *grid_load_from_file(char *file_name)
                 char *tmp_ptr = realloc(array, array_length);
                 if (tmp_ptr == NULL)
                 {
-                    errx(1, "Failed to reallocate memory for the grid array.");
+                    errx(EXIT_FAILURE, "Failed to reallocate memory for the grid array.");
                 }
                 array = tmp_ptr;
             }
@@ -136,13 +136,13 @@ Grid *grid_load_from_file(char *file_name)
         }
         else
         {
-            errx(1, "Invalid character found at line %i: '%c'.", height + 1, c);
+            errx(EXIT_FAILURE, "Invalid character found at line %i: '%c'.", height + 1, c);
         }
     }
 
     if (width < 5)
     {
-        errx(1,
+        errx(EXIT_FAILURE,
              "Given grid is too small: its width should be greater or equal to "
              "5 but got: %i.",
              width);
