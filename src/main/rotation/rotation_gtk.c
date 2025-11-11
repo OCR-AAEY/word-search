@@ -1,4 +1,4 @@
-
+/*
 #ifndef UNIT_TEST
 #include "matrix/matrix.h"
 #include "pretreatment/pretreatment.h"
@@ -220,3 +220,4 @@ int main(int argc, char **argv)
 }
 
 #endif
+*/

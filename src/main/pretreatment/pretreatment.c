@@ -14,7 +14,7 @@ uint8_t pixel_to_grayscale(Pixel *pixel)
 
 Matrix *image_to_grayscale(ImageData *img)
 {
-    Matrix *grayscaled_pixels = mat_create_empty(img->height, img->width);
+    Matrix *grayscaled_pixels = mat_create_zero(img->height, img->width);
     for (size_t h = 0; h < img->height; h++)
     {
         for (size_t w = 0; w < img->width; w++)
@@ -74,7 +74,7 @@ Matrix *convolve_horizontally(const Matrix *src, const double *kernel,
     int m = (kernel_size - 1) / 2;
     size_t height = mat_height(src);
     size_t width = mat_width(src);
-    Matrix *dst = mat_create_empty(height, width);
+    Matrix *dst = mat_create_zero(height, width);
 
     for (size_t x = 0; x < height; x++)
         for (size_t y = 0; y < width; y++)
@@ -109,7 +109,7 @@ Matrix *convolve_vertically(const Matrix *src, const double *kernel,
     int m = (kernel_size - 1) / 2;
     size_t height = mat_height(src);
     size_t width = mat_width(src);
-    Matrix *dst = mat_create_empty(height, width);
+    Matrix *dst = mat_create_zero(height, width);
 
     for (size_t x = 0; x < height; x++)
         for (size_t y = 0; y < width; y++)
@@ -165,7 +165,7 @@ Matrix *adaptative_gaussian_thresholding(const Matrix *src, double max_value,
     export_matrix(blurred, GAUSSIAN_BLURRED_FILENAME);
     size_t height = mat_height(src);
     size_t width = mat_width(src);
-    Matrix *dest = mat_create_empty(height, width);
+    Matrix *dest = mat_create_zero(height, width);
 
     for (size_t h = 0; h < height; h++)
     {
@@ -199,7 +199,7 @@ Matrix *morph_transformation_1d(const Matrix *src, size_t kernel_size,
     int anchor = kernel_size / 2; // handles even kernels
     size_t height = mat_height(src);
     size_t width = mat_width(src);
-    Matrix *dst = mat_create_empty(height, width);
+    Matrix *dst = mat_create_zero(height, width);
 
     for (size_t x = 0; x < height; x++)
         for (size_t y = 0; y < width; y++)
