@@ -16,13 +16,23 @@ size_t mat_height(const Matrix *m);
 /// @return The number of columns in the matrix.
 size_t mat_width(const Matrix *m);
 
+/// @brief Creates a  matrix initialized with teh given value on the heap.
+/// @param[in] height Number of rows in the new matrix (must be non-zero).
+/// @param[in] width Number of columns in the new matrix (must be non-zero).
+/// @param[in] value The value to which the coefficients of the matrix will be
+/// initialized. If value is 0, `mat_create_zero` should be used instead.
+/// @return A pointer to a newly allocated matrix.
+/// @throw Terminates the program if height or width is zero, or if memory
+/// allocation fails.
+Matrix *mat_create(size_t height, size_t width, double value);
+
 /// @brief Creates an empty matrix (initialized with zeros) on the heap.
 /// @param[in] height Number of rows in the new matrix (must be non-zero).
 /// @param[in] width Number of columns in the new matrix (must be non-zero).
 /// @return A pointer to a newly allocated zero-filled matrix.
 /// @throw Terminates the program if height or width is zero, or if memory
 /// allocation fails.
-Matrix *mat_create_empty(size_t height, size_t width);
+Matrix *mat_create_zero(size_t height, size_t width);
 
 /// @brief Creates a new matrix using an existing array as its content.
 /// @param[in] height Number of rows in the matrix (must be non-zero).
@@ -147,12 +157,12 @@ void mat_inplace_addition(Matrix *a, const Matrix *b);
 /// @param[in] a Pointer to the first Matrix (minuend).
 /// @param[in] b Pointer to the second Matrix (subtrahend).
 /// @return Pointer to a newly allocated Matrix containing the result of a - b.
-Matrix *mat_substraction(const Matrix *a, const Matrix *b);
+Matrix *mat_subtraction(const Matrix *a, const Matrix *b);
 
 /// @brief Performs element-wise subtraction of matrix b from matrix a in-place.
 /// @param[in, out] a Pointer to the Matrix that will be modified (minuend).
 /// @param[in] b Pointer to the Matrix to subtract (subtrahend).
-void mat_inplace_substraction(Matrix *a, const Matrix *b);
+void mat_inplace_subtraction(Matrix *a, const Matrix *b);
 
 /// @brief Multiplies a matrix by a scalar value and returns the result.
 /// @param[in] m Pointer to the input matrix.
