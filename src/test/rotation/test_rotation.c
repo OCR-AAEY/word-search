@@ -1,14 +1,9 @@
-#include "bounding_boxes/pretreatment.h"
-#include "bounding_boxes/visualization.h"
 #include "image_loader/image_loading.h"
 #include "matrix/matrix.h"
+#include "pretreatment/pretreatment.h"
+#include "pretreatment/visualization.h"
 #include "rotation/rotation.h"
 #include <criterion/criterion.h>
-#include <err.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
-#include <glib.h>
-#include <gtk/gtk.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
