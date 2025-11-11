@@ -79,7 +79,8 @@ Matrix *mat_create_gaussian_random(size_t height, size_t width);
 /// @param[in] stddev The standard deviation (σ) of the normal distribution.
 /// @return [out] A pointer to a newly allocated `Matrix` structure filled with
 /// random values following N(mean, stddev²).
-/// @throw The program terminates with `errx(EXIT_FAILURE, ...)` if `height == 0` or `width
+/// @throw The program terminates with `errx(EXIT_FAILURE, ...)` if `height ==
+/// 0` or `width
 /// == 0` or memory allocation for the matrix or its content fails.
 /// @note The caller is responsible for freeing the returned matrix using
 /// `mat_free()`.

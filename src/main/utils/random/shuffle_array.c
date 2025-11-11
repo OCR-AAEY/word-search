@@ -10,7 +10,8 @@ void shuffle_array(void *array, size_t elt_size, size_t length)
 
     void *tmp = malloc(elt_size);
     if (tmp == NULL)
-        errx(EXIT_FAILURE, "Failed to allocate memory for internal temporary buffer.");
+        errx(EXIT_FAILURE,
+             "Failed to allocate memory for internal temporary buffer.");
 
     for (size_t i = 0; i < length - 1; i++)
     {

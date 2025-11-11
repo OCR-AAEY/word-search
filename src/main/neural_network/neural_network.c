@@ -98,11 +98,13 @@ Neural_Network *net_load_from_file(char *filename)
 
     int fd = fileno(file_stream);
     if (fd == -1)
-        errx(EXIT_FAILURE, "Failed to open file descriptor of file %s.", filename);
+        errx(EXIT_FAILURE, "Failed to open file descriptor of file %s.",
+             filename);
 
     Neural_Network *net = malloc(sizeof(Neural_Network));
     if (net == NULL)
-        errx(EXIT_FAILURE, "Failed to allocate memory for net_load_from_file (net).");
+        errx(EXIT_FAILURE,
+             "Failed to allocate memory for net_load_from_file (net).");
 
     // The number of bytes read has read.
     ssize_t r_out;
@@ -110,13 +112,14 @@ Neural_Network *net_load_from_file(char *filename)
     // Read the layer number.
     r_out = read(fd, &net->layer_number, sizeof(size_t));
     if (r_out != sizeof(size_t))
-        errx(EXIT_FAILURE, "Invalid file %s: failed to read layer_number.", filename);
+        errx(EXIT_FAILURE, "Invalid file %s: failed to read layer_number.",
+             filename);
 
     // Allocate the necessary arrays.
     net->layer_heights = calloc(net->layer_number, sizeof(size_t));
     if (net->layer_heights == NULL)
         errx(EXIT_FAILURE, "Failed to allocate memory for net_load_from_file "
-                "(net->layer_heights).");
+                           "(net->layer_heights).");
 
     net->weights = calloc(net->layer_number, sizeof(Matrix *));
     if (net->weights == NULL)
@@ -134,7 +137,8 @@ Neural_Network *net_load_from_file(char *filename)
     {
         r_out = read(fd, &net->layer_heights[i], sizeof(size_t));
         if (r_out != sizeof(size_t))
-            errx(EXIT_FAILURE, "Invalid file %s: failed to read %zuth layer's height.",
+            errx(EXIT_FAILURE,
+                 "Invalid file %s: failed to read %zuth layer's height.",
                  filename, i);
     }
 
@@ -228,7 +232,8 @@ void net_save_to_file(const Neural_Network *net, char *filename)
 
     int fd = fileno(file_stream);
     if (fd == -1)
-        errx(EXIT_FAILURE, "Failed to open file descriptor of file %s.", filename);
+        errx(EXIT_FAILURE, "Failed to open file descriptor of file %s.",
+             filename);
 
     // The number of bytes write has written.
     ssize_t w_out;
@@ -236,7 +241,8 @@ void net_save_to_file(const Neural_Network *net, char *filename)
     // Write the layer number.
     w_out = write(fd, &net->layer_number, sizeof(size_t));
     if (w_out != sizeof(size_t))
-        errx(EXIT_FAILURE, "Failed to write file %s: failed to write net->layer_number.",
+        errx(EXIT_FAILURE,
+             "Failed to write file %s: failed to write net->layer_number.",
              filename);
 
     // Write the height of the layers.
