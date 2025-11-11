@@ -25,23 +25,23 @@ inline size_t mat_width(const Matrix *m) { return m->width; }
 Matrix *mat_create(size_t height, size_t width, double value)
 {
     if (height == 0)
-        errx(1,
+        errx(EXIT_FAILURE,
              "Failed to create matrix: invalid height '%zu'. Height must be "
              "non-zero.",
              height);
     if (width == 0)
-        errx(1,
+        errx(EXIT_FAILURE,
              "Failed to create matrix: invalid width '%zu'. Width must be "
              "non-zero.",
              width);
 
     double *content = calloc(height * width, sizeof(double));
     if (content == NULL)
-        errx(1, "Failed to allocate memory for matrix content.");
+        errx(EXIT_FAILURE, "Failed to allocate memory for matrix content.");
 
     Matrix *m = malloc(sizeof(Matrix));
     if (m == NULL)
-        errx(1, "Failed to allocate memory for matrix struct.");
+        errx(EXIT_FAILURE, "Failed to allocate memory for matrix struct.");
 
     for (size_t i = 0; i < height * width; i++)
         content[i] = value;
@@ -53,23 +53,23 @@ Matrix *mat_create(size_t height, size_t width, double value)
 Matrix *mat_create_zero(size_t height, size_t width)
 {
     if (height == 0)
-        errx(1,
+        errx(EXIT_FAILURE,
              "Failed to create matrix: invalid height '%zu'. Height must be "
              "non-zero.",
              height);
     if (width == 0)
-        errx(1,
+        errx(EXIT_FAILURE,
              "Failed to create matrix: invalid width '%zu'. Width must be "
              "non-zero.",
              width);
 
     double *content = calloc(height * width, sizeof(double));
     if (content == NULL)
-        errx(1, "Failed to allocate memory for matrix content.");
+        errx(EXIT_FAILURE, "Failed to allocate memory for matrix content.");
 
     Matrix *m = malloc(sizeof(Matrix));
     if (m == NULL)
-        errx(1, "Failed to allocate memory for matrix struct.");
+        errx(EXIT_FAILURE, "Failed to allocate memory for matrix struct.");
 
     *m = (Matrix){.height = height, .width = width, .content = content};
     return m;
@@ -78,23 +78,23 @@ Matrix *mat_create_zero(size_t height, size_t width)
 Matrix *mat_create_from_arr(size_t height, size_t width, const double *content)
 {
     if (height == 0)
-        errx(1,
+        errx(EXIT_FAILURE,
              "Failed to create matrix: invalid height '%zu'. Height must be "
              "non-zero.",
              height);
     if (width == 0)
-        errx(1,
+        errx(EXIT_FAILURE,
              "Failed to create matrix: invalid width '%zu'. Width must be "
              "non-zero.",
              width);
 
     Matrix *m = malloc(sizeof(Matrix));
     if (m == NULL)
-        errx(1, "Failed to allocate memory for matrix struct.");
+        errx(EXIT_FAILURE, "Failed to allocate memory for matrix struct.");
 
     double *content_copy = calloc(height * width, sizeof(double));
     if (content_copy == NULL)
-        errx(1, "Failed to allocate memory for matrix struct's content.");
+        errx(EXIT_FAILURE, "Failed to allocate memory for matrix struct's content.");
 
     for (size_t i = 0; i < height * width; i++)
     {
@@ -109,19 +109,19 @@ Matrix *mat_create_uniform_random(size_t height, size_t width, double min,
                                   double max)
 {
     if (height == 0)
-        errx(1,
+        errx(EXIT_FAILURE,
              "Failed to create matrix: invalid height '%zu'. Height must be "
              "non-zero.",
              height);
     if (width == 0)
-        errx(1,
+        errx(EXIT_FAILURE,
              "Failed to create matrix: invalid width '%zu'. Width must be "
              "non-zero.",
              width);
 
     double *content = calloc(height * width, sizeof(double));
     if (content == NULL)
-        errx(1, "Failed to allocate memory for matrix content.");
+        errx(EXIT_FAILURE, "Failed to allocate memory for matrix content.");
 
     for (size_t i = 0; i < height * width; i++)
     {
@@ -132,7 +132,7 @@ Matrix *mat_create_uniform_random(size_t height, size_t width, double min,
     if (m == NULL)
     {
         free(content);
-        errx(1, "Failed to allocate memory for matrix struct.");
+        errx(EXIT_FAILURE, "Failed to allocate memory for matrix struct.");
     }
 
     *m = (Matrix){.height = height, .width = width, .content = content};
@@ -142,19 +142,19 @@ Matrix *mat_create_uniform_random(size_t height, size_t width, double min,
 Matrix *mat_create_gaussian_random(size_t height, size_t width)
 {
     if (height == 0)
-        errx(1,
+        errx(EXIT_FAILURE,
              "Failed to create matrix: invalid height '%zu'. Height must be "
              "non-zero.",
              height);
     if (width == 0)
-        errx(1,
+        errx(EXIT_FAILURE,
              "Failed to create matrix: invalid width '%zu'. Width must be "
              "non-zero.",
              width);
 
     double *content = calloc(height * width, sizeof(double));
     if (content == NULL)
-        errx(1, "Failed to allocate memory for matrix content.");
+        errx(EXIT_FAILURE, "Failed to allocate memory for matrix content.");
 
     for (size_t i = 0; i < height * width; i++)
     {
@@ -165,7 +165,7 @@ Matrix *mat_create_gaussian_random(size_t height, size_t width)
     if (m == NULL)
     {
         free(content);
-        errx(1, "Failed to allocate memory for matrix struct.");
+        errx(EXIT_FAILURE, "Failed to allocate memory for matrix struct.");
     }
 
     *m = (Matrix){.height = height, .width = width, .content = content};
@@ -176,19 +176,19 @@ Matrix *mat_create_normal_random(size_t height, size_t width, double mean,
                                  double stddev)
 {
     if (height == 0)
-        errx(1,
+        errx(EXIT_FAILURE,
              "Failed to create matrix: invalid height '%zu'. Height must be "
              "non-zero.",
              height);
     if (width == 0)
-        errx(1,
+        errx(EXIT_FAILURE,
              "Failed to create matrix: invalid width '%zu'. Width must be "
              "non-zero.",
              width);
 
     double *content = calloc(height * width, sizeof(double));
     if (content == NULL)
-        errx(1, "Failed to allocate memory for matrix content.");
+        errx(EXIT_FAILURE, "Failed to allocate memory for matrix content.");
 
     for (size_t i = 0; i < height * width; i++)
     {
@@ -199,7 +199,7 @@ Matrix *mat_create_normal_random(size_t height, size_t width, double mean,
     if (m == NULL)
     {
         free(content);
-        errx(1, "Failed to allocate memory for matrix struct.");
+        errx(EXIT_FAILURE, "Failed to allocate memory for matrix struct.");
     }
 
     *m = (Matrix){.height = height, .width = width, .content = content};
@@ -244,14 +244,14 @@ Matrix *mat_deepcopy(const Matrix *m)
 {
     double *content = calloc(m->height * m->width, sizeof(double));
     if (content == NULL)
-        errx(1, "Failed to allocate memory for deepcopy content.");
+        errx(EXIT_FAILURE, "Failed to allocate memory for deepcopy content.");
 
     for (size_t i = 0; i < m->height * m->width; i++)
         content[i] = m->content[i];
 
     Matrix *new_m = malloc(sizeof(Matrix));
     if (new_m == NULL)
-        errx(1, "Failed to allocate memory for matrix struct.");
+        errx(EXIT_FAILURE, "Failed to allocate memory for matrix struct.");
 
     *new_m =
         (Matrix){.height = m->height, .width = m->width, .content = content};
@@ -266,10 +266,10 @@ double *mat_unsafe_coef_ptr(const Matrix *m, size_t h, size_t w)
 double *mat_coef_ptr(const Matrix *m, size_t h, size_t w)
 {
     if (h >= m->height)
-        errx(1, "Invalid height given. Expected < %zu and got %zu.", m->height,
+        errx(EXIT_FAILURE, "Invalid height given. Expected < %zu and got %zu.", m->height,
              h);
     if (w >= m->width)
-        errx(1, "Invalid width given. Expected < %zu and got %zu.", m->width,
+        errx(EXIT_FAILURE, "Invalid width given. Expected < %zu and got %zu.", m->width,
              w);
     return mat_unsafe_coef_ptr(m, h, w);
 }
@@ -277,10 +277,10 @@ double *mat_coef_ptr(const Matrix *m, size_t h, size_t w)
 double mat_coef(const Matrix *m, size_t h, size_t w)
 {
     if (h >= m->height)
-        errx(1, "Invalid height given. Expected < %zu and got %zu.", m->height,
+        errx(EXIT_FAILURE, "Invalid height given. Expected < %zu and got %zu.", m->height,
              h);
     if (w >= m->width)
-        errx(1, "Invalid width given. Expected < %zu and got %zu.", m->width,
+        errx(EXIT_FAILURE, "Invalid width given. Expected < %zu and got %zu.", m->width,
              w);
     return *mat_unsafe_coef_ptr(m, h, w);
 }
@@ -288,10 +288,10 @@ double mat_coef(const Matrix *m, size_t h, size_t w)
 Matrix *mat_addition(const Matrix *a, const Matrix *b)
 {
     if (a->height != b->height)
-        errx(1, "Matrix addition failed: mismatched heights (%zu vs %zu).",
+        errx(EXIT_FAILURE, "Matrix addition failed: mismatched heights (%zu vs %zu).",
              a->height, b->height);
     if (a->width != b->width)
-        errx(1, "Matrix addition failed: mismatched widths (%zu vs %zu).",
+        errx(EXIT_FAILURE, "Matrix addition failed: mismatched widths (%zu vs %zu).",
              a->width, b->width);
 
     Matrix *res = mat_deepcopy(a);
@@ -307,10 +307,10 @@ Matrix *mat_addition(const Matrix *a, const Matrix *b)
 void mat_inplace_addition(Matrix *a, const Matrix *b)
 {
     if (a->height != b->height)
-        errx(1, "Matrix addition failed: mismatched heights (%zu vs %zu).",
+        errx(EXIT_FAILURE, "Matrix addition failed: mismatched heights (%zu vs %zu).",
              a->height, b->height);
     if (a->width != b->width)
-        errx(1, "Matrix addition failed: mismatched widths (%zu vs %zu).",
+        errx(EXIT_FAILURE, "Matrix addition failed: mismatched widths (%zu vs %zu).",
              a->width, b->width);
 
     for (size_t i = 0; i < a->height * a->width; i++)
@@ -322,10 +322,10 @@ void mat_inplace_addition(Matrix *a, const Matrix *b)
 Matrix *mat_subtraction(const Matrix *a, const Matrix *b)
 {
     if (a->height != b->height)
-        errx(1, "Matrix subtraction failed: mismatched heights (%zu vs %zu).",
+        errx(EXIT_FAILURE, "Matrix subtraction failed: mismatched heights (%zu vs %zu).",
              a->height, b->height);
     if (a->width != b->width)
-        errx(1, "Matrix subtraction failed: mismatched widths (%zu vs %zu).",
+        errx(EXIT_FAILURE, "Matrix subtraction failed: mismatched widths (%zu vs %zu).",
              a->width, b->width);
 
     Matrix *res = mat_deepcopy(a);
@@ -341,10 +341,10 @@ Matrix *mat_subtraction(const Matrix *a, const Matrix *b)
 void mat_inplace_subtraction(Matrix *a, const Matrix *b)
 {
     if (a->height != b->height)
-        errx(1, "Matrix subtraction failed: mismatched heights (%zu vs %zu).",
+        errx(EXIT_FAILURE, "Matrix subtraction failed: mismatched heights (%zu vs %zu).",
              a->height, b->height);
     if (a->width != b->width)
-        errx(1, "Matrix subtraction failed: mismatched widths (%zu vs %zu).",
+        errx(EXIT_FAILURE, "Matrix subtraction failed: mismatched widths (%zu vs %zu).",
              a->width, b->width);
 
     for (size_t i = 0; i < a->height * a->width; i++)
@@ -376,7 +376,7 @@ void mat_inplace_scalar_multiplication(Matrix *m, double a)
 Matrix *mat_multiplication(const Matrix *a, const Matrix *b)
 {
     if (a->width != b->height)
-        errx(1, "Cannot multiply two matrices if the width of the first does "
+        errx(EXIT_FAILURE, "Cannot multiply two matrices if the width of the first does "
                 "not match the height of the second.");
 
     Matrix *m = mat_create_zero(a->height, b->width);
@@ -399,11 +399,11 @@ Matrix *mat_multiplication(const Matrix *a, const Matrix *b)
 Matrix *mat_hadamard(const Matrix *a, const Matrix *b)
 {
     if (a->height != b->height)
-        errx(1,
+        errx(EXIT_FAILURE,
              "Matrix hadamard product failed: mismatched heights (%zu vs %zu).",
              a->height, b->height);
     if (a->width != b->width)
-        errx(1,
+        errx(EXIT_FAILURE,
              "Matrix hadamard product failed: mismatched widths (%zu vs %zu).",
              a->width, b->width);
 
@@ -420,11 +420,11 @@ Matrix *mat_hadamard(const Matrix *a, const Matrix *b)
 void mat_inplace_hadamard(Matrix *a, const Matrix *b)
 {
     if (a->height != b->height)
-        errx(1,
+        errx(EXIT_FAILURE,
              "Matrix hadamard product failed: mismatched heights (%zu vs %zu).",
              a->height, b->height);
     if (a->width != b->width)
-        errx(1,
+        errx(EXIT_FAILURE,
              "Matrix hadamard product failed: mismatched widths (%zu vs %zu).",
              a->width, b->width);
 
@@ -477,12 +477,12 @@ void mat_inplace_sigmoid_derivative(Matrix *m)
 double mat_mean_squared_error(Matrix *actual, Matrix *expected)
 {
     if (actual->height != expected->height)
-        errx(1,
+        errx(EXIT_FAILURE,
              "Matrix mean squared error calculation failed: mismatched heights "
              "(%zu vs %zu).",
              actual->height, expected->height);
     if (actual->width != expected->width)
-        errx(1,
+        errx(EXIT_FAILURE,
              "Matrix mean squared error calculation failed: mismatched widths "
              "(%zu vs %zu).",
              actual->height, expected->height);
@@ -609,7 +609,7 @@ Matrix *mat_normalize(const Matrix *m)
     }
 
     if (sum == 0.0)
-        errx(1, "Cannot normalize a zero matrix.");
+        errx(EXIT_FAILURE, "Cannot normalize a zero matrix.");
 
     for (size_t i = 0; i < m->height * m->width; i++)
     {
@@ -629,7 +629,7 @@ void mat_inplace_normalize(Matrix *m)
     }
 
     if (sum == 0.0)
-        errx(1, "Cannot normalize a zero matrix.");
+        errx(EXIT_FAILURE, "Cannot normalize a zero matrix.");
 
     for (size_t i = 0; i < m->height * m->width; i++)
     {
@@ -687,7 +687,7 @@ void mat_print(const Matrix *m, unsigned int precision)
 {
     if (m == NULL)
     {
-        errx(1, "Given matrix pointer is null.");
+        errx(EXIT_FAILURE, "Given matrix pointer is null.");
     }
     else
     {
