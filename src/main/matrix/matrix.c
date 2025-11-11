@@ -94,7 +94,8 @@ Matrix *mat_create_from_arr(size_t height, size_t width, const double *content)
 
     double *content_copy = calloc(height * width, sizeof(double));
     if (content_copy == NULL)
-        errx(EXIT_FAILURE, "Failed to allocate memory for matrix struct's content.");
+        errx(EXIT_FAILURE,
+             "Failed to allocate memory for matrix struct's content.");
 
     for (size_t i = 0; i < height * width; i++)
     {
@@ -266,32 +267,34 @@ double *mat_unsafe_coef_ptr(const Matrix *m, size_t h, size_t w)
 double *mat_coef_ptr(const Matrix *m, size_t h, size_t w)
 {
     if (h >= m->height)
-        errx(EXIT_FAILURE, "Invalid height given. Expected < %zu and got %zu.", m->height,
-             h);
+        errx(EXIT_FAILURE, "Invalid height given. Expected < %zu and got %zu.",
+             m->height, h);
     if (w >= m->width)
-        errx(EXIT_FAILURE, "Invalid width given. Expected < %zu and got %zu.", m->width,
-             w);
+        errx(EXIT_FAILURE, "Invalid width given. Expected < %zu and got %zu.",
+             m->width, w);
     return mat_unsafe_coef_ptr(m, h, w);
 }
 
 double mat_coef(const Matrix *m, size_t h, size_t w)
 {
     if (h >= m->height)
-        errx(EXIT_FAILURE, "Invalid height given. Expected < %zu and got %zu.", m->height,
-             h);
+        errx(EXIT_FAILURE, "Invalid height given. Expected < %zu and got %zu.",
+             m->height, h);
     if (w >= m->width)
-        errx(EXIT_FAILURE, "Invalid width given. Expected < %zu and got %zu.", m->width,
-             w);
+        errx(EXIT_FAILURE, "Invalid width given. Expected < %zu and got %zu.",
+             m->width, w);
     return *mat_unsafe_coef_ptr(m, h, w);
 }
 
 Matrix *mat_addition(const Matrix *a, const Matrix *b)
 {
     if (a->height != b->height)
-        errx(EXIT_FAILURE, "Matrix addition failed: mismatched heights (%zu vs %zu).",
+        errx(EXIT_FAILURE,
+             "Matrix addition failed: mismatched heights (%zu vs %zu).",
              a->height, b->height);
     if (a->width != b->width)
-        errx(EXIT_FAILURE, "Matrix addition failed: mismatched widths (%zu vs %zu).",
+        errx(EXIT_FAILURE,
+             "Matrix addition failed: mismatched widths (%zu vs %zu).",
              a->width, b->width);
 
     Matrix *res = mat_deepcopy(a);
@@ -307,10 +310,12 @@ Matrix *mat_addition(const Matrix *a, const Matrix *b)
 void mat_inplace_addition(Matrix *a, const Matrix *b)
 {
     if (a->height != b->height)
-        errx(EXIT_FAILURE, "Matrix addition failed: mismatched heights (%zu vs %zu).",
+        errx(EXIT_FAILURE,
+             "Matrix addition failed: mismatched heights (%zu vs %zu).",
              a->height, b->height);
     if (a->width != b->width)
-        errx(EXIT_FAILURE, "Matrix addition failed: mismatched widths (%zu vs %zu).",
+        errx(EXIT_FAILURE,
+             "Matrix addition failed: mismatched widths (%zu vs %zu).",
              a->width, b->width);
 
     for (size_t i = 0; i < a->height * a->width; i++)
@@ -322,10 +327,12 @@ void mat_inplace_addition(Matrix *a, const Matrix *b)
 Matrix *mat_subtraction(const Matrix *a, const Matrix *b)
 {
     if (a->height != b->height)
-        errx(EXIT_FAILURE, "Matrix subtraction failed: mismatched heights (%zu vs %zu).",
+        errx(EXIT_FAILURE,
+             "Matrix subtraction failed: mismatched heights (%zu vs %zu).",
              a->height, b->height);
     if (a->width != b->width)
-        errx(EXIT_FAILURE, "Matrix subtraction failed: mismatched widths (%zu vs %zu).",
+        errx(EXIT_FAILURE,
+             "Matrix subtraction failed: mismatched widths (%zu vs %zu).",
              a->width, b->width);
 
     Matrix *res = mat_deepcopy(a);
@@ -341,10 +348,12 @@ Matrix *mat_subtraction(const Matrix *a, const Matrix *b)
 void mat_inplace_subtraction(Matrix *a, const Matrix *b)
 {
     if (a->height != b->height)
-        errx(EXIT_FAILURE, "Matrix subtraction failed: mismatched heights (%zu vs %zu).",
+        errx(EXIT_FAILURE,
+             "Matrix subtraction failed: mismatched heights (%zu vs %zu).",
              a->height, b->height);
     if (a->width != b->width)
-        errx(EXIT_FAILURE, "Matrix subtraction failed: mismatched widths (%zu vs %zu).",
+        errx(EXIT_FAILURE,
+             "Matrix subtraction failed: mismatched widths (%zu vs %zu).",
              a->width, b->width);
 
     for (size_t i = 0; i < a->height * a->width; i++)
@@ -376,8 +385,9 @@ void mat_inplace_scalar_multiplication(Matrix *m, double a)
 Matrix *mat_multiplication(const Matrix *a, const Matrix *b)
 {
     if (a->width != b->height)
-        errx(EXIT_FAILURE, "Cannot multiply two matrices if the width of the first does "
-                "not match the height of the second.");
+        errx(EXIT_FAILURE,
+             "Cannot multiply two matrices if the width of the first does "
+             "not match the height of the second.");
 
     Matrix *m = mat_create_zero(a->height, b->width);
 

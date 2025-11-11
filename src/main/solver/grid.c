@@ -124,7 +124,8 @@ Grid *grid_load_from_file(char *file_name)
                 char *tmp_ptr = realloc(array, array_length);
                 if (tmp_ptr == NULL)
                 {
-                    errx(EXIT_FAILURE, "Failed to reallocate memory for the grid array.");
+                    errx(EXIT_FAILURE,
+                         "Failed to reallocate memory for the grid array.");
                 }
                 array = tmp_ptr;
             }
@@ -136,7 +137,8 @@ Grid *grid_load_from_file(char *file_name)
         }
         else
         {
-            errx(EXIT_FAILURE, "Invalid character found at line %i: '%c'.", height + 1, c);
+            errx(EXIT_FAILURE, "Invalid character found at line %i: '%c'.",
+                 height + 1, c);
         }
     }
 
