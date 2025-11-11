@@ -33,118 +33,109 @@
 #           MACROS           #
 ##############################
 
+# Whether gcc commands should be displayed during compilation or not.
 VERBOSE ?= 0
 
-# Directories
-SRC_DIR     = src
-MAIN_DIR    = $(SRC_DIR)/main
-TEST_DIR    = $(SRC_DIR)/test
-BUILD_DIR   = build
+# Source directory.
+SRC_DIR   = src
+# Main directory.
+MAIN_DIR  = $(SRC_DIR)/main
+# Test directory.
+TEST_DIR  = $(SRC_DIR)/test
+# Build directory.
+BUILD_DIR = build
+# Main sub-directory in build directory.
+BUILD_MAIN_DIR = build/main
 
-# Compiler and flags
+# Compiler.
 ifeq ($(VERBOSE),0)
-CC          = @gcc
+CC = @gcc
 else
-CC          = gcc
+CC = gcc
 endif
-CFLAGS      = -Wall -Wextra -fsanitize=address -I$(MAIN_DIR)
-XCFLAGS     =
-TEST_FLAGS  = -DUNIT_TEST $(shell pkg-config --cflags --libs criterion)
-GTK_FLAGS   = $(shell pkg-config --cflags --libs gtk+-3.0)
-LIB_FLAGS   = -lm $(GTK_FLAGS)
 
-# Source files
-SRC_MAIN    = $(shell find $(MAIN_DIR) -name '*.c')
-SRC_TEST    = $(shell find $(TEST_DIR) -name '*.c')
+# C flags.
+CFLAGS         = -Wall -Wextra -fsanitize=address -I$(MAIN_DIR)
+# Additional C flags.
+XCFLAGS        =
+# C flags for unit testing.
+TEST_FLAGS     = -DUNIT_TEST
+# C flags for unit test libraries import.
+TEST_LIB_FLAGS = $(shell pkg-config --cflags --libs criterion)
+# C flags for libraries import.
+LIB_FLAGS      = -lm $(shell pkg-config --cflags --libs gtk+-3.0)
 
-# Object files
+# Source files located in the main directory.
+SRC_MAIN = $(shell find $(MAIN_DIR) -name '*.c' -and -not -name '*_main.c')
+# Source files located in the test directory.
+SRC_TEST = $(shell find $(TEST_DIR) -name '*.c' -and -not -name '*_main.c')
+
+# All object files with respect to the source files of the main directory.
 OBJ_MAIN          = $(SRC_MAIN:$(MAIN_DIR)/%.c=$(BUILD_DIR)/main/%.o)
+# All object files with respect to the source files of the main directory compiled for unit tests.
 OBJ_MAIN_FOR_TEST = $(SRC_MAIN:$(MAIN_DIR)/%.c=$(BUILD_DIR)/main_for_test/%.o)
-OBJ_TEST_FOR_TEST          = $(SRC_TEST:$(TEST_DIR)/%.c=$(BUILD_DIR)/test/%.o)
+# All object files with respect to the source files of the test directory compiled for unit tests.
+OBJ_TEST_FOR_TEST = $(SRC_TEST:$(TEST_DIR)/%.c=$(BUILD_DIR)/test/%.o)
 
-# Executables
-BIN_SOLVER       = solver
-BIN_IMAGE_LOADER = image_loader
-BIN_XNOR_TRAIN   = xnor_train
-BIN_XNOR_RUN     = xnor_run
-BIN_LOCATION 	 = location
-BIN_ROTATION     = rotation
-# BIN_APP         = app
-BIN_TEST         = run_tests
+# Solver executable.
+BIN_SOLVER = solver
+# OCR neural network training executable.
+BIN_OCR    = ocr
+# Main application executable.
+BIN_APP    = app
+# Unit tests executable.
+BIN_TEST   = run_tests
 
 ##############################
 #          TARGETS           #
 ##############################
 
-# Solver target
-$(BIN_SOLVER): $(filter $(BUILD_DIR)/main/solver/%.o,$(OBJ_MAIN))
+# Solver target.
+$(BIN_SOLVER): $(filter $(BUILD_MAIN_DIR)/solver/%.o,$(OBJ_MAIN)) $(BUILD_MAIN_DIR)/solver/solver_main.o
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 
-# Image loader target
-$(BIN_IMAGE_LOADER): $(filter $(BUILD_DIR)/main/image_loader/%.o,$(OBJ_MAIN))
+# OCR neural network training target.
+$(BIN_OCR): $(filter $(BUILD_MAIN_DIR)/neural_network/%.o,$(OBJ_MAIN)) $(BUILD_MAIN_DIR)/neural_network/ocr_main.o
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 
-# XNOR neural network training target
-$(BIN_XNOR_TRAIN): $(BUILD_DIR)/main/xnor/xnor_train.o $(filter $(BUILD_DIR)/main/neural_network/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/matrix/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/utils/%.o,$(OBJ_MAIN))
+# Main app target.
+$(BIN_APP): $(OBJ_MAIN) $(BUILD_MAIN_DIR)/app/app_main.o
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 
-# XNOR neural network running target
-$(BIN_XNOR_RUN): $(BUILD_DIR)/main/xnor/xnor_run.o $(filter $(BUILD_DIR)/main/neural_network/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/matrix/%.o,$(OBJ_MAIN)) $(filter $(BUILD_DIR)/main/utils/%.o,$(OBJ_MAIN))
-	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-
-# Location target
-$(BIN_LOCATION): $(filter $(BUILD_DIR)/main/bounding_boxes/%.o,$(OBJ_MAIN)) \
-					$(filter $(BUILD_DIR)/main/image_loader/%.o,$(OBJ_MAIN)) \
-					$(filter $(BUILD_DIR)/main/matrix/%.o,$(OBJ_MAIN)) \
-					$(filter $(BUILD_DIR)/main/extract_char/%.o,$(OBJ_MAIN)) \
-					$(filter $(BUILD_DIR)/main/utils/%.o,$(OBJ_MAIN)) \
-					$(BUILD_DIR)/main/rotation/rotation.o
-	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-
-$(BIN_ROTATION): $(filter $(BUILD_DIR)/main/image_loader/%.o,$(OBJ_MAIN)) \
-					$(filter $(BUILD_DIR)/main/matrix/%.o,$(OBJ_MAIN)) \
-					$(BUILD_DIR)/main/bounding_boxes/pretreatment.o \
-					$(BUILD_DIR)/main/bounding_boxes/visualization.o \
-					$(filter $(BUILD_DIR)/main/utils/%.o,$(OBJ_MAIN)) \
-					$(filter $(BUILD_DIR)/main/rotation/%.o,$(OBJ_MAIN))
-	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-
-## App target
-#$(BIN_APP): $(filter %app/%.o,$(OBJ_MAIN))
-#	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-
-# Test binary
+# Unit tests target.
 $(BIN_TEST): $(OBJ_MAIN_FOR_TEST) $(OBJ_TEST_FOR_TEST)
-	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(TEST_FLAGS) $(LIB_FLAGS)
+	$(CC) $(CFLAGS) $(XCFLAGS) $(TEST_FLAGS) $^ -o $@ $(LIB_FLAGS) $(TEST_LIB_FLAGS)
 
 ##############################
 #        PATTERN RULES       #
 ##############################
 
-# Compile main sources for normal executables
+# Compile main sources for non-test target.
 $(BUILD_DIR)/main/%.o: $(MAIN_DIR)/%.c
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(XCFLAGS) -c $< -o $@ $(LIB_FLAGS)
 
-# Compile main sources for tests
+# Compile main sources for unit tests target.
 $(BUILD_DIR)/main_for_test/%.o: $(MAIN_DIR)/%.c
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) $(XCFLAGS) -c $< -o $@ $(TEST_FLAGS) $(LIB_FLAGS)
+	$(CC) $(CFLAGS) $(XCFLAGS) $(TEST_FLAGS) -c $< -o $@ $(LIB_FLAGS) $(TEST_LIB_FLAGS)
 
-# Compile test sources
+# Compile test sources for unit tests target.
 $(BUILD_DIR)/test/%.o: $(TEST_DIR)/%.c
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) $(XCFLAGS) -c $< -o $@ $(TEST_FLAGS) $(LIB_FLAGS)
+	$(CC) $(CFLAGS) $(XCFLAGS) $(TEST_FLAGS) -c $< -o $@ $(LIB_FLAGS) $(TEST_LIB_FLAGS)
 
 ##############################
 #           PHONY            #
 ##############################
 
-all: $(BIN_SOLVER) $(BIN_XNOR_TRAIN) $(BIN_XNOR_RUN) $(BIN_ROTATION) $(BIN_LOCATION) #$(BIN_APP)
+.PHONY: all run test clean format
 
-#run: $(BIN_APP)
-#	@echo "Running app..."
-#	@./$<
+all: $(BIN_SOLVER) $(BIN_OCR) $(BIN_APP)
+
+run: $(BIN_APP)
+	@echo "Running app..."
+	@./$<
 
 test: $(BIN_TEST)
 	@echo "Running unit tests..."
@@ -155,19 +146,11 @@ clean:
 	@rm -rf $(BUILD_DIR)
 	@echo "Cleaning executables..."
 	@rm -rf $(BIN_SOLVER)
-	@rm -rf $(BIN_IMAGE_LOADER)
-	@rm -rf $(BIN_XNOR_TRAIN)
-	@rm -rf $(BIN_XNOR_RUN)
-	@rm -rf $(BIN_LOCATION)
-	@rm -rf $(BIN_ROTATION)
+	@rm -rf $(BIN_OCR)
 	@rm -rf $(BIN_TEST)
 	@echo "Cleaning misc files..."
 	@rm -rf extracted/
-	@rm -rf xnor.net
-	@rm -rf grid
 
 format:
 	@echo "Formatting source files..."
 	@find . -iname '*.h' -o -iname '*.c' | xargs clang-format -i
-
-.PHONY: all test clean format
