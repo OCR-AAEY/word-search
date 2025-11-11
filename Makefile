@@ -93,18 +93,22 @@ BIN_TEST   = run_tests
 # Solver target.
 $(BIN_SOLVER): $(filter $(BUILD_MAIN_DIR)/solver/%.o,$(OBJ_MAIN)) $(BUILD_MAIN_DIR)/solver/solver_main.o
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+	@echo "$(BIN_SOLVER): \033[32mCompilation succeeded\033[0m"
 
 # OCR neural network training target.
 $(BIN_OCR): $(filter $(BUILD_MAIN_DIR)/neural_network/%.o,$(OBJ_MAIN)) $(BUILD_MAIN_DIR)/neural_network/ocr_main.o
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+	@echo "$(BIN_OCR): \033[32mCompilation succeeded\033[0m"
 
 # Main app target.
 $(BIN_APP): $(OBJ_MAIN) $(BUILD_MAIN_DIR)/app/app_main.o
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+	@echo "$(BIN_APP): \033[32mCompilation succeeded\033[0m"
 
 # Unit tests target.
 $(BIN_TEST): $(OBJ_MAIN_FOR_TEST) $(OBJ_TEST_FOR_TEST)
 	$(CC) $(CFLAGS) $(XCFLAGS) $(TEST_FLAGS) $^ -o $@ $(LIB_FLAGS) $(TEST_LIB_FLAGS)
+	@echo "$(BIN_TEST): \033[32mCompilation succeeded\033[0m"
 
 ##############################
 #        PATTERN RULES       #
@@ -150,7 +154,9 @@ clean:
 	@rm -rf $(BIN_TEST)
 	@echo "Cleaning misc files..."
 	@rm -rf extracted/
+	@echo "\033[32mClean succeeded\033[0m"
 
 format:
 	@echo "Formatting source files..."
 	@find . -iname '*.h' -o -iname '*.c' | xargs clang-format -i
+	@echo "\033[32mFormatting succeeded\033[0m"
