@@ -1,4 +1,4 @@
-
+/*
 #ifndef UNIT_TEST
 #include "bounding_boxes/pretreatment.h"
 #include "bounding_boxes/visualization.h"
@@ -220,3 +220,4 @@ int main(int argc, char **argv)
 }
 
 #endif
+*/
