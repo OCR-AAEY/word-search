@@ -59,7 +59,7 @@ CFLAGS         = -Wall -Wextra -fsanitize=address -I$(MAIN_DIR)
 # Additional C flags.
 XCFLAGS        =
 # C flags for unit testing.
-TEST_FLAGS     = -DUNIT_TEST
+TEST_FLAGS     = -DUNIT_TEST -I$(TEST_DIR)
 # C flags for unit test libraries import.
 TEST_LIB_FLAGS = $(shell pkg-config --cflags --libs criterion)
 # C flags for libraries import.
