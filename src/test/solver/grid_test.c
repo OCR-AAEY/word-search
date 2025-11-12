@@ -12,19 +12,19 @@ Test(solver, grid_load_from_file_test)
     grid_free(grid);
 }
 
-Test(solver, grid_load_from_file_failure_1, .exit_code = 1)
+Test(solver, grid_load_from_file_failure_1, .exit_code = EXIT_FAILURE)
 {
     Grid *grid = grid_load_from_file("./this_file_is_not_supposed_to_exist");
     grid_free(grid);
 }
 
-Test(solver, grid_load_from_file_failure_2, .exit_code = 1)
+Test(solver, grid_load_from_file_failure_2, .exit_code = EXIT_FAILURE)
 {
     Grid *grid = grid_load_from_file("./src/test/solver/grid_2.txt");
     grid_free(grid);
 }
 
-Test(solver, grid_load_from_file_failure_3, .exit_code = 1)
+Test(solver, grid_load_from_file_failure_3, .exit_code = EXIT_FAILURE)
 {
     Grid *grid = grid_load_from_file("./src/test/solver/grid_3.txt");
     grid_free(grid);

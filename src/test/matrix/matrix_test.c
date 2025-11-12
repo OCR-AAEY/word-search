@@ -200,7 +200,7 @@ Test(matrix, mat_normalize_random_test)
     }
 }
 
-Test(matrix, mat_normalize_failure, .exit_code = 1)
+Test(matrix, mat_normalize_failure, .exit_code = EXIT_FAILURE)
 {
     Matrix *m = mat_create_zero(4, 6);
 
