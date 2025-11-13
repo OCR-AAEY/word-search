@@ -16,10 +16,10 @@ Matrix *rotate_matrix(const Matrix *src, float angle)
 
     float rad = angle * M_PI / 180.0f;
 
-    size_t nw =
-        (size_t)(fabsf((float)w * cosf(rad)) + fabsf((float)h * sinf(rad)) + 0.5f);
-    size_t nh =
-        (size_t)(fabsf((float)h * cosf(rad)) + fabsf((float)w * sinf(rad)) + 0.5f);
+    size_t nw = (size_t)(fabsf((float)w * cosf(rad)) +
+                         fabsf((float)h * sinf(rad)) + 0.5f);
+    size_t nh = (size_t)(fabsf((float)h * cosf(rad)) +
+                         fabsf((float)w * sinf(rad)) + 0.5f);
 
     Matrix *rotated = mat_create_zero(nh, nw);
 
@@ -40,8 +40,10 @@ Matrix *rotate_matrix(const Matrix *src, float angle)
     {
         for (size_t x = 0; x < nw; x++)
         {
-            float tx = ((float)x - ncx) * cosf(rad) - ((float)y - ncy) * sinf(rad) + cx;
-            float ty = ((float)x - ncx) * sinf(rad) + ((float)y - ncy) * cosf(rad) + cy;
+            float tx = ((float)x - ncx) * cosf(rad) -
+                       ((float)y - ncy) * sinf(rad) + cx;
+            float ty = ((float)x - ncx) * sinf(rad) +
+                       ((float)y - ncy) * cosf(rad) + cy;
 
             if (tx >= 0.0f && tx < (float)w && ty >= 0.0f && ty < (float)h)
             {
@@ -64,8 +66,10 @@ ImageData *rotate_image(ImageData *img, float angle)
 
     float rad = angle * M_PI / 180.0;
 
-    int nw = (int)(fabsf((float)w * cosf(rad)) + fabsf((float)h * sinf(rad)) + 0.5f);
-    int nh = (int)(fabsf((float)h * cosf(rad)) + fabsf((float)w * sinf(rad)) + 0.5f);
+    int nw =
+        (int)(fabsf((float)w * cosf(rad)) + fabsf((float)h * sinf(rad)) + 0.5f);
+    int nh =
+        (int)(fabsf((float)h * cosf(rad)) + fabsf((float)w * sinf(rad)) + 0.5f);
 
     Pixel *np = calloc(nw * nh, sizeof(Pixel));
     if (!np)
@@ -89,8 +93,10 @@ ImageData *rotate_image(ImageData *img, float angle)
     {
         for (int x = 0; x < nw; x++)
         {
-            float tx = ((float)x - ncx) * cosf(rad) - ((float)y - ncy) * sinf(rad) + cx;
-            float ty = ((float)x - ncx) * sinf(rad) + ((float)y - ncy) * cosf(rad) + cy;
+            float tx = ((float)x - ncx) * cosf(rad) -
+                       ((float)y - ncy) * sinf(rad) + cx;
+            float ty = ((float)x - ncx) * sinf(rad) +
+                       ((float)y - ncy) * cosf(rad) + cy;
 
             if (tx >= 0 && tx < w && ty >= 0 && ty < h)
             {

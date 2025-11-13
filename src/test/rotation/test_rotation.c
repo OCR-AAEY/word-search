@@ -24,7 +24,8 @@ int compare_images_with_tolerance(ImageData *a, ImageData *b)
             if (abs(pa->r - pb->r) > MAX_DIFF ||
                 abs(pa->g - pb->g) > MAX_DIFF || abs(pa->b - pb->b) > MAX_DIFF)
             {
-                // printf("%hhudr %hhudg %hhudb\n", abs(pa->r - pb->r), abs(pa->g - pb->g), abs(pa->b - pb->b));
+                // printf("%hhudr %hhudg %hhudb\n", abs(pa->r - pb->r),
+                // abs(pa->g - pb->g), abs(pa->b - pb->b));
                 return 0;
             }
         }

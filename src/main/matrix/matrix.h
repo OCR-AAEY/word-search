@@ -319,8 +319,7 @@ Matrix *mat_map_with_indexes(const Matrix *m,
 /// w)`.
 /// @note This function modifies @p m directly and does not allocate new memory.
 /// Useful for applying coordinate-dependent transformations.
-void mat_inplace_map_with_indexes(Matrix *m,
-                                  float (*f)(float, size_t, size_t));
+void mat_inplace_map_with_indexes(Matrix *m, float (*f)(float, size_t, size_t));
 
 /// @brief Prints the contents of a matrix to stdout in a formatted 2D layout.
 /// @param[in] m Pointer to the matrix to print.
