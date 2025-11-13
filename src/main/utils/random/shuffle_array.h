@@ -11,7 +11,7 @@
 /// @throw Terminates the program if memory allocation for the temporary buffer
 /// fails.
 /// @note This function performs an in-place shuffle of the array by swapping
-/// elements bytewise. It works with any data type (e.g., int, double, structs)
+/// elements bytewise. It works with any data type (e.g., int, float, structs)
 /// as long as elt_size is correctly specified.
 void shuffle_array(void *array, size_t elt_size, size_t length);
 

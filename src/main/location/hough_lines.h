@@ -7,10 +7,10 @@
 typedef struct Line
 {
     /// The distance from the origin to the line.
-    double r;
+    float r;
 
     /// The angle of the line in degrees.
-    double theta;
+    float theta;
 } Line;
 
 /// @brief Represents a Point in cartesian coordinates.
@@ -40,8 +40,8 @@ typedef struct Point
 /// `theta_precision <= 0`.
 /// @note The returned array is dynamically allocated and should be freed by the
 /// caller.
-Line **hough_transform_lines(Matrix *src, float theta_precision, double delta_r,
-                             double delta_theta, size_t *size_out);
+Line **hough_transform_lines(Matrix *src, float theta_precision, float delta_r,
+                             float delta_theta, size_t *size_out);
 
 /// @brief Computes intersection points of two groups of lines.
 /// @param[in] lines Array of pointers to Line structures (must not be NULL).
@@ -82,8 +82,8 @@ Matrix *create_hough_accumulator(size_t height, size_t width,
 /// @param[out] mean_out Pointer to store the mean (must not be NULL).
 /// @return void
 /// @throw Throws if any pointer is NULL.
-void statistics_on_accumulator(Matrix *accumulator, double *stddev_out,
-                               double *mean_out);
+void statistics_on_accumulator(Matrix *accumulator, float *stddev_out,
+                               float *mean_out);
 
 /// @brief Populates a Hough accumulator from a source image.
 /// For each pixel that is black (`0`), increment the r values corresponding to
@@ -97,7 +97,7 @@ void statistics_on_accumulator(Matrix *accumulator, double *stddev_out,
 /// the accumulator. Must not be NULL.
 /// @throw Throws if `src` or `accumulator` or `max_count` is NULL.
 void populate_hough_lines(Matrix *src, Matrix *accumulator,
-                          double theta_precision, size_t *max_count);
+                          float theta_precision, size_t *max_count);
 
 /// @brief Extracts lines from a populated Hough accumulator.
 /// @param[in] accumulator Pointer to the populated accumulator matrix. Must not
@@ -116,7 +116,7 @@ void populate_hough_lines(Matrix *src, Matrix *accumulator,
 /// @note The returned array is dynamically allocated and should be freed by the
 /// caller.
 Line **extract_hough_lines(Matrix *accumulator, size_t threshold,
-                           double theta_precision, size_t *line_count);
+                           float theta_precision, size_t *line_count);
 
 /// @brief Applies Non-Maximum Suppression (NMS) to a set of Hough lines.
 ///
@@ -146,8 +146,8 @@ Line **extract_hough_lines(Matrix *accumulator, size_t threshold,
 ///
 /// @note The function frees memory for suppressed lines.
 /// @note The function modifies the input array in-place.
-Line **hough_lines_NMS(Line **lines, size_t *line_count, double delta_r,
-                       double delta_theta);
+Line **hough_lines_NMS(Line **lines, size_t *line_count, float delta_r,
+                       float delta_theta);
 
 /// @brief Prints an array of lines with their r and theta values.
 /// @param[in] lines Array of pointers to Line structures.
