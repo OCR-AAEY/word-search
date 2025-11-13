@@ -667,8 +667,7 @@ void mat_inplace_map(Matrix *m, float (*f)(float))
     }
 }
 
-Matrix *mat_map_with_indexes(const Matrix *m,
-                             float (*f)(float, size_t, size_t))
+Matrix *mat_map_with_indexes(const Matrix *m, float (*f)(float, size_t, size_t))
 {
     Matrix *res = mat_create_zero(m->height, m->width);
 
@@ -682,8 +681,7 @@ Matrix *mat_map_with_indexes(const Matrix *m,
     return res;
 }
 
-void mat_inplace_map_with_indexes(Matrix *m,
-                                  float (*f)(float, size_t, size_t))
+void mat_inplace_map_with_indexes(Matrix *m, float (*f)(float, size_t, size_t))
 {
     for (size_t h = 0; h < m->height; h++)
     {
