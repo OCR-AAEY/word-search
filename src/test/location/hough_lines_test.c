@@ -1,7 +1,7 @@
 #include <criterion/criterion.h>
 
-#include "rotation/hough_lines.h"
 #include "pretreatment/pretreatment.h"
+#include "rotation/hough_lines.h"
 #include <math.h>
 
 Test(hough_lines, level_2_image_1)
