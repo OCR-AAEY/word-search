@@ -1,5 +1,5 @@
 #include "image_loader/image_loading.h"
-#include "location/hough_lines.h"
+#include "rotation/hough_lines.h"
 #include "location/location.h"
 #include <cairo.h>
 
