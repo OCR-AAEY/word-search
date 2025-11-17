@@ -29,7 +29,7 @@ float hough_transform_lines_top_angle(Matrix *src, float theta_precision);
 /// @return A pointer to the allocated accumulator matrix.
 /// @throw Throws if `theta_precision <= 0`.
 Matrix *create_hough_accumulator_rotation(size_t height, size_t width,
-                                 float theta_precision);
+                                          float theta_precision);
 /// @brief Populates a Hough accumulator from a source image.
 /// For each pixel that is black (`0`), increment the r values corresponding to
 /// all theta angles possible.
