@@ -81,6 +81,8 @@ OBJ_TEST_FOR_TEST = $(SRC_TEST:$(TEST_DIR)/%.c=$(BUILD_DIR)/test/%.o)
 BIN_SOLVER = solver
 # OCR neural network training executable.
 BIN_OCR    = ocr
+# Rotate test executable.
+BIN_AUTO_ROTATE = rotate
 # Main application executable.
 BIN_APP    = app
 # Unit tests executable.
@@ -99,6 +101,11 @@ $(BIN_SOLVER): $(filter $(BUILD_MAIN_DIR)/solver/%.o,$(OBJ_MAIN)) $(BUILD_MAIN_D
 $(BIN_OCR): $(filter $(BUILD_MAIN_DIR)/neural_network/%.o,$(OBJ_MAIN)) $(BUILD_MAIN_DIR)/neural_network/ocr_main.o
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 	@echo "$(BIN_OCR): \033[32mCompilation succeeded\033[0m"
+
+# Auto rotation target.
+$(BIN_AUTO_ROTATE): $(filter $(BUILD_MAIN_DIR)/rotation/%.o,$(OBJ_MAIN)) $(BUILD_MAIN_DIR)/pretreatment/pretreatment.o $(filter $(BUILD_MAIN_DIR)/image_loader/%.o,$(OBJ_MAIN))  $(filter $(BUILD_MAIN_DIR)/utils/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/matrix/%.o,$(OBJ_MAIN)) $(BUILD_MAIN_DIR)/rotation/rotate_main.o
+	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+	@echo "$(BIN_AUTO_ROTATE): \033[32mCompilation succeeded\033[0m"
 
 # Main app target.
 $(BIN_APP): $(OBJ_MAIN) $(BUILD_MAIN_DIR)/app/app_main.o
