@@ -80,23 +80,27 @@ OBJ_TEST_FOR_TEST = $(SRC_TEST:$(TEST_DIR)/%.c=$(BUILD_DIR)/test/%.o)
 # Solver executable.
 BIN_SOLVER = solver
 # OCR neural network training executable.
-BIN_OCR    = ocr
+BIN_OCR    = ocr_train
 # Main application executable.
 BIN_APP    = app
 # Unit tests executable.
 BIN_TEST   = run_tests
+
+define import
+$(foreach dir,$(1),$(filter $(BUILD_MAIN_DIR)/$(dir)/%.o,$(OBJ_MAIN)))
+endef
 
 ##############################
 #          TARGETS           #
 ##############################
 
 # Solver target.
-$(BIN_SOLVER): $(filter $(BUILD_MAIN_DIR)/solver/%.o,$(OBJ_MAIN)) $(BUILD_MAIN_DIR)/solver/solver_main.o
+$(BIN_SOLVER): $(call import,solver) $(BUILD_MAIN_DIR)/solver/solver_main.o
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 	@echo "$(BIN_SOLVER): \033[32mCompilation succeeded\033[0m"
 
 # OCR neural network training target.
-$(BIN_OCR): $(filter $(BUILD_MAIN_DIR)/neural_network/%.o,$(OBJ_MAIN)) $(BUILD_MAIN_DIR)/neural_network/ocr_main.o
+$(BIN_OCR): $(call import,ocr matrix utils) $(BUILD_MAIN_DIR)/ocr/ocr_train_main.o
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 	@echo "$(BIN_OCR): \033[32mCompilation succeeded\033[0m"
 
@@ -109,6 +113,10 @@ $(BIN_APP): $(OBJ_MAIN) $(BUILD_MAIN_DIR)/app/app_main.o
 $(BIN_TEST): $(OBJ_MAIN_FOR_TEST) $(OBJ_TEST_FOR_TEST)
 	$(CC) $(CFLAGS) $(XCFLAGS) $(TEST_FLAGS) $^ -o $@ $(LIB_FLAGS) $(TEST_LIB_FLAGS)
 	@echo "$(BIN_TEST): \033[32mCompilation succeeded\033[0m"
+
+# ocr_training_data: $(OBJ_MAIN) $(BUILD_MAIN_DIR)/ocr/ocr_training_data.o
+# 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+# 	@echo "$(BIN_OCR): \033[32mCompilation succeeded\033[0m"
 
 ##############################
 #        PATTERN RULES       #
