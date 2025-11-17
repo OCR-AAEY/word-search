@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <time.h>
 
-Matrix *create_hough_accumulator(size_t height, size_t width,
+Matrix *create_hough_accumulator_rotation(size_t height, size_t width,
                                  float theta_precision)
 {
     if (theta_precision <= 0)
@@ -113,7 +113,7 @@ float hough_transform_lines_top_angle(Matrix *src, float theta_precision)
     clock_t start, end;
     start = clock();
 
-    Matrix *accumulator = create_hough_accumulator(
+    Matrix *accumulator = create_hough_accumulator_rotation(
         mat_height(src), mat_width(src), theta_precision);
 
     end = clock();

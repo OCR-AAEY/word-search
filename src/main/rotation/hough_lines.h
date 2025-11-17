@@ -1,5 +1,5 @@
-#ifndef HOUGH_LINES_H
-#define HOUGH_LINES_H
+#ifndef HOUGH_LINES_ROTATION_H
+#define HOUGH_LINES_ROTATION_H
 
 #include "matrix/matrix.h"
 
@@ -28,7 +28,7 @@ float hough_transform_lines_top_angle(Matrix *src, float theta_precision);
 /// strictly positive.
 /// @return A pointer to the allocated accumulator matrix.
 /// @throw Throws if `theta_precision <= 0`.
-Matrix *create_hough_accumulator(size_t height, size_t width,
+Matrix *create_hough_accumulator_rotation(size_t height, size_t width,
                                  float theta_precision);
 /// @brief Populates a Hough accumulator from a source image.
 /// For each pixel that is black (`0`), increment the r values corresponding to

@@ -1,7 +1,7 @@
 #include <criterion/criterion.h>
 
+#include "location/hough_lines_legacy.h"
 #include "pretreatment/pretreatment.h"
-#include "rotation/hough_lines.h"
 #include <math.h>
 
 Test(hough_lines, level_2_image_1)
@@ -47,7 +47,7 @@ static void run_test_for_file(const char *file_path, size_t expected_points,
     mat_free(gray);
 
     size_t nb_lines = 0;
-    Line **lines = hough_transform_lines(threshold, 1, 5, 1, &nb_lines);
+    Line **lines = hough_transform_lines(threshold, 1.0f, 5, 1, &nb_lines);
     cr_assert_not_null(lines, "Failed to detect lines for %s", file_path);
 
     size_t points_width, points_height;

@@ -121,7 +121,7 @@ Matrix *auto_rotate_matrix(Matrix *img)
 {
     clock_t start, end;
     start = clock();
-    float theta_angle = hough_transform_lines(img, 1.0f);
+    float theta_angle = hough_transform_lines_top_angle(img, 1.0f);
     end = clock();
     printf("Hough transform lines : %lf\n",
            ((double)(end - start)) / CLOCKS_PER_SEC);
