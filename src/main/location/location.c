@@ -1,8 +1,8 @@
 #include "location/location.h"
 #include "extract_char/extract_char.h"
-#include "rotation/hough_lines.h"
 #include "pretreatment/pretreatment.h"
 #include "pretreatment/visualization.h"
+#include "rotation/hough_lines.h"
 #include "rotation/rotation.h"
 #include "utils/utils.h"
 #include <stdio.h>
