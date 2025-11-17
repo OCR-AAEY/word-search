@@ -1,4 +1,4 @@
-#include "location/hough_lines.h"
+#include "rotation/hough_lines.h"
 #include "utils/math/trigo.h"
 #include <err.h>
 #include <glib.h>

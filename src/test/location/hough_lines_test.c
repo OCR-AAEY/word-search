@@ -1,6 +1,6 @@
 #include <criterion/criterion.h>
 
-#include "location/hough_lines.h"
+#include "rotation/hough_lines.h"
 #include "pretreatment/pretreatment.h"
 #include <math.h>
 
