@@ -8,7 +8,7 @@
 #include <time.h>
 
 Matrix *create_hough_accumulator_rotation(size_t height, size_t width,
-                                 float theta_precision)
+                                          float theta_precision)
 {
     if (theta_precision <= 0)
         errx(EXIT_FAILURE, "Theta precision must be strictly positive");
