@@ -21,10 +21,10 @@ Matrix *rotate_matrix(const Matrix *src, double angle)
     double cos_angle = cos(rad);
     double sin_angle = sin(rad);
 
-    size_t nw =
-        (size_t)(fabs((double)w * cos_angle) + fabs((double)h * sin_angle) + 0.5);
-    size_t nh =
-        (size_t)(fabs((double)h * cos_angle) + fabs((double)w * sin_angle) + 0.5);
+    size_t nw = (size_t)(fabs((double)w * cos_angle) +
+                         fabs((double)h * sin_angle) + 0.5);
+    size_t nh = (size_t)(fabs((double)h * cos_angle) +
+                         fabs((double)w * sin_angle) + 0.5);
 
     Matrix *rotated = mat_create_zero(nh, nw);
 
