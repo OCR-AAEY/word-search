@@ -1,8 +1,11 @@
 #include "rotation.h"
-#include "pretreatment/visualization.h"
+// #include "pretreatment/visualization.h"
+#include "rotation/hough_lines.h"
+#include "utils/math/trigo.h"
 #include <err.h>
 #include <math.h>
 #include <stdlib.h>
+#include <time.h>
 
 Matrix *rotate_matrix(const Matrix *src, double angle)
 {
@@ -112,4 +115,26 @@ ImageData *rotate_image(ImageData *img, double angle)
     out->pixels = np;
 
     return out;
+}
+
+Matrix *auto_rotate_matrix(Matrix *img)
+{
+    clock_t start, end;
+    start = clock();
+    float theta_angle = hough_transform_lines(img, 1.0f);
+    end = clock();
+    printf("Hough transform lines : %lf\n",
+           ((double)(end - start)) / CLOCKS_PER_SEC);
+    float rotation_angle = fmodf(theta_angle, 90);
+    if (rotation_angle > 45)
+    {
+        rotation_angle = rotation_angle - 90;
+    }
+    printf("Angle found : %f | Rotation needed :%f\n", theta_angle,
+           rotation_angle);
+    start = clock();
+    Matrix *rotated = rotate_matrix(img, rotation_angle);
+    end = clock();
+    printf("Rotation : %lf\n", ((double)(end - start)) / CLOCKS_PER_SEC);
+    return rotated;
 }

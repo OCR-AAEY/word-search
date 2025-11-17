@@ -3,7 +3,6 @@
 
 #include "image_loader/image_loading.h"
 #include "matrix/matrix.h"
-#include "pretreatment/pretreatment.h"
 
 /**
  * @brief Rotates a grayscale matrix by a specified angle.
@@ -31,5 +30,7 @@ Matrix *rotate_matrix(const Matrix *src, double angle);
  *         Returns NULL on failure (e.g., memory allocation error).
  */
 ImageData *rotate_image(ImageData *img, double angle);
+
+Matrix *auto_rotate_matrix(Matrix *img);
 
 #endif
