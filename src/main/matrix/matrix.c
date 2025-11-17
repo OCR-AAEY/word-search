@@ -1,6 +1,7 @@
 #include <err.h>
 #include <math.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include "matrix.h"
 #include "utils/math/gcd.h"
@@ -266,10 +267,10 @@ double *mat_unsafe_coef_ptr(const Matrix *m, size_t h, size_t w)
 
 double *mat_coef_ptr(const Matrix *m, size_t h, size_t w)
 {
-    if (h >= m->height)
+    if (h >= m->height)// (void)(*(char*)NULL);
         errx(EXIT_FAILURE, "Invalid height given. Expected < %zu and got %zu.",
              m->height, h);
-    if (w >= m->width)
+    if (w >= m->width)// (void)(*(char*)NULL);
         errx(EXIT_FAILURE, "Invalid width given. Expected < %zu and got %zu.",
              m->width, w);
     return mat_unsafe_coef_ptr(m, h, w);
@@ -277,10 +278,10 @@ double *mat_coef_ptr(const Matrix *m, size_t h, size_t w)
 
 double mat_coef(const Matrix *m, size_t h, size_t w)
 {
-    if (h >= m->height)
+    if (h >= m->height)// (void)(*(char*)NULL);
         errx(EXIT_FAILURE, "Invalid height given. Expected < %zu and got %zu.",
              m->height, h);
-    if (w >= m->width)
+    if (w >= m->width)// (void)(*(char*)NULL);
         errx(EXIT_FAILURE, "Invalid width given. Expected < %zu and got %zu.",
              m->width, w);
     return *mat_unsafe_coef_ptr(m, h, w);
@@ -484,29 +485,259 @@ void mat_inplace_sigmoid_derivative(Matrix *m)
     }
 }
 
-double mat_mean_squared_error(Matrix *actual, Matrix *expected)
+void mat_inplace_relu(Matrix *m)
 {
-    if (actual->height != expected->height)
-        errx(EXIT_FAILURE,
-             "Matrix mean squared error calculation failed: mismatched heights "
-             "(%zu vs %zu).",
-             actual->height, expected->height);
-    if (actual->width != expected->width)
-        errx(EXIT_FAILURE,
-             "Matrix mean squared error calculation failed: mismatched widths "
-             "(%zu vs %zu).",
-             actual->height, expected->height);
-
-    double sum = 0.0;
-
-    for (size_t i = 0; i < actual->height * actual->width; i++)
+    for (size_t i = 0; i < m->height * m->width; i++)
     {
-        double error = (actual->content[i] - expected->content[i]);
-        sum += error * error;
+        if (m->content[i] < 0)
+            m->content[i] = 0;
+    }
+}
+
+Matrix *mat_relu_derivative(Matrix *m)
+{
+    Matrix *res = mat_create_zero(m->height, m->width);
+
+    for (size_t i = 0; i < m->height * m->width; i++)
+    {
+        if (m->content[i] > 0)
+            res->content[i] = 1;
+        else
+            res->content[i] = 0;
     }
 
-    return sum / (actual->height * actual->width);
+    return res;
 }
+
+void mat_inplace_softmax(Matrix *m)
+{
+    float sum = 0.0f;
+    for (size_t i = 0; i < m->height * m->width; i++)
+    {
+        m->content[i] = expf(m->content[i]);
+        sum += m->content[i];
+    }
+    for (size_t i = 0; i < m->height * m->width; i++)
+    {
+        m->content[i] /= sum;
+    }
+}
+
+Matrix *mat_strip_margins(Matrix *m)
+{
+    // Whether an activated (<=> black <=> 1.0f) pixel has been found.
+    int found;
+    // The new coordinates (included).
+    size_t h_i = 0, h_f = m->height - 1, w_i = 0, w_f = m->width - 1;
+
+    found = 0;
+    while (h_i < m->height && !found)
+    {
+        for (size_t w = 0; w < m->width && !found; w++)
+            found = *mat_coef_ptr(m, h_i, w) > 0.5f;
+        h_i++;
+    }
+    h_i--;
+
+    found = 0;
+    while (h_f > 0 && !found)
+    {
+        for (size_t w = 0; w < m->width && !found; w++)
+            found = *mat_coef_ptr(m, h_f, w) > 0.5f;
+        h_f--;
+    }
+    h_f++;
+
+    found = 0;
+    while (w_i < m->width && !found)
+    {
+        for (size_t h = 0; h < m->height && !found; h++)
+            found = *mat_coef_ptr(m, h, w_i) > 0.5f;
+        w_i++;
+    }
+    w_i--;
+
+    found = 0;
+    while (w_f > 0 && !found)
+    {
+        for (size_t h = 0; h < m->height && !found; h++)
+            found = *mat_coef_ptr(m, h, w_f) > 0.5f;
+        w_f--;
+    }
+    w_f++;
+
+    if (h_i > h_f || w_i > w_f)
+        errx(EXIT_FAILURE, "Matrix empty.");
+
+    Matrix *res = mat_create_zero(h_f - h_i + 1, w_f - w_i + 1);
+    for (size_t h = 0; h < res->height; h++)
+        for (size_t w = 0; w < res->width; w++)
+            *mat_coef_ptr(res, h, w) = *mat_coef_ptr(m, h_i + h, w_i + w);
+
+    return res;
+}
+
+Matrix *mat_scale_to_28(Matrix *m)
+{
+    const size_t TARGET = 28;
+    Matrix *res = mat_create_zero(TARGET, TARGET);
+
+    // Compute scaling factors for height and width
+    float scale_h = (float)m->height / (float)TARGET;
+    float scale_w = (float)m->width  / (float)TARGET;
+
+    // Use the larger scale to preserve aspect ratio
+    float factor = (scale_h > scale_w) ? scale_h : scale_w;
+
+    // Compute offset to center the content
+    float h_offset = ((TARGET * factor) - m->height) / 2.0f;
+    float w_offset = ((TARGET * factor) - m->width ) / 2.0f;
+
+    for (size_t h = 0; h < TARGET; h++)
+    {
+        for (size_t w = 0; w < TARGET; w++)
+        {
+            // Map target pixel to source matrix coordinates
+            float sh = h * factor - h_offset;
+            float sw = w * factor - w_offset;
+
+            // Clamp to valid source range
+            if (sh < 0) sh = 0;
+            if (sw < 0) sw = 0;
+            if (sh > m->height - 1) sh = m->height - 1;
+            if (sw > m->width  - 1) sw = m->width  - 1;
+
+            // Split into integer and fractional parts
+            float sh_frac, sw_frac, sh_int, sw_int;
+            sh_frac = modff(sh, &sh_int);
+            sw_frac = modff(sw, &sw_int);
+
+            size_t ih = (size_t)sh_int;
+            size_t iw = (size_t)sw_int;
+
+            // Neighboring indices, clamped
+            size_t ih2 = (ih + 1 < m->height) ? ih + 1 : ih;
+            size_t iw2 = (iw + 1 < m->width ) ? iw + 1 : iw;
+
+            // Bilinear interpolation weights
+            float w_tl = (1.0f - sh_frac) * (1.0f - sw_frac);
+            float w_tr = (1.0f - sh_frac) * sw_frac;
+            float w_bl = sh_frac * (1.0f - sw_frac);
+            float w_br = sh_frac * sw_frac;
+
+            // Compute interpolated pixel value
+            float pixel =
+                w_tl * mat_coef(m, ih,  iw ) +
+                w_tr * mat_coef(m, ih,  iw2) +
+                w_bl * mat_coef(m, ih2, iw ) +
+                w_br * mat_coef(m, ih2, iw2);
+
+            *mat_unsafe_coef_ptr(res, h, w) = roundf(pixel);
+        }
+    }
+
+    return res;
+}
+
+
+// Matrix *mat_scale_to_28(Matrix *m)
+// {
+//     Matrix *res = mat_create_zero(28, 28);
+
+//     float factor;
+//     size_t h0 = 0, w0 = 0;
+//     if (m->height > m->width)
+//     {
+//         factor = (float)(m->height - 1) / 27.0f;
+//         w0 = (m->height - m->width) / 2;
+//     }
+//     else if (m->width > m->height)
+//     {
+//         factor = (float)(m->width - 1) / 27.0f;
+//         h0 = (m->width - m->height) / 2;
+//     }
+//     else
+//     {
+//         factor = (float)(m->height - 1) / 27.0f;
+//     }
+
+//     for (size_t h = 0; h < 28; h++)
+//     {
+//         for (size_t w = 0; w < 28; w++)
+//         {
+//             // Decompose into fractional and integer part the coordinate
+//             // coresponsing to h and w on the source matrix.
+//             float new_h_frac, new_h_int, new_w_frac, new_w_int;
+//             new_h_frac = modff(factor * (float)h, &new_h_int);
+//             new_w_frac = modff(factor * (float)w, &new_w_int);
+
+//             // Compute the 4 adjacent indices.
+//             size_t tl_h = h0 + (size_t)new_h_int;
+//             size_t tl_w = w0 + (size_t)new_w_int;
+//             size_t br_h = (tl_h + 1 < m->height) ? tl_h + 1 : tl_h;
+//             size_t br_w = (tl_w + 1 < m->width) ? tl_w + 1 : tl_w;
+
+//             // Compute the 4 weights.
+//             float tl_weight = (1.0f - new_h_frac) * (1.0f - new_w_frac);
+//             float tr_weight = (1.0f - new_h_frac) * new_w_frac;
+//             float bl_weight = new_h_frac * (1.0f - new_w_frac);
+//             float br_weight = new_h_frac * new_w_frac;
+
+//             float pixel = tl_weight * mat_coef(m, tl_h, tl_w) +
+//                           tr_weight * mat_coef(m, tl_h, br_w) +
+//                           bl_weight * mat_coef(m, br_h, tl_w) +
+//                           br_weight * mat_coef(m, br_h, br_w);
+//             *mat_unsafe_coef_ptr(res, h, w) = roundf(pixel);
+//         }
+//     }
+
+//     return res;
+// }
+
+// Matrix *mat_cross_entropy(Matrix *actual, Matrix*expected)
+// {
+//     if (actual->height != expected->height)
+//         errx(EXIT_FAILURE,
+//              "Matrix hadamard product failed: mismatched heights (%zu vs
+//              %zu).", actual->height, expected->height);
+//     if (actual->width != expected->width)
+//         errx(EXIT_FAILURE,
+//              "Matrix hadamard product failed: mismatched widths (%zu vs
+//              %zu).", actual->width, expected->width);
+
+//     Matrix *res = alloc_matrix(actual->height, actual->width);
+
+//     for (size_t i = 0; i < actual->height * actual->width, i++)
+//     {
+//         res->content =
+//     }
+// }
+
+// double mat_mean_squared_error(Matrix *actual, Matrix *expected)
+// {
+//     if (actual->height != expected->height)
+//         errx(EXIT_FAILURE,
+//              "Matrix mean squared error calculation failed: mismatched
+//              heights "
+//              "(%zu vs %zu).",
+//              actual->height, expected->height);
+//     if (actual->width != expected->width)
+//         errx(EXIT_FAILURE,
+//              "Matrix mean squared error calculation failed: mismatched widths
+//              "
+//              "(%zu vs %zu).",
+//              actual->height, expected->height);
+
+//     double sum = 0.0;
+
+//     for (size_t i = 0; i < actual->height * actual->width; i++)
+//     {
+//         double error = (actual->content[i] - expected->content[i]);
+//         sum += error * error;
+//     }
+
+//     return sum / (actual->height * actual->width);
+// }
 
 Matrix *mat_transpose(const Matrix *m)
 {
@@ -715,4 +946,90 @@ void mat_print(const Matrix *m, unsigned int precision)
             printf("\n");
         }
     }
+}
+
+Matrix *mat_load_from_file(char *filename)
+{
+    FILE *file_stream = fopen(filename, "r");
+    if (file_stream == NULL)
+        errx(EXIT_FAILURE, "Failed to open file: %s", filename);
+
+    int fd = fileno(file_stream);
+    if (fd == -1)
+        errx(EXIT_FAILURE, "Failed to open file descriptor of file %s.",
+             filename);
+
+    int r_out;
+    size_t height, width;
+
+    r_out = read(fd, &height, sizeof(size_t));
+    if (r_out != sizeof(size_t))
+        errx(EXIT_FAILURE, "Invalid file %s: failed to read matrix's height.",
+             filename);
+
+    r_out = read(fd, &width, sizeof(size_t));
+    if (r_out != sizeof(size_t))
+        errx(EXIT_FAILURE, "Invalid file %s: failed to read matrix's width.",
+             filename);
+
+    Matrix *res = mat_create_zero(height, width);
+
+    // Read the matrix content.
+    for (size_t i = 0; i < height * width; i++)
+    {
+        r_out = read(fd, &res->content[i], sizeof(double));
+        if (r_out != sizeof(double))
+            errx(EXIT_FAILURE,
+                 "Invalid file %s: failed to read matrix's "
+                 "%zuth coefficient.",
+                 filename, i);
+    }
+
+    fclose(file_stream);
+
+    return res;
+}
+
+void mat_save_to_file(Matrix *m, char *filename)
+{
+    FILE *file_stream = fopen(filename, "w");
+    if (file_stream == NULL)
+        errx(EXIT_FAILURE, "Failed to open file: %s", filename);
+
+    int fd = fileno(file_stream);
+    if (fd == -1)
+        errx(EXIT_FAILURE, "Failed to open file descriptor of file %s.",
+             filename);
+
+    int w_out;
+
+    w_out = write(fd, &m->height, sizeof(size_t));
+    if (w_out != sizeof(size_t))
+        errx(EXIT_FAILURE,
+             "Failed to write file %s: failed to write matrix's height.",
+             filename);
+
+    w_out = write(fd, &m->width, sizeof(size_t));
+    if (w_out != sizeof(size_t))
+        errx(EXIT_FAILURE,
+             "Failed to write file %s: failed to write matrix's width.",
+             filename);
+
+    // Write the matrix content.
+    for (size_t h = 0; h < m->height; h++)
+    {
+        for (size_t w = 0; w < m->width; w++)
+        {
+            w_out = write(fd, mat_unsafe_coef_ptr(m, h, w), sizeof(double));
+            if (w_out != sizeof(double))
+                errx(EXIT_FAILURE,
+                     "Failed to write file %s: failed to write matrix's "
+                     "coefficient at position (h:%zu, w:%zu).",
+                     filename, h, w);
+        }
+    }
+
+    fclose(file_stream);
+
+    printf("written\n");
 }

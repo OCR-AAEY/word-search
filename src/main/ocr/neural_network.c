@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include "neural_network.h"
+#include "dataset.h"
 #include "utils/math/sigmoid.h"
 #include "utils/random/shuffle_array.h"
 
@@ -359,30 +360,29 @@ Matrix *net_feed_forward(const Neural_Network *net, Matrix *input,
 
     for (size_t i = 1; i < net->layer_number; i++)
     {
-        // Compute the result between layer i and i + 1.
+        // Compute the result between layer i - 1 and i.
 
         // The activation vector (column matrix) after the ith layer.
         Matrix *curr_activation =
             mat_multiplication(net->weights[i], prev_activation);
         mat_inplace_addition(curr_activation, net->biases[i]);
 
+        // Store the result column matrix before the application of the
+        // activation function.
         if (out_params)
-        {
-            // Store the result column matrix before the application of the
-            // activation function.
             layers_results[i] = mat_deepcopy(curr_activation);
 
-            mat_inplace_sigmoid(curr_activation);
-
-            // Store the activation column matrix.
-            layers_activations[i] = mat_deepcopy(curr_activation);
-        }
+        if (i == net->layer_number - 1)
+            mat_inplace_softmax(curr_activation);
         else
-        {
-            mat_inplace_sigmoid(curr_activation);
-        }
+            mat_inplace_relu(curr_activation);
+
+        // Store the activation column matrix.
+        if (out_params)
+            layers_activations[i] = mat_deepcopy(curr_activation);
 
         mat_free(prev_activation);
+    
         prev_activation = curr_activation;
     }
 
@@ -417,12 +417,8 @@ void net_back_propagation(Neural_Network *net, Matrix *expected,
 
     // Compute the error column matrix for the last layer.
 
-    // delta = (act[L - 1] - expected) ⊙ σ'(res[L - 1])
-    a = mat_subtraction(layers_activations[net->layer_number - 1], expected);
-    b = mat_sigmoid_derivative(layers_results[net->layer_number - 1]);
-    delta = mat_hadamard(a, b);
-    mat_free(a);
-    mat_free(b);
+    // delta = (act[L - 1] - expected)
+    delta = mat_subtraction(layers_activations[net->layer_number - 1], expected);
 
     // delta_nabla_w = delta × (act[L - 2])^T
     a = mat_transpose(layers_activations[net->layer_number - 2]);
@@ -436,12 +432,12 @@ void net_back_propagation(Neural_Network *net, Matrix *expected,
     // penultimate layer to the first one (excluding the input layer).
     for (size_t i = net->layer_number - 2; i > 0; i--)
     {
-        // delta = ((net.weights[i + 1])^T × delta) ⊙ σ'(res[i])
+        // delta = ((net.weights[i + 1])^T × delta) ⊙ relu'(res[i])
         a = mat_transpose(net->weights[i + 1]);
         b = mat_multiplication(a, delta);
         mat_free(a);
         a = b;
-        b = mat_sigmoid_derivative(layers_results[i]);
+        b = mat_relu_derivative(layers_results[i]);
         delta = mat_hadamard(a, b);
         mat_free(a);
         mat_free(b);
@@ -474,16 +470,14 @@ void net_update(Neural_Network *net, Matrix **nabla_w, Matrix **nabla_b,
     }
 }
 
-void net_train(Neural_Network *net, Training_Data **training_data,
-               size_t training_data_size, size_t epochs, size_t batch_size,
+void net_train(Neural_Network *net, Dataset *dataset, size_t epochs, size_t batch_size,
                double learning_rate)
 {
     for (size_t epoch = 0; epoch < epochs; epoch++)
     {
-        shuffle_array(training_data, sizeof(Training_Data *),
-                      training_data_size);
+        ds_shuffle(dataset);
 
-        for (size_t batch = 0; batch < training_data_size / batch_size; batch++)
+        for (size_t batch = 0; batch < ds_size(dataset) / batch_size; batch++)
         {
             Matrix **nabla_w = calloc(net->layer_number, sizeof(Matrix *));
             Matrix **nabla_b = calloc(net->layer_number, sizeof(Matrix *));
@@ -497,7 +491,8 @@ void net_train(Neural_Network *net, Training_Data **training_data,
 
             for (size_t i = 0; i < batch_size; i++)
             {
-                Training_Data *data = training_data[batch * batch_size + i];
+                printf("getting one data from batch %zu\n", i);
+                Training_Data *td = ds_get_data(dataset, batch * batch_size + i);
                 Matrix **layers_results =
                     calloc(net->layer_number, sizeof(Matrix *));
                 Matrix **layers_activations =
@@ -507,10 +502,10 @@ void net_train(Neural_Network *net, Training_Data **training_data,
                 Matrix **delta_nabla_b =
                     calloc(net->layer_number, sizeof(Matrix *));
 
-                mat_free(net_feed_forward(net, data->input, layers_results,
+                mat_free(net_feed_forward(net, td->input, layers_results,
                                           layers_activations));
 
-                net_back_propagation(net, data->expected, layers_results,
+                net_back_propagation(net, td->expected, layers_results,
                                      layers_activations, delta_nabla_w,
                                      delta_nabla_b);
 
@@ -532,23 +527,23 @@ void net_train(Neural_Network *net, Training_Data **training_data,
             mat_free_matrix_array(nabla_b, net->layer_number);
         }
 
-        if ((epoch + 1) % 100 == 0)
+        if ((epoch + 1) % 10 == 0)
         {
             size_t successes = 0;
-            for (size_t i = 0; i < training_data_size; i++)
+            for (size_t i = 0; i < ds_size(dataset); i++)
             {
                 Matrix *output =
-                    net_feed_forward(net, training_data[i]->input, NULL, NULL);
+                    net_feed_forward(net, ds_get_data(dataset, i)->input, NULL, NULL);
                 mat_inplace_map(output, round);
-                if (mat_eq(output, training_data[i]->expected))
+                if (mat_eq(output, ds_get_data(dataset, i)->expected))
                     successes++;
                 mat_free(output);
             }
             printf("Epoch %zu / %zu completed with accuracy %.2lf%% (%zu / "
                    "%zu).\n",
                    epoch + 1, epochs,
-                   100.0 * (double)successes / (double)training_data_size,
-                   successes, training_data_size);
+                   100.0 * (double)successes / (double)ds_size(dataset),
+                   successes, ds_size(dataset));
         }
     }
 }

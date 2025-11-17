@@ -228,13 +228,23 @@ Matrix *mat_sigmoid_derivative(const Matrix *m);
 /// @param[in, out] m Pointer to the Matrix to be modified.
 void mat_inplace_sigmoid_derivative(Matrix *m);
 
-/// @brief Computes the mean squared error (MSE) between two matrices.
-/// @param[in] actual Pointer to the matrix containing actual values.
-/// @param[in] expected Pointer to the matrix containing expected values.
-/// @return The mean squared error between the two matrices as a double.
-/// @throw Exits the program with an error if the matrices have mismatched
-/// dimensions.
-double mat_mean_squared_error(Matrix *actual, Matrix *expected);
+void mat_inplace_relu(Matrix *m);
+
+Matrix *mat_relu_derivative(Matrix *m);
+
+void mat_inplace_softmax(Matrix *m);
+
+Matrix *mat_strip_margins(Matrix *m);
+
+Matrix *mat_scale_to_28(Matrix *m);
+
+// /// @brief Computes the mean squared error (MSE) between two matrices.
+// /// @param[in] actual Pointer to the matrix containing actual values.
+// /// @param[in] expected Pointer to the matrix containing expected values.
+// /// @return The mean squared error between the two matrices as a double.
+// /// @throw Exits the program with an error if the matrices have mismatched
+// /// dimensions.
+// double mat_mean_squared_error(Matrix *actual, Matrix *expected);
 
 /// @brief Returns the transpose of a matrix as a new matrix.
 /// @param[in] m Pointer to the input Matrix.
@@ -327,5 +337,9 @@ void mat_inplace_map_with_indexes(Matrix *m,
 /// @param[in] precision Number of decimal places to display for each element.
 /// @throw Terminates the program if the matrix pointer is NULL.
 void mat_print(const Matrix *m, unsigned int precision);
+
+Matrix *mat_load_from_file(char *filename);
+
+void mat_save_to_file(Matrix *m, char *filename);
 
 #endif
