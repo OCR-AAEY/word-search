@@ -1,5 +1,6 @@
 #include "image_loader/image_loading.h"
 #include "matrix/matrix.h"
+#include "pretreatment/pretreatment.h"
 #include "pretreatment/visualization.h"
 #include "rotation/hough_lines.h"
 #include "rotation/rotation.h"
