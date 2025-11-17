@@ -18,11 +18,13 @@ Matrix *rotate_matrix(const Matrix *src, double angle)
     size_t h = (size_t)mat_height(src);
 
     double rad = angle * M_PI / 180.0;
+    double cos_angle = cos(rad);
+    double sin_angle = sin(rad);
 
     size_t nw =
-        (size_t)(fabs((double)w * cos(rad)) + fabs((double)h * sin(rad)) + 0.5);
+        (size_t)(fabs((double)w * cos_angle) + fabs((double)h * sin_angle) + 0.5);
     size_t nh =
-        (size_t)(fabs((double)h * cos(rad)) + fabs((double)w * sin(rad)) + 0.5);
+        (size_t)(fabs((double)h * cos_angle) + fabs((double)w * sin_angle) + 0.5);
 
     Matrix *rotated = mat_create_zero(nh, nw);
 
@@ -43,8 +45,8 @@ Matrix *rotate_matrix(const Matrix *src, double angle)
     {
         for (size_t x = 0; x < nw; x++)
         {
-            double tx = (x - ncx) * cos(rad) - (y - ncy) * sin(rad) + cx;
-            double ty = (x - ncx) * sin(rad) + (y - ncy) * cos(rad) + cy;
+            double tx = (x - ncx) * cos_angle - (y - ncy) * sin_angle + cx;
+            double ty = (x - ncx) * sin_angle + (y - ncy) * cos_angle + cy;
 
             if (tx >= 0 && tx < w && ty >= 0 && ty < h)
             {
