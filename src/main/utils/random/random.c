@@ -40,35 +40,35 @@ unsigned long rand_ul_uniform_nm(unsigned long min, unsigned long max)
     return min + rand_ul_uniform(max - min);
 }
 
-double rand_d_uniform()
+float rand_f_uniform()
 {
     seed_once();
 
     unsigned long r = ((unsigned long)rand() << 0) |
                       ((unsigned long)rand() << 15) |
                       ((unsigned long)rand() << 30);
-    return r / ((double)(ULONG_MAX));
+    return r / ((float)(ULONG_MAX));
 }
 
-double rand_d_uniform_m(double max) { return rand_d_uniform() * max; }
+float rand_f_uniform_m(float max) { return rand_f_uniform() * max; }
 
-double rand_d_uniform_nm(double min, double max)
+float rand_f_uniform_nm(float min, float max)
 {
-    return min + rand_d_uniform_m(max - min);
+    return min + rand_f_uniform_m(max - min);
 }
 
-double rand_d_gaussian()
+float rand_f_gaussian()
 {
-    double u = rand_d_uniform();
-    double v = rand_d_uniform();
+    float u = rand_f_uniform();
+    float v = rand_f_uniform();
     // To avoid a log(0) call.
-    if (u < 1e-300)
-        u = 1e-300;
+    if (u < 1e-10f)
+        u = 1e-10f;
 
     return sqrt(-2 * log(u)) * cos(2 * M_PI * v);
 }
 
-double rand_d_normal(double mean, double stddev)
+float rand_d_normal(float mean, float stddev)
 {
-    return mean + stddev * rand_d_gaussian();
+    return mean + stddev * rand_f_gaussian();
 }

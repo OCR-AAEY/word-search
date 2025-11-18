@@ -13,15 +13,15 @@ Matrix *create_hough_accumulator(size_t height, size_t width,
         errx(EXIT_FAILURE, "Theta precision must be strictly positive");
 
     // Maximum possible distance from the origin of the image (image diagonal)
-    double diag = sqrt((double)height * height + (double)width * width);
-    size_t r_max = (size_t)ceil(diag);
+    float diag = sqrtf((float)height * height + (float)width * width);
+    size_t r_max = (size_t)ceilf(diag);
 
     // Number of rows = 2*r_max + 1 to include both negative and positive r
     // values
     size_t acc_height = 2 * r_max + 1;
 
     // Number of columns = number of theta steps (0°..180° exclusive)
-    size_t acc_width = (size_t)round(180.0 / theta_precision);
+    size_t acc_width = (size_t)roundf(180.0f / theta_precision);
 
     // columns are the theta values, and lines are the r values
     Matrix *accumulator = mat_create_zero(acc_height, acc_width);
@@ -30,7 +30,7 @@ Matrix *create_hough_accumulator(size_t height, size_t width,
 }
 
 void populate_hough_lines(Matrix *src, Matrix *accumulator,
-                          double theta_precision, size_t *max_count)
+                          float theta_precision, size_t *max_count)
 {
     if (src == NULL)
         errx(EXIT_FAILURE, "The source matrix is NULL");
@@ -52,7 +52,7 @@ void populate_hough_lines(Matrix *src, Matrix *accumulator,
     {
         for (size_t w = 0; w < width; w++)
         {
-            double pixel = mat_coef(src, h, w);
+            float pixel = mat_coef(src, h, w);
             // if the pixel is not black, we skip it
             if (pixel != 0)
             {
@@ -65,15 +65,15 @@ void populate_hough_lines(Matrix *src, Matrix *accumulator,
             {
                 // theta_max is the maximum index for theta in the accumulator
                 // since we have a step of theta_precision, we have :
-                double r =
-                    (double)w * cosd((double)theta_index * theta_precision) +
-                    (double)h * sind((double)theta_index * theta_precision);
+                float r =
+                    (float)w * cosd((float)theta_index * theta_precision) +
+                    (float)h * sind((float)theta_index * theta_precision);
 
                 // since r can be at least -r_max, we shift it to an integer
                 // to have the index in the accumulator
-                size_t r_index = (size_t)round(r + (double)r_max);
+                size_t r_index = (size_t)roundf(r + (float)r_max);
 
-                double *accumulator_cell =
+                float *accumulator_cell =
                     mat_coef_ptr(accumulator, r_index, theta_index);
                 (*accumulator_cell)++;
 
@@ -85,15 +85,15 @@ void populate_hough_lines(Matrix *src, Matrix *accumulator,
     }
 }
 
-void statistics_on_accumulator(Matrix *accumulator, double *stddev_out,
-                               double *mean_out)
+void statistics_on_accumulator(Matrix *accumulator, float *stddev_out,
+                               float *mean_out)
 {
     if (stddev_out == NULL || mean_out == NULL)
         errx(EXIT_FAILURE, "Got null out parameters : stddev or mean");
     size_t height = mat_height(accumulator);
     size_t width = mat_width(accumulator);
     size_t N = height * width;
-    double sum = 0;
+    float sum = 0;
     for (size_t h = 0; h < height; h++)
     {
         for (size_t w = 0; w < width; w++)
@@ -103,21 +103,21 @@ void statistics_on_accumulator(Matrix *accumulator, double *stddev_out,
     }
     *mean_out = sum / N;
 
-    double var_sum = 0;
+    float var_sum = 0;
     for (size_t h = 0; h < height; h++)
     {
         for (size_t w = 0; w < width; w++)
         {
-            double diff = mat_coef(accumulator, h, w) - *mean_out;
+            float diff = mat_coef(accumulator, h, w) - *mean_out;
             var_sum += diff * diff;
         }
     }
 
-    *stddev_out = sqrt(var_sum / N);
+    *stddev_out = sqrtf(var_sum / N);
 }
 
 Line **extract_hough_lines(Matrix *accumulator, size_t threshold,
-                           double theta_precision, size_t *line_count)
+                           float theta_precision, size_t *line_count)
 {
     if (accumulator == NULL)
         errx(EXIT_FAILURE, "The accumulator matrix is NULL");
@@ -138,7 +138,7 @@ Line **extract_hough_lines(Matrix *accumulator, size_t threshold,
     {
         for (size_t theta_index = 0; theta_index < theta_max; theta_index++)
         {
-            double count = mat_coef(accumulator, r, theta_index);
+            float count = mat_coef(accumulator, r, theta_index);
             // ignore values that are below the threshold
             if (count < threshold)
                 continue;
@@ -163,15 +163,15 @@ Line **extract_hough_lines(Matrix *accumulator, size_t threshold,
                 errx(EXIT_FAILURE, "Line allocation failed");
             }
             lines[(*line_count)++] = line;
-            line->r = (double)r - (double)r_max;
-            line->theta = (double)theta_index * theta_precision;
+            line->r = (float)r - (float)r_max;
+            line->theta = (float)theta_index * theta_precision;
         }
     }
     return lines;
 }
 
-Line **hough_lines_NMS(Line **lines, size_t *line_count, double delta_r,
-                       double delta_theta)
+Line **hough_lines_NMS(Line **lines, size_t *line_count, float delta_r,
+                       float delta_theta)
 {
     if (lines == NULL)
         errx(EXIT_FAILURE, "The Lines array is NULL");
@@ -199,8 +199,8 @@ Line **hough_lines_NMS(Line **lines, size_t *line_count, double delta_r,
 
             // mark as suppressed the lines that are too close in r and theta
             // considering they are the same
-            if (ABS(round(lj->r - li->r)) < delta_r &&
-                ABS(round(lj->theta - li->theta)) < delta_theta)
+            if (ABS(roundf(lj->r - li->r)) < delta_r &&
+                ABS(roundf(lj->theta - li->theta)) < delta_theta)
             {
                 suppressed[j] = TRUE;
             }
@@ -225,8 +225,8 @@ Line **hough_lines_NMS(Line **lines, size_t *line_count, double delta_r,
     return lines;
 }
 
-Line **hough_transform_lines(Matrix *src, float theta_precision, double delta_r,
-                             double delta_theta, size_t *size_out)
+Line **hough_transform_lines(Matrix *src, float theta_precision, float delta_r,
+                             float delta_theta, size_t *size_out)
 {
     if (src == NULL)
         errx(EXIT_FAILURE, "The source matrix is NULL");
@@ -239,12 +239,12 @@ Line **hough_transform_lines(Matrix *src, float theta_precision, double delta_r,
     size_t max_acc;
     populate_hough_lines(src, accumulator, theta_precision, &max_acc);
 
-    // double stddev, mean;
+    // float stddev, mean;
     // statistics_on_accumulator(accumulator, &stddev, &mean);
 
-    // double k = 5;
+    // float k = 5;
     // float threshold = mean + k*stddev;
-    float threshold = max_acc * 0.7;
+    float threshold = (float)max_acc * 0.7f;
     Line **lines =
         extract_hough_lines(accumulator, threshold, theta_precision, size_out);
 
@@ -260,8 +260,8 @@ void print_lines(Line **lines, size_t size)
 {
     for (size_t i = 0; i < size; i++)
     {
-        double theta = lines[i]->theta;
-        double r = lines[i]->r;
+        float theta = lines[i]->theta;
+        float r = lines[i]->r;
 
         printf("Line %zu : (%f, %f)\n", i, r, theta);
     }

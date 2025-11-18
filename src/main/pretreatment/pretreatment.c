@@ -19,27 +19,27 @@ Matrix *image_to_grayscale(ImageData *img)
     {
         for (size_t w = 0; w < img->width; w++)
         {
-            double *gray_scaled_pixel = mat_coef_ptr(grayscaled_pixels, h, w);
+            float *gray_scaled_pixel = mat_coef_ptr(grayscaled_pixels, h, w);
             *gray_scaled_pixel = pixel_to_grayscale(get_pixel(img, h, w));
         }
     }
     return grayscaled_pixels;
 }
 
-double gaussian_function(int x, double sigma)
+float gaussian_function(int x, float sigma)
 {
-    return exp(-(x * x) / (2.0 * sigma * sigma));
+    return expf(-((float)x * x) / (2.0f * sigma * sigma));
 }
 
-double *gaussian_kernel_1d(double sigma, size_t kernel_size)
+float *gaussian_kernel_1d(float sigma, size_t kernel_size)
 {
     int m = (kernel_size - 1) / 2;
-    double *kernel = malloc(kernel_size * sizeof(double));
-    double sum = 0.0;
+    float *kernel = malloc(kernel_size * sizeof(float));
+    float sum = 0.0f;
 
     for (int i = -m; i <= m; i++)
     {
-        double value = gaussian_function(i, sigma);
+        float value = gaussian_function(i, sigma);
         kernel[i + m] = value;
         sum += value;
     }
@@ -62,7 +62,7 @@ int clamp(int value, int min, int max)
     return value;
 }
 
-Matrix *convolve_horizontally(const Matrix *src, const double *kernel,
+Matrix *convolve_horizontally(const Matrix *src, const float *kernel,
                               size_t kernel_size)
 {
     if (kernel_size % 2 == 0)
@@ -79,25 +79,25 @@ Matrix *convolve_horizontally(const Matrix *src, const double *kernel,
     for (size_t x = 0; x < height; x++)
         for (size_t y = 0; y < width; y++)
         {
-            double *dst_pixel = mat_coef_ptr(dst, x, y);
+            float *dst_pixel = mat_coef_ptr(dst, x, y);
             for (int i = -m; i <= m; i++)
             {
                 // clamp will treat indexes out of bound to stay at the last
                 // acceptable value. This will repeat the pixel inside the
                 // image to fill the missing pixels.
-                double image_pixel =
+                float image_pixel =
                     mat_coef(src, x, clamp(y + i, 0, width - 1));
                 // i is the index from the center of the kernel
                 // by adding m we make sure that we use the indexing method
                 // of the kernel vector
-                double weight = kernel[m + i];
+                float weight = kernel[m + i];
                 *dst_pixel += weight * image_pixel;
             }
         }
     return dst;
 }
 
-Matrix *convolve_vertically(const Matrix *src, const double *kernel,
+Matrix *convolve_vertically(const Matrix *src, const float *kernel,
                             size_t kernel_size)
 {
     if (kernel_size % 2 == 0)
@@ -114,25 +114,25 @@ Matrix *convolve_vertically(const Matrix *src, const double *kernel,
     for (size_t x = 0; x < height; x++)
         for (size_t y = 0; y < width; y++)
         {
-            double *dst_pixel = mat_coef_ptr(dst, x, y);
+            float *dst_pixel = mat_coef_ptr(dst, x, y);
             for (int i = -m; i <= m; i++)
             {
                 // clamp will treat indexes out of bound to stay at the last
                 // acceptable value. This will repeat the pixel inside the
                 // image to fill the missing pixels.
-                double image_pixel =
+                float image_pixel =
                     mat_coef(src, clamp(x + i, 0, height - 1), y);
                 // i is the index from the center of the kernel
                 // by adding m we make sure that we use the indexing method
                 // of the kernel vector
-                double weight = kernel[m + i];
+                float weight = kernel[m + i];
                 *dst_pixel += weight * image_pixel;
             }
         }
     return dst;
 }
 
-Matrix *gaussian_blur(const Matrix *src, double sigma, size_t kernel_size)
+Matrix *gaussian_blur(const Matrix *src, float sigma, size_t kernel_size)
 {
     if (kernel_size % 2 == 0)
         errx(EXIT_FAILURE, "The kernel size must be an odd number");
@@ -140,7 +140,7 @@ Matrix *gaussian_blur(const Matrix *src, double sigma, size_t kernel_size)
     if (src == NULL)
         errx(EXIT_FAILURE, "The source matrix is NULL");
 
-    const double *kernel = gaussian_kernel_1d(sigma, kernel_size);
+    const float *kernel = gaussian_kernel_1d(sigma, kernel_size);
 
     Matrix *tmp = convolve_horizontally(src, kernel, kernel_size);
     Matrix *blurred = convolve_vertically(tmp, kernel, kernel_size);
@@ -150,12 +150,12 @@ Matrix *gaussian_blur(const Matrix *src, double sigma, size_t kernel_size)
     return blurred;
 }
 
-Matrix *adaptative_gaussian_thresholding(const Matrix *src, double max_value,
-                                         size_t kernel_size, double sigma,
-                                         double c)
+Matrix *adaptative_gaussian_thresholding(const Matrix *src, float max_value,
+                                         size_t kernel_size, float sigma,
+                                         float c)
 {
     if (max_value < 0)
-        errx(EXIT_FAILURE, "The max value must be a positive double");
+        errx(EXIT_FAILURE, "The max value must be a positive float");
     if (sigma <= 0)
         errx(EXIT_FAILURE, "Sigma must be positive");
     if (src == NULL)
@@ -171,10 +171,10 @@ Matrix *adaptative_gaussian_thresholding(const Matrix *src, double max_value,
     {
         for (size_t w = 0; w < width; w++)
         {
-            double *pixel = mat_coef_ptr(dest, h, w);
-            double blurred_pixel = mat_coef(blurred, h, w);
-            double src_pixel = mat_coef(src, h, w);
-            double T = blurred_pixel - c;
+            float *pixel = mat_coef_ptr(dest, h, w);
+            float blurred_pixel = mat_coef(blurred, h, w);
+            float src_pixel = mat_coef(src, h, w);
+            float T = blurred_pixel - c;
             *pixel = src_pixel > T ? max_value : 0;
         }
     }
@@ -204,14 +204,14 @@ Matrix *morph_transformation_1d(const Matrix *src, size_t kernel_size,
     for (size_t x = 0; x < height; x++)
         for (size_t y = 0; y < width; y++)
         {
-            double *dst_pixel = mat_coef_ptr(dst, x, y);
-            double extreme_val = transform == Erosion ? 0 : 255;
+            float *dst_pixel = mat_coef_ptr(dst, x, y);
+            float extreme_val = transform == Erosion ? 0.0f : 255.0f;
             for (int i = -anchor; i < (int)kernel_size - anchor; i++)
             {
                 // clamp will treat indexes out of bound to stay at the last
                 // acceptable value. This will repeat the pixel inside the
                 // image to fill the missing pixels.
-                double image_pixel;
+                float image_pixel;
                 switch (orientation)
                 {
                 case Horizontal:

@@ -2,9 +2,9 @@
 
 #include "sigmoid.h"
 
-double sigmoid(double x) { return 1.0 / (1.0 + exp(-x)); }
+float sigmoid(float x) { return 1.0f / (1.0f + exp(-x)); }
 
-double sigmoid_derivative(double x)
+float sigmoid_derivative(float x)
 {
-    return exp(-x) / ((1.0 + exp(-x)) * (1.0 + exp(-x)));
+    return exp(-x) / ((1.0f + exp(-x)) * (1.0f + exp(-x)));
 }

@@ -9,9 +9,9 @@
 /// @brief Computes sine of an angle in degrees.
 /// @param[in] degrees Angle in degrees.
 /// @return Sine of the angle.
-double sind(double degrees);
+float sind(float degrees);
 
 /// @brief Computes cosine of an angle in degrees.
 /// @param[in] degrees Angle in degrees.
 /// @return Cosine of the angle.
-double cosd(double degrees);
+float cosd(float degrees);
