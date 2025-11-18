@@ -15,10 +15,9 @@ int main()
     Dataset *dataset =
         ds_load_from_directory("./assets/ocr-training-dataset/matrices/");
 
-    Neural_Network *net =
-        net_create_empty(5, (size_t[]){784, 512, 256, 128, 26});
+    Neural_Network *net = net_load_from_file("ocr.net");
 
-    net_train(net, dataset, 10000, 64, 0.01);
+    net_train(net, dataset, 10, 64, 0.01);
 
     net_save_to_file(net, "ocr.net");
 

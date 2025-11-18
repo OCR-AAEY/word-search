@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "neural_network.h"
 #include "dataset.h"
+#include "neural_network.h"
 #include "utils/math/sigmoid.h"
 #include "utils/random/shuffle_array.h"
 
@@ -382,7 +382,7 @@ Matrix *net_feed_forward(const Neural_Network *net, Matrix *input,
             layers_activations[i] = mat_deepcopy(curr_activation);
 
         mat_free(prev_activation);
-    
+
         prev_activation = curr_activation;
     }
 
@@ -418,7 +418,8 @@ void net_back_propagation(Neural_Network *net, Matrix *expected,
     // Compute the error column matrix for the last layer.
 
     // delta = (act[L - 1] - expected)
-    delta = mat_subtraction(layers_activations[net->layer_number - 1], expected);
+    delta =
+        mat_subtraction(layers_activations[net->layer_number - 1], expected);
 
     // delta_nabla_w = delta × (act[L - 2])^T
     a = mat_transpose(layers_activations[net->layer_number - 2]);
@@ -470,8 +471,8 @@ void net_update(Neural_Network *net, Matrix **nabla_w, Matrix **nabla_b,
     }
 }
 
-void net_train(Neural_Network *net, Dataset *dataset, size_t epochs, size_t batch_size,
-               double learning_rate)
+void net_train(Neural_Network *net, Dataset *dataset, size_t epochs,
+               size_t batch_size, double learning_rate)
 {
     for (size_t epoch = 0; epoch < epochs; epoch++)
     {
@@ -491,8 +492,8 @@ void net_train(Neural_Network *net, Dataset *dataset, size_t epochs, size_t batc
 
             for (size_t i = 0; i < batch_size; i++)
             {
-                printf("getting one data from batch %zu\n", i);
-                Training_Data *td = ds_get_data(dataset, batch * batch_size + i);
+                Training_Data *td =
+                    ds_get_data(dataset, batch * batch_size + i);
                 Matrix **layers_results =
                     calloc(net->layer_number, sizeof(Matrix *));
                 Matrix **layers_activations =
@@ -532,10 +533,9 @@ void net_train(Neural_Network *net, Dataset *dataset, size_t epochs, size_t batc
             size_t successes = 0;
             for (size_t i = 0; i < ds_size(dataset); i++)
             {
-                Matrix *output =
-                    net_feed_forward(net, ds_get_data(dataset, i)->input, NULL, NULL);
-                mat_inplace_map(output, round);
-                if (mat_eq(output, ds_get_data(dataset, i)->expected))
+                Training_Data *td = ds_get_data(dataset, i);
+                Matrix *output = net_feed_forward(net, td->input, NULL, NULL);
+                if (mat_max_h(output) == td->expected_class)
                     successes++;
                 mat_free(output);
             }

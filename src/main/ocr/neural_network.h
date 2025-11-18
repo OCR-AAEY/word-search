@@ -1,8 +1,8 @@
 #ifndef NEURAL_NETWORK_H
 #define NEURAL_NETWORK_H
 
-#include "matrix/matrix.h"
 #include "dataset.h"
+#include "matrix/matrix.h"
 #include <stddef.h>
 
 /// @brief Represents a fully connected neural network.
@@ -115,8 +115,8 @@ void net_update(Neural_Network *net, Matrix **nabla_w, Matrix **nabla_b,
 /// @param[in] batch_size Number of samples per mini-batch.
 /// @param[in] learning_rate Scalar to scale the gradient updates.
 /// @throw Exits the program if any memory allocation fails during training.
-void net_train(Neural_Network *net, Dataset *dataset, size_t epochs, size_t batch_size,
-               double learning_rate);
+void net_train(Neural_Network *net, Dataset *dataset, size_t epochs,
+               size_t batch_size, double learning_rate);
 
 /// @brief Prints all weights and biases of the given neural network. Displays
 /// each weight and bias matrix in a readable format using `mat_print()`. The

@@ -11,6 +11,7 @@ struct Training_Data
 {
     Matrix *input;
     Matrix *expected;
+    size_t expected_class;
 };
 
 typedef struct Training_Data Training_Data;
