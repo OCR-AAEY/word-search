@@ -542,7 +542,7 @@ void net_train(Neural_Network *net, Dataset *dataset, size_t epochs,
             printf("Epoch %zu / %zu completed with accuracy %.2lf%% (%zu / "
                    "%zu).\n",
                    epoch + 1, epochs,
-                   100.0 * (double)successes / (double)ds_size(dataset),
+                   100.0f * (float)successes / (float)ds_size(dataset),
                    successes, ds_size(dataset));
         }
     }
