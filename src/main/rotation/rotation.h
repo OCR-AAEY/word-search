@@ -16,7 +16,7 @@
  * @return Pointer to a new Matrix containing the rotated data.
  *         Returns NULL on failure (e.g., memory allocation error).
  */
-Matrix *rotate_matrix(const Matrix *src, double angle);
+Matrix *rotate_matrix(const Matrix *src, float angle);
 
 /**
  * @brief Rotates a full color image by a specified angle.
@@ -30,6 +30,6 @@ Matrix *rotate_matrix(const Matrix *src, double angle);
  * @return Pointer to a new ImageData containing the rotated image.
  *         Returns NULL on failure (e.g., memory allocation error).
  */
-ImageData *rotate_image(ImageData *img, double angle);
+ImageData *rotate_image(ImageData *img, float angle);
 
 #endif

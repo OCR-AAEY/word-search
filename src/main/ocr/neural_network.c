@@ -162,7 +162,7 @@ Neural_Network *net_load_from_file(char *filename)
                  "Invalid file %s: failed to read %zuth weight matrix's width.",
                  filename, i);
 
-        double *content = calloc(height * width, sizeof(double));
+        float *content = calloc(height * width, sizeof(float));
         if (content == NULL)
             errx(EXIT_FAILURE,
                  "Failed to allocate memory for net_load_from_file (content).");
@@ -170,8 +170,8 @@ Neural_Network *net_load_from_file(char *filename)
         // Read the matrix content.
         for (size_t j = 0; j < height * width; j++)
         {
-            r_out = read(fd, &content[j], sizeof(double));
-            if (r_out != sizeof(double))
+            r_out = read(fd, &content[j], sizeof(float));
+            if (r_out != sizeof(float))
                 errx(EXIT_FAILURE,
                      "Invalid file %s: failed to read %zuth weight matrix's "
                      "%zuth coefficient.",
@@ -200,7 +200,7 @@ Neural_Network *net_load_from_file(char *filename)
                  "Invalid file %s: failed to read %zuth bias matrix's width.",
                  filename, i);
 
-        double *content = calloc(height * width, sizeof(double));
+        float *content = calloc(height * width, sizeof(float));
         if (content == NULL)
             errx(EXIT_FAILURE,
                  "Failed to allocate memory for net_load_from_file (content).");
@@ -208,8 +208,8 @@ Neural_Network *net_load_from_file(char *filename)
         // Read the matrix content.
         for (size_t j = 0; j < height * width; j++)
         {
-            r_out = read(fd, &content[j], sizeof(double));
-            if (r_out != sizeof(double))
+            r_out = read(fd, &content[j], sizeof(float));
+            if (r_out != sizeof(float))
                 errx(EXIT_FAILURE,
                      "Invalid file %s: failed to read %zuth bias matrix's "
                      "%zuth coefficient.",
@@ -284,8 +284,8 @@ void net_save_to_file(const Neural_Network *net, char *filename)
             for (size_t w = 0; w < mat_width(net->weights[i]); w++)
             {
                 w_out = write(fd, mat_coef_ptr(net->weights[i], h, w),
-                              sizeof(double));
-                if (w_out != sizeof(double))
+                              sizeof(float));
+                if (w_out != sizeof(float))
                     errx(
                         1,
                         "Failed to write file %s: failed to write %zuth weight "
@@ -322,8 +322,8 @@ void net_save_to_file(const Neural_Network *net, char *filename)
             for (size_t w = 0; w < mat_width(net->biases[i]); w++)
             {
                 w_out = write(fd, mat_coef_ptr(net->biases[i], h, w),
-                              sizeof(double));
-                if (w_out != sizeof(double))
+                              sizeof(float));
+                if (w_out != sizeof(float))
                     errx(EXIT_FAILURE,
                          "Failed to write file %s: failed to write %zuth bias "
                          "matrix's coefficient at position (h:%zu, w:%zu).",
@@ -457,14 +457,14 @@ void net_back_propagation(Neural_Network *net, Matrix *expected,
 }
 
 void net_update(Neural_Network *net, Matrix **nabla_w, Matrix **nabla_b,
-                size_t batch_size, double learning_rate)
+                size_t batch_size, float learning_rate)
 {
     for (size_t i = 1; i < net->layer_number; i++)
     {
         mat_inplace_scalar_multiplication(nabla_w[i],
-                                          learning_rate / (double)batch_size);
+                                          learning_rate / (float)batch_size);
         mat_inplace_scalar_multiplication(nabla_b[i],
-                                          learning_rate / (double)batch_size);
+                                          learning_rate / (float)batch_size);
 
         mat_inplace_subtraction(net->weights[i], nabla_w[i]);
         mat_inplace_subtraction(net->biases[i], nabla_b[i]);
@@ -472,7 +472,7 @@ void net_update(Neural_Network *net, Matrix **nabla_w, Matrix **nabla_b,
 }
 
 void net_train(Neural_Network *net, Dataset *dataset, size_t epochs,
-               size_t batch_size, double learning_rate)
+               size_t batch_size, float learning_rate)
 {
     for (size_t epoch = 0; epoch < epochs; epoch++)
     {

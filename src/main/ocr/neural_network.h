@@ -102,7 +102,7 @@ void net_back_propagation(Neural_Network *net, Matrix *expected,
 /// update.
 /// @throw None. Assumes all matrices are properly allocated.
 void net_update(Neural_Network *net, Matrix **nabla_w, Matrix **nabla_b,
-                size_t batch_size, double learning_rate);
+                size_t batch_size, float learning_rate);
 
 /// @brief Trains a neural network using mini-batch stochastic gradient descent.
 /// @param[in, out] net Pointer to the Neural_Network to train; its weights and
@@ -116,7 +116,7 @@ void net_update(Neural_Network *net, Matrix **nabla_w, Matrix **nabla_b,
 /// @param[in] learning_rate Scalar to scale the gradient updates.
 /// @throw Exits the program if any memory allocation fails during training.
 void net_train(Neural_Network *net, Dataset *dataset, size_t epochs,
-               size_t batch_size, double learning_rate);
+               size_t batch_size, float learning_rate);
 
 /// @brief Prints all weights and biases of the given neural network. Displays
 /// each weight and bias matrix in a readable format using `mat_print()`. The
