@@ -60,7 +60,7 @@ Matrix *image_to_grayscale(ImageData *img);
 /// @param[in] kernel_size Size of the square Gaussian kernel (must be odd).
 /// @return Pointer to a newly allocated matrix containing the blurred image.
 /// @throw Throws if the kernel_size is even or the @p src is NULL.
-Matrix *gaussian_blur(const Matrix *src, double sigma, size_t kernel_size);
+Matrix *gaussian_blur(const Matrix *src, float sigma, size_t kernel_size);
 
 /// @brief Applies adaptive Gaussian thresholding to an input image.
 ///
@@ -84,9 +84,9 @@ Matrix *gaussian_blur(const Matrix *src, double sigma, size_t kernel_size);
 /// image.
 /// @throw Throws if the @p max_value or @p sigma are invalid or if @p src is
 /// NULL.
-Matrix *adaptative_gaussian_thresholding(const Matrix *src, double max_value,
-                                         size_t kernel_size, double sigma,
-                                         double c);
+Matrix *adaptative_gaussian_thresholding(const Matrix *src, float max_value,
+                                         size_t kernel_size, float sigma,
+                                         float c);
 
 /// @brief Applies erosion to a matrix using a separable 2-pass approach
 /// (horizontal then vertical).
@@ -140,7 +140,7 @@ uint8_t pixel_to_grayscale(Pixel *pixel);
 /// @param[in] x The x-coordinate relative to the center of the kernel vector.
 /// @param[in] sigma The standard deviation of the Gaussian.
 /// @return The Gaussian value at the given coordinates.
-double gaussian_function(int x, double sigma);
+float gaussian_function(int x, float sigma);
 
 /// @brief Return the 1D Gaussian kernel for a given sigma and size
 ///
@@ -152,7 +152,7 @@ double gaussian_function(int x, double sigma);
 /// return NULL.
 /// @return The gaussian kernel vector or NULL if kernel_size is incorrect
 /// (even).
-double *gaussian_kernel_1d(double sigma, size_t kernel_size);
+float *gaussian_kernel_1d(float sigma, size_t kernel_size);
 
 /// @brief Clamp an integer value between a minimum and a maximum.
 /// @param[in] value The integer value to clamp.
@@ -175,7 +175,7 @@ int clamp(int value, int min, int max);
 /// @return Pointer to the matrix containing the horizontally
 ///         convolved image.
 /// @throw Throws if the @p src is NULL or kernel_size is even.
-Matrix *convolve_horizontally(const Matrix *src, const double *kernel,
+Matrix *convolve_horizontally(const Matrix *src, const float *kernel,
                               size_t kernel_size);
 
 /// @brief Performs a 1D vertical convolution on an image.
@@ -191,7 +191,7 @@ Matrix *convolve_horizontally(const Matrix *src, const double *kernel,
 /// @return Pointer to the matrix containing the vertically
 ///         convolved image.
 /// @throw Throws if the @p src is NULL or kernel_size is even.
-Matrix *convolve_vertically(const Matrix *src, const double *kernel,
+Matrix *convolve_vertically(const Matrix *src, const float *kernel,
                             size_t kernel_size);
 
 /// @brief Performs a 1D morphological transformation (erosion or dilation)

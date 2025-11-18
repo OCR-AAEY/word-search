@@ -1,8 +1,8 @@
 #ifndef TEST_SETTINGS_H
 #define TEST_SETTINGS_H
 
-/** The precesion with which double are compared using cr_*_float_eq. */
-#define EPSILON 1E-6
+/** The precesion with which float are compared using cr_*_float_eq. */
+#define EPSILON 1E-6f
 
 /** The number of times random test will be repeated. */
 #define REPEAT                                                                 \
