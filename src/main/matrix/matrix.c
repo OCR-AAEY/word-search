@@ -714,7 +714,7 @@ Matrix *mat_scale_to_28(Matrix *m)
 //     }
 // }
 
-// double mat_mean_squared_error(Matrix *actual, Matrix *expected)
+// float mat_mean_squared_error(Matrix *actual, Matrix *expected)
 // {
 //     if (actual->height != expected->height)
 //         errx(EXIT_FAILURE,
@@ -729,11 +729,11 @@ Matrix *mat_scale_to_28(Matrix *m)
 //              "(%zu vs %zu).",
 //              actual->height, expected->height);
 
-//     double sum = 0.0;
+//     float sum = 0.0f;
 
 //     for (size_t i = 0; i < actual->height * actual->width; i++)
 //     {
-//         double error = (actual->content[i] - expected->content[i]);
+//         float error = (actual->content[i] - expected->content[i]);
 //         sum += error * error;
 //     }
 
@@ -976,8 +976,8 @@ Matrix *mat_load_from_file(char *filename)
     // Read the matrix content.
     for (size_t i = 0; i < height * width; i++)
     {
-        r_out = read(fd, &res->content[i], sizeof(double));
-        if (r_out != sizeof(double))
+        r_out = read(fd, &res->content[i], sizeof(float));
+        if (r_out != sizeof(float))
             errx(EXIT_FAILURE,
                  "Invalid file %s: failed to read matrix's "
                  "%zuth coefficient.",
@@ -1019,8 +1019,8 @@ void mat_save_to_file(Matrix *m, char *filename)
     {
         for (size_t w = 0; w < m->width; w++)
         {
-            w_out = write(fd, mat_unsafe_coef_ptr(m, h, w), sizeof(double));
-            if (w_out != sizeof(double))
+            w_out = write(fd, mat_unsafe_coef_ptr(m, h, w), sizeof(float));
+            if (w_out != sizeof(float))
                 errx(EXIT_FAILURE,
                      "Failed to write file %s: failed to write matrix's "
                      "coefficient at position (h:%zu, w:%zu).",
