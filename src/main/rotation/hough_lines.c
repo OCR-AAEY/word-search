@@ -1,11 +1,8 @@
 #include "rotation/hough_lines.h"
 #include "utils/math/trigo.h"
 #include <err.h>
-#include <glib.h>
 #include <math.h>
 #include <stddef.h>
-#include <stdio.h>
-#include <time.h>
 
 Matrix *create_hough_accumulator_rotation(size_t height, size_t width,
                                           float theta_precision)
@@ -65,7 +62,7 @@ float populate_hough_lines_top_angle(Matrix *src, Matrix *accumulator,
     {
         for (size_t w = 0; w < width; w++)
         {
-            double pixel = *mat_unsafe_coef_ptr(src, h, w);
+            const double pixel = *mat_unsafe_coef_ptr(src, h, w);
             // if the pixel is not black, we skip it
             if (pixel != 0)
             {
@@ -110,23 +107,12 @@ float hough_transform_lines_top_angle(Matrix *src, float theta_precision)
     if (src == NULL)
         errx(EXIT_FAILURE, "The source matrix is NULL");
 
-    clock_t start, end;
-    start = clock();
-
     Matrix *accumulator = create_hough_accumulator_rotation(
         mat_height(src), mat_width(src), theta_precision);
 
-    end = clock();
-    printf("Create accumulator : %lf\n",
-           ((double)(end - start)) / CLOCKS_PER_SEC);
-
-    start = clock();
     float max_theta =
         populate_hough_lines_top_angle(src, accumulator, theta_precision);
 
-    end = clock();
-    printf("Populate accumulator : %lf\n",
-           ((double)(end - start)) / CLOCKS_PER_SEC);
     mat_free(accumulator);
 
     return max_theta;

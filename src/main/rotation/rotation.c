@@ -121,22 +121,15 @@ ImageData *rotate_image(ImageData *img, double angle)
 
 Matrix *auto_rotate_matrix(Matrix *img)
 {
-    clock_t start, end;
-    start = clock();
     float theta_angle = hough_transform_lines_top_angle(img, 1.0f);
-    end = clock();
-    printf("Hough transform lines : %lf\n",
-           ((double)(end - start)) / CLOCKS_PER_SEC);
+
     float rotation_angle = fmodf(theta_angle, 90);
     if (rotation_angle > 45)
     {
         rotation_angle = rotation_angle - 90;
     }
-    printf("Angle found : %f | Rotation needed :%f\n", theta_angle,
-           rotation_angle);
-    start = clock();
+    printf("Rotation applied :%f\n", rotation_angle);
+
     Matrix *rotated = rotate_matrix(img, rotation_angle);
-    end = clock();
-    printf("Rotation : %lf\n", ((double)(end - start)) / CLOCKS_PER_SEC);
     return rotated;
 }
