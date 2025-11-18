@@ -342,4 +342,6 @@ Matrix *mat_load_from_file(char *filename);
 
 void mat_save_to_file(Matrix *m, char *filename);
 
+size_t mat_max_h(Matrix *m);
+
 #endif

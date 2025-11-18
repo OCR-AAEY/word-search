@@ -16,6 +16,20 @@ struct Dataset
     size_t size;
 };
 
+Training_Data *td_create(Matrix *input, size_t expected_class)
+{
+    Training_Data *tuple = malloc(sizeof(Training_Data));
+    if (tuple == NULL)
+        errx(EXIT_FAILURE, "failed to malloc");
+
+    tuple->input = input;
+    tuple->expected = mat_create_zero(26, 1);
+    *mat_coef_ptr(tuple->expected, expected_class, 0) = 1.0;
+    tuple->expected_class = expected_class;
+
+    return tuple;
+}
+
 void td_free(Training_Data *td)
 {
     free(td->input);
@@ -46,13 +60,13 @@ void ds_add_tuple(Dataset *dataset, Training_Data *tuple)
     if (dataset->size >= dataset->max_size)
     {
         dataset->max_size += DATASET_SIZE_STEP;
-        Training_Data **ptr = realloc(dataset->content, dataset->max_size * sizeof(Training_Data));
+        Training_Data **ptr = realloc(
+            dataset->content, dataset->max_size * sizeof(Training_Data));
         if (ptr == NULL)
             errx(EXIT_FAILURE, "failed to realloc");
         dataset->content = ptr;
     }
 
-    // printf("%zu/%zu\n", dataset->size, dataset->max_size);
     dataset->content[dataset->size] = tuple;
     dataset->size++;
 }
@@ -82,14 +96,10 @@ Dataset *ds_load_from_directory(char *dirname)
         if (!S_ISREG(st.st_mode))
             continue;
 
-        Training_Data *tuple = malloc(sizeof(Training_Data));
-        if (tuple == NULL)
-            errx(EXIT_FAILURE, "failed to malloc");
+        Matrix *input = mat_load_from_file(path);
+        mat_inplace_vertical_flatten(input);
 
-        tuple->input = mat_load_from_file(path);
-        mat_inplace_vertical_flatten(tuple->input);
-        tuple->expected = mat_create_zero(26, 1);
-        *mat_coef_ptr(tuple->expected, entry->d_name[0] - 'a', 0) = 1.0;
+        Training_Data *tuple = td_create(input, entry->d_name[0] - 'a');
 
         ds_add_tuple(dataset, tuple);
     }

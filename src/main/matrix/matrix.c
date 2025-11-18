@@ -267,10 +267,10 @@ double *mat_unsafe_coef_ptr(const Matrix *m, size_t h, size_t w)
 
 double *mat_coef_ptr(const Matrix *m, size_t h, size_t w)
 {
-    if (h >= m->height)// (void)(*(char*)NULL);
+    if (h >= m->height)
         errx(EXIT_FAILURE, "Invalid height given. Expected < %zu and got %zu.",
              m->height, h);
-    if (w >= m->width)// (void)(*(char*)NULL);
+    if (w >= m->width)
         errx(EXIT_FAILURE, "Invalid width given. Expected < %zu and got %zu.",
              m->width, w);
     return mat_unsafe_coef_ptr(m, h, w);
@@ -278,10 +278,10 @@ double *mat_coef_ptr(const Matrix *m, size_t h, size_t w)
 
 double mat_coef(const Matrix *m, size_t h, size_t w)
 {
-    if (h >= m->height)// (void)(*(char*)NULL);
+    if (h >= m->height)
         errx(EXIT_FAILURE, "Invalid height given. Expected < %zu and got %zu.",
              m->height, h);
-    if (w >= m->width)// (void)(*(char*)NULL);
+    if (w >= m->width)
         errx(EXIT_FAILURE, "Invalid width given. Expected < %zu and got %zu.",
              m->width, w);
     return *mat_unsafe_coef_ptr(m, h, w);
@@ -584,14 +584,14 @@ Matrix *mat_scale_to_28(Matrix *m)
 
     // Compute scaling factors for height and width
     float scale_h = (float)m->height / (float)TARGET;
-    float scale_w = (float)m->width  / (float)TARGET;
+    float scale_w = (float)m->width / (float)TARGET;
 
     // Use the larger scale to preserve aspect ratio
     float factor = (scale_h > scale_w) ? scale_h : scale_w;
 
     // Compute offset to center the content
     float h_offset = ((TARGET * factor) - m->height) / 2.0f;
-    float w_offset = ((TARGET * factor) - m->width ) / 2.0f;
+    float w_offset = ((TARGET * factor) - m->width) / 2.0f;
 
     for (size_t h = 0; h < TARGET; h++)
     {
@@ -602,10 +602,14 @@ Matrix *mat_scale_to_28(Matrix *m)
             float sw = w * factor - w_offset;
 
             // Clamp to valid source range
-            if (sh < 0) sh = 0;
-            if (sw < 0) sw = 0;
-            if (sh > m->height - 1) sh = m->height - 1;
-            if (sw > m->width  - 1) sw = m->width  - 1;
+            if (sh < 0)
+                sh = 0;
+            if (sw < 0)
+                sw = 0;
+            if (sh > m->height - 1)
+                sh = m->height - 1;
+            if (sw > m->width - 1)
+                sw = m->width - 1;
 
             // Split into integer and fractional parts
             float sh_frac, sw_frac, sh_int, sw_int;
@@ -617,7 +621,7 @@ Matrix *mat_scale_to_28(Matrix *m)
 
             // Neighboring indices, clamped
             size_t ih2 = (ih + 1 < m->height) ? ih + 1 : ih;
-            size_t iw2 = (iw + 1 < m->width ) ? iw + 1 : iw;
+            size_t iw2 = (iw + 1 < m->width) ? iw + 1 : iw;
 
             // Bilinear interpolation weights
             float w_tl = (1.0f - sh_frac) * (1.0f - sw_frac);
@@ -627,10 +631,8 @@ Matrix *mat_scale_to_28(Matrix *m)
 
             // Compute interpolated pixel value
             float pixel =
-                w_tl * mat_coef(m, ih,  iw ) +
-                w_tr * mat_coef(m, ih,  iw2) +
-                w_bl * mat_coef(m, ih2, iw ) +
-                w_br * mat_coef(m, ih2, iw2);
+                w_tl * mat_coef(m, ih, iw) + w_tr * mat_coef(m, ih, iw2) +
+                w_bl * mat_coef(m, ih2, iw) + w_br * mat_coef(m, ih2, iw2);
 
             *mat_unsafe_coef_ptr(res, h, w) = roundf(pixel);
         }
@@ -638,7 +640,6 @@ Matrix *mat_scale_to_28(Matrix *m)
 
     return res;
 }
-
 
 // Matrix *mat_scale_to_28(Matrix *m)
 // {
@@ -1032,4 +1033,14 @@ void mat_save_to_file(Matrix *m, char *filename)
     fclose(file_stream);
 
     printf("written\n");
+}
+
+size_t mat_max_h(Matrix *m)
+{
+    size_t max_h = 0;
+    for (size_t h = 1; h < m->height; h++)
+        if (*mat_unsafe_coef_ptr(m, h, 0) > *mat_unsafe_coef_ptr(m, max_h, 0))
+            max_h = h;
+
+    return max_h;
 }
