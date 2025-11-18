@@ -1,11 +1,7 @@
 #include "rotation.h"
-// #include "pretreatment/visualization.h"
 #include "rotation/hough_lines.h"
 #include "utils/math/trigo.h"
 #include <err.h>
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
 
 Matrix *rotate_matrix(const Matrix *src, double angle)
 {
@@ -14,12 +10,11 @@ Matrix *rotate_matrix(const Matrix *src, double angle)
         errx(EXIT_FAILURE, "rotate_matrix: src matrix is NULL");
     }
 
-    size_t w = (size_t)mat_width(src);
-    size_t h = (size_t)mat_height(src);
+    size_t w = mat_width(src);
+    size_t h = mat_height(src);
 
-    double rad = angle * M_PI / 180.0;
-    double cos_angle = cos(rad);
-    double sin_angle = sin(rad);
+    double cos_angle = cosd(angle);
+    double sin_angle = sind(angle);
 
     size_t nw = (size_t)(fabs((double)w * cos_angle) +
                          fabs((double)h * sin_angle) + 0.5);
@@ -67,10 +62,11 @@ ImageData *rotate_image(ImageData *img, double angle)
     int h = img->height;
     Pixel *p = img->pixels;
 
-    double rad = angle * M_PI / 180.0;
+    double cos_angle = cosd(angle);
+    double sin_angle = sind(angle);
 
-    int nw = (int)(fabs(w * cos(rad)) + fabs(h * sin(rad)) + 0.5);
-    int nh = (int)(fabs(h * cos(rad)) + fabs(w * sin(rad)) + 0.5);
+    int nw = (int)(fabs(w * cos_angle) + fabs(h * sin_angle) + 0.5);
+    int nh = (int)(fabs(h * cos_angle) + fabs(w * sin_angle) + 0.5);
 
     Pixel *np = calloc(nw * nh, sizeof(Pixel));
     if (!np)
@@ -94,8 +90,8 @@ ImageData *rotate_image(ImageData *img, double angle)
     {
         for (int x = 0; x < nw; x++)
         {
-            double tx = (x - ncx) * cos(rad) - (y - ncy) * sin(rad) + cx;
-            double ty = (x - ncx) * sin(rad) + (y - ncy) * cos(rad) + cy;
+            double tx = (x - ncx) * cos_angle - (y - ncy) * sin_angle + cx;
+            double ty = (x - ncx) * sin_angle + (y - ncy) * cos_angle + cy;
 
             if (tx >= 0 && tx < w && ty >= 0 && ty < h)
             {
