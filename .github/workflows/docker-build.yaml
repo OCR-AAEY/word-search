@@ -32,7 +32,7 @@ jobs:
 
           # Checks if there are files that changed
           if [[ -n "$FILES" ]]; then
-            for file in ${{ steps.dockerfiles.outputs.dockerfiles }}; do
+            for file in $FILES do
               # Extract image name from Dockerfile filename
               IMAGE_NAME=$(basename "$file" .Dockerfile)
               IMAGE_BASE=ghcr.io/ocr-aaey/$IMAGE_NAME
