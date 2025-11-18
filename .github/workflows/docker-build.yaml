@@ -6,6 +6,10 @@ on:
       - '.github/docker/**.Dockerfile'   # Trigger only when Dockerfiles are changed
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
