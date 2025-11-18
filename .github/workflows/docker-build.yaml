@@ -34,7 +34,7 @@ jobs:
           if [[ -n "$FILES" ]]; then
             for file in $FILES do
               # Extract image name from Dockerfile filename
-              IMAGE_NAME=$(basename "$file" .Dockerfile)
+              IMAGE_NAME=${file%.Dockerfile}
               IMAGE_BASE=ghcr.io/ocr-aaey/$IMAGE_NAME
               COMMIT_TAG=${GITHUB_SHA::8}
 
