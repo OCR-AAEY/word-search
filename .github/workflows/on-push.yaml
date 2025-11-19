@@ -1,0 +1,21 @@
+name: On push
+
+on:
+  push:
+
+jobs:
+
+  build-docker-images:
+    name: Run build-docker-images
+    uses: ./.github/workflows/build-docker-images.yaml
+    secrets: inherit
+
+  build-and-test:
+    needs: build-docker-images
+    name: Run build-and-test
+    uses: ./.github/workflows/build-and-test.yaml
+
+  check-format:
+    needs: build-docker-images
+    name: Run check-format
+    uses: ./.github/workflows/check-format.yaml
