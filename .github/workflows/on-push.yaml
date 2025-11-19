@@ -18,8 +18,10 @@ jobs:
     needs: build-docker-images
     name: Run build-and-test
     uses: ./.github/workflows/build-and-test.yaml
+    secrets: inherit
 
   check-format:
     needs: build-docker-images
     name: Run check-format
     uses: ./.github/workflows/check-format.yaml
+    secrets: inherit
