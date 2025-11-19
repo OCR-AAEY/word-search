@@ -4,7 +4,9 @@ on:
   push:
 
 jobs:
+
   check-format:
+    name: Check format
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/ocr-aaey/ci-format:latest

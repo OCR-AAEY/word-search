@@ -1,21 +1,23 @@
 name: Build and test
 
 on:
-  push:
+  workflow_call:
 
 jobs:
-  build:
+
+  build-and-test:
+    name: Build and test
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/ocr-aaey/ci-build-test:latest
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GHCR_PAT }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Build project
+        shell: bash
         run: |
           make VERBOSE=1 XCFLAGS=-Werror test
