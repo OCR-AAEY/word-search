@@ -8,10 +8,9 @@
 /// @param[in] src Pointer to the source binary image matrix. Must not be NULL.
 /// @param[in] theta_precision Angular resolution in degrees for the Hough
 /// accumulator. Must be strictly positive.
-/// @return An array of pointers to `Line` structures representing detected
-/// lines.
+/// @return The angle of the most probable line detected in degrees (0 to 180°).
 /// @throw Throws if `src` is NULL or `theta_precision <= 0`.
-float hough_transform_lines_top_angle(Matrix *src, float theta_precision);
+float hough_transform_find_peak_angle(Matrix *src, float theta_precision);
 
 /// ============= internal functions ===============
 
@@ -32,7 +31,7 @@ Matrix *create_hough_accumulator_rotation(size_t height, size_t width,
                                           float theta_precision);
 /// @brief Populates a Hough accumulator from a source image.
 /// For each pixel that is black (`0`), increment the r values corresponding to
-/// all theta angles possible.
+/// all theta angles possible. And returns the angle for the most voted line.
 /// @param[in] src Pointer to the source binary image matrix. Must not be NULL.
 /// @param[in,out] accumulator Pointer to the accumulator matrix to populate.
 /// Must not be NULL.
@@ -41,6 +40,6 @@ Matrix *create_hough_accumulator_rotation(size_t height, size_t width,
 /// @returns The theta angle of the line with the highest vote count in the
 /// accumulator.
 /// @throw Throws if `src` or `accumulator` are NULL.
-float populate_hough_lines_top_angle(Matrix *src, Matrix *accumulator,
+float populate_acc_find_peak_theta(Matrix *src, Matrix *accumulator,
                                      float theta_precision);
 #endif

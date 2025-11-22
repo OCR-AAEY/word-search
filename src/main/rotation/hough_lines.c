@@ -27,7 +27,7 @@ Matrix *create_hough_accumulator_rotation(size_t height, size_t width,
     return accumulator;
 }
 
-float populate_hough_lines_top_angle(Matrix *src, Matrix *accumulator,
+float populate_acc_find_peak_theta(Matrix *src, Matrix *accumulator,
                                      float theta_precision)
 {
     if (src == NULL)
@@ -102,7 +102,7 @@ float populate_hough_lines_top_angle(Matrix *src, Matrix *accumulator,
     return max_voted_theta;
 }
 
-float hough_transform_lines_top_angle(Matrix *src, float theta_precision)
+float hough_transform_find_peak_angle(Matrix *src, float theta_precision)
 {
     if (src == NULL)
         errx(EXIT_FAILURE, "The source matrix is NULL");
@@ -111,7 +111,7 @@ float hough_transform_lines_top_angle(Matrix *src, float theta_precision)
         mat_height(src), mat_width(src), theta_precision);
 
     float max_theta =
-        populate_hough_lines_top_angle(src, accumulator, theta_precision);
+        populate_acc_find_peak_theta(src, accumulator, theta_precision);
 
     mat_free(accumulator);
 
