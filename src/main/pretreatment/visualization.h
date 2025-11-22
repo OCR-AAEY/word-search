@@ -8,7 +8,7 @@
 /// @param[in] x X-coordinate of the point center.
 /// @param[in] y Y-coordinate of the point center.
 /// @param[in] radius Radius of the point circle.
-void draw_point(cairo_t *cr, double x, double y, double radius);
+void draw_point(cairo_t *cr, float x, float y, float radius);
 
 /// @brief Draws multiple points on an input image and saves the result as a PNG
 /// file.

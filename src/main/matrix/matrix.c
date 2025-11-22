@@ -7,7 +7,7 @@
 #include "utils/math/sigmoid.h"
 #include "utils/random/random.h"
 
-/// @brief A 2D matrix of double-precision floating point numbers.
+/// @brief A 2D matrix of single-precision floating point numbers.
 struct Matrix
 {
     /// @brief Number of rows (height) of the matrix.
@@ -15,14 +15,14 @@ struct Matrix
     /// @brief Number of columns (width) of the matrix.
     size_t width;
     /// @brief The matrix elements stored in a contiguous row-major array.
-    double *content;
+    float *content;
 };
 
 inline size_t mat_height(const Matrix *m) { return m->height; }
 
 inline size_t mat_width(const Matrix *m) { return m->width; }
 
-Matrix *mat_create(size_t height, size_t width, double value)
+Matrix *mat_create(size_t height, size_t width, float value)
 {
     if (height == 0)
         errx(EXIT_FAILURE,
@@ -35,7 +35,7 @@ Matrix *mat_create(size_t height, size_t width, double value)
              "non-zero.",
              width);
 
-    double *content = calloc(height * width, sizeof(double));
+    float *content = calloc(height * width, sizeof(float));
     if (content == NULL)
         errx(EXIT_FAILURE, "Failed to allocate memory for matrix content.");
 
@@ -63,7 +63,7 @@ Matrix *mat_create_zero(size_t height, size_t width)
              "non-zero.",
              width);
 
-    double *content = calloc(height * width, sizeof(double));
+    float *content = calloc(height * width, sizeof(float));
     if (content == NULL)
         errx(EXIT_FAILURE, "Failed to allocate memory for matrix content.");
 
@@ -75,7 +75,7 @@ Matrix *mat_create_zero(size_t height, size_t width)
     return m;
 }
 
-Matrix *mat_create_from_arr(size_t height, size_t width, const double *content)
+Matrix *mat_create_from_arr(size_t height, size_t width, const float *content)
 {
     if (height == 0)
         errx(EXIT_FAILURE,
@@ -92,7 +92,7 @@ Matrix *mat_create_from_arr(size_t height, size_t width, const double *content)
     if (m == NULL)
         errx(EXIT_FAILURE, "Failed to allocate memory for matrix struct.");
 
-    double *content_copy = calloc(height * width, sizeof(double));
+    float *content_copy = calloc(height * width, sizeof(float));
     if (content_copy == NULL)
         errx(EXIT_FAILURE,
              "Failed to allocate memory for matrix struct's content.");
@@ -106,8 +106,8 @@ Matrix *mat_create_from_arr(size_t height, size_t width, const double *content)
     return m;
 }
 
-Matrix *mat_create_uniform_random(size_t height, size_t width, double min,
-                                  double max)
+Matrix *mat_create_uniform_random(size_t height, size_t width, float min,
+                                  float max)
 {
     if (height == 0)
         errx(EXIT_FAILURE,
@@ -120,13 +120,13 @@ Matrix *mat_create_uniform_random(size_t height, size_t width, double min,
              "non-zero.",
              width);
 
-    double *content = calloc(height * width, sizeof(double));
+    float *content = calloc(height * width, sizeof(float));
     if (content == NULL)
         errx(EXIT_FAILURE, "Failed to allocate memory for matrix content.");
 
     for (size_t i = 0; i < height * width; i++)
     {
-        content[i] = rand_d_uniform_nm(min, max);
+        content[i] = rand_f_uniform_nm(min, max);
     }
 
     Matrix *m = malloc(sizeof(Matrix));
@@ -153,13 +153,13 @@ Matrix *mat_create_gaussian_random(size_t height, size_t width)
              "non-zero.",
              width);
 
-    double *content = calloc(height * width, sizeof(double));
+    float *content = calloc(height * width, sizeof(float));
     if (content == NULL)
         errx(EXIT_FAILURE, "Failed to allocate memory for matrix content.");
 
     for (size_t i = 0; i < height * width; i++)
     {
-        content[i] = rand_d_gaussian();
+        content[i] = rand_f_gaussian();
     }
 
     Matrix *m = malloc(sizeof(Matrix));
@@ -173,8 +173,8 @@ Matrix *mat_create_gaussian_random(size_t height, size_t width)
     return m;
 }
 
-Matrix *mat_create_normal_random(size_t height, size_t width, double mean,
-                                 double stddev)
+Matrix *mat_create_normal_random(size_t height, size_t width, float mean,
+                                 float stddev)
 {
     if (height == 0)
         errx(EXIT_FAILURE,
@@ -187,7 +187,7 @@ Matrix *mat_create_normal_random(size_t height, size_t width, double mean,
              "non-zero.",
              width);
 
-    double *content = calloc(height * width, sizeof(double));
+    float *content = calloc(height * width, sizeof(float));
     if (content == NULL)
         errx(EXIT_FAILURE, "Failed to allocate memory for matrix content.");
 
@@ -231,7 +231,7 @@ int mat_eq(Matrix *a, Matrix *b)
     if (a->height != b->height || a->width != b->width)
         return 0;
 
-    double epsilon = 1E-9;
+    float epsilon = 1E-9;
     for (size_t i = 0; i < a->height * a->width; i++)
     {
         if (fabs(a->content[i] - b->content[i]) > epsilon)
@@ -243,7 +243,7 @@ int mat_eq(Matrix *a, Matrix *b)
 
 Matrix *mat_deepcopy(const Matrix *m)
 {
-    double *content = calloc(m->height * m->width, sizeof(double));
+    float *content = calloc(m->height * m->width, sizeof(float));
     if (content == NULL)
         errx(EXIT_FAILURE, "Failed to allocate memory for deepcopy content.");
 
@@ -259,12 +259,12 @@ Matrix *mat_deepcopy(const Matrix *m)
     return new_m;
 }
 
-double *mat_unsafe_coef_ptr(const Matrix *m, size_t h, size_t w)
+float *mat_unsafe_coef_ptr(const Matrix *m, size_t h, size_t w)
 {
     return m->content + h * m->width + w;
 }
 
-double *mat_coef_ptr(const Matrix *m, size_t h, size_t w)
+float *mat_coef_ptr(const Matrix *m, size_t h, size_t w)
 {
     if (h >= m->height)
         errx(EXIT_FAILURE, "Invalid height given. Expected < %zu and got %zu.",
@@ -275,7 +275,7 @@ double *mat_coef_ptr(const Matrix *m, size_t h, size_t w)
     return mat_unsafe_coef_ptr(m, h, w);
 }
 
-double mat_coef(const Matrix *m, size_t h, size_t w)
+float mat_coef(const Matrix *m, size_t h, size_t w)
 {
     if (h >= m->height)
         errx(EXIT_FAILURE, "Invalid height given. Expected < %zu and got %zu.",
@@ -362,7 +362,7 @@ void mat_inplace_subtraction(Matrix *a, const Matrix *b)
     }
 }
 
-Matrix *mat_scalar_multiplication(const Matrix *m, double a)
+Matrix *mat_scalar_multiplication(const Matrix *m, float a)
 {
     Matrix *res = mat_create_zero(m->height, m->width);
 
@@ -374,7 +374,7 @@ Matrix *mat_scalar_multiplication(const Matrix *m, double a)
     return res;
 }
 
-void mat_inplace_scalar_multiplication(Matrix *m, double a)
+void mat_inplace_scalar_multiplication(Matrix *m, float a)
 {
     for (size_t i = 0; i < m->height * m->width; i++)
     {
@@ -484,7 +484,7 @@ void mat_inplace_sigmoid_derivative(Matrix *m)
     }
 }
 
-double mat_mean_squared_error(Matrix *actual, Matrix *expected)
+float mat_mean_squared_error(Matrix *actual, Matrix *expected)
 {
     if (actual->height != expected->height)
         errx(EXIT_FAILURE,
@@ -497,11 +497,11 @@ double mat_mean_squared_error(Matrix *actual, Matrix *expected)
              "(%zu vs %zu).",
              actual->height, expected->height);
 
-    double sum = 0.0;
+    float sum = 0.0f;
 
     for (size_t i = 0; i < actual->height * actual->width; i++)
     {
-        double error = (actual->content[i] - expected->content[i]);
+        float error = actual->content[i] - expected->content[i];
         sum += error * error;
     }
 
@@ -533,7 +533,7 @@ void mat_inplace_transpose(Matrix *m)
             {
                 size_t i = h * m->width + w;
                 size_t j = w * m->width + h;
-                double tmp = m->content[i];
+                float tmp = m->content[i];
                 m->content[i] = m->content[j];
                 m->content[j] = tmp;
             }
@@ -546,7 +546,7 @@ void mat_inplace_transpose(Matrix *m)
         for (size_t i = 0; i < cycles; i++)
         {
             size_t current = i;
-            double tmp = m->content[i];
+            float tmp = m->content[i];
 
             while (1)
             {
@@ -611,7 +611,7 @@ Matrix *mat_normalize(const Matrix *m)
 {
     Matrix *res = mat_create_zero(m->height, m->width);
 
-    double sum = 0.0;
+    float sum = 0.0f;
 
     for (size_t i = 0; i < m->height * m->width; i++)
     {
@@ -631,7 +631,7 @@ Matrix *mat_normalize(const Matrix *m)
 
 void mat_inplace_normalize(Matrix *m)
 {
-    double sum = 0.0;
+    float sum = 0.0f;
 
     for (size_t i = 0; i < m->height * m->width; i++)
     {
@@ -647,7 +647,7 @@ void mat_inplace_normalize(Matrix *m)
     }
 }
 
-Matrix *mat_map(const Matrix *m, double (*f)(double))
+Matrix *mat_map(const Matrix *m, float (*f)(float))
 {
     Matrix *res = mat_create_zero(m->height, m->width);
 
@@ -659,7 +659,7 @@ Matrix *mat_map(const Matrix *m, double (*f)(double))
     return res;
 }
 
-void mat_inplace_map(Matrix *m, double (*f)(double))
+void mat_inplace_map(Matrix *m, float (*f)(float))
 {
     for (size_t i = 0; i < m->height * m->width; i++)
     {
@@ -667,8 +667,7 @@ void mat_inplace_map(Matrix *m, double (*f)(double))
     }
 }
 
-Matrix *mat_map_with_indexes(const Matrix *m,
-                             double (*f)(double, size_t, size_t))
+Matrix *mat_map_with_indexes(const Matrix *m, float (*f)(float, size_t, size_t))
 {
     Matrix *res = mat_create_zero(m->height, m->width);
 
@@ -682,8 +681,7 @@ Matrix *mat_map_with_indexes(const Matrix *m,
     return res;
 }
 
-void mat_inplace_map_with_indexes(Matrix *m,
-                                  double (*f)(double, size_t, size_t))
+void mat_inplace_map_with_indexes(Matrix *m, float (*f)(float, size_t, size_t))
 {
     for (size_t h = 0; h < m->height; h++)
     {

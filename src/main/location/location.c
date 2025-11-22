@@ -143,8 +143,8 @@ size_t *histogram_horizontal(Matrix *src, BoundingBox *area, size_t *size_out)
     {
         for (size_t w = 0; w < vert_size; w++)
         {
-            double pixel = mat_coef(src, h + area->tl.y, w + area->tl.x);
-            if (pixel == 0)
+            float pixel = mat_coef(src, h + area->tl.y, w + area->tl.x);
+            if (pixel == 0.0f)
             {
                 histogram[h] += 1;
             }
@@ -283,8 +283,8 @@ size_t *histogram_vertical(Matrix *src, BoundingBox *area, size_t *size_out)
     {
         for (size_t w = 0; w < *size_out; w++)
         {
-            double pixel = mat_coef(src, h + area->tl.y, w + area->tl.x);
-            if (pixel == 0)
+            float pixel = mat_coef(src, h + area->tl.y, w + area->tl.x);
+            if (pixel == 0.0f)
             {
                 histogram[w] += 1;
             }
@@ -534,10 +534,10 @@ int main(int argc, char **argv)
     if (image != 1 && image != 2)
         errx(EXIT_FAILURE, "The image argument must be either 1 or 2");
 
-    double angle;
+    float angle;
     // char *angle_arg = argv[3];
-    // double angle = atof(angle_arg);
-    // if (ABS(angle) > 180)
+    // float angle = atof(angle_arg);
+    // if (ABS(angle) > 180.0f)
     //     errx(EXIT_FAILURE,
     //          "The angle argument must be a float between -180 and 180");
 

@@ -35,14 +35,14 @@ void save_image_region(const Matrix *matrix, const char *name, size_t x0,
         guchar *p = pixels + j * rowstride;
         for (size_t i = 0; i < width; i++)
         {
-            double val = mat_coef(matrix, j + y0, i + x0);
+            float val = mat_coef(matrix, j + y0, i + x0);
 
             if (val > 255 || val < 0)
             {
                 errx(EXIT_FAILURE, "value out of bound");
             }
 
-            guchar value = (guchar)round(val);
+            guchar value = (guchar)roundf(val);
             p[3 * i + 0] = value;
             p[3 * i + 1] = value;
             p[3 * i + 2] = value;
