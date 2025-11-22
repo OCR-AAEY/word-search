@@ -15,8 +15,6 @@ xnor.net
 /rotation
 /app
 /run_tests
-/rotate
-
 # IDEs
 .idea/
 .vscode/
