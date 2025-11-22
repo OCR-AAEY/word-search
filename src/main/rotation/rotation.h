@@ -31,6 +31,11 @@ Matrix *rotate_matrix(const Matrix *src, float angle);
  */
 ImageData *rotate_image(ImageData *img, float angle);
 
-Matrix *auto_rotate_matrix(Matrix *img);
+/// @brief Deskews automatically the image, using hough lines to detect the
+/// rotated angle of the grid.
+/// @param img Pointer to the matrix of the image to rotate automatically
+/// @return Returns a pointer to a newly allocated Matrix rerpesenting the
+/// deskewed image.
+Matrix *auto_deskew_matrix(Matrix *img);
 
 #endif
