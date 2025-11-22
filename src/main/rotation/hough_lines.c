@@ -11,7 +11,7 @@ Matrix *create_hough_accumulator_rotation(size_t height, size_t width,
         errx(EXIT_FAILURE, "Theta precision must be strictly positive");
 
     // Maximum possible distance from the origin of the image (image diagonal)
-    double diag = sqrt((double)height * height + (double)width * width);
+    float diag = sqrt((float)height * height + (float)width * width);
     size_t r_max = (size_t)ceil(diag);
 
     // Number of rows = 2*r_max + 1 to include both negative and positive r
@@ -40,12 +40,12 @@ float populate_acc_find_peak_theta(Matrix *src, Matrix *accumulator,
     size_t r_max = (mat_height(accumulator) - 1) / 2;
 
     // pre compute cos and sin values, like a cache
-    double *cosd_table = malloc(theta_index_max * sizeof(double));
-    double *sind_table = malloc(theta_index_max * sizeof(double));
+    float *cosd_table = malloc(theta_index_max * sizeof(float));
+    float *sind_table = malloc(theta_index_max * sizeof(float));
 
     for (size_t theta_index = 0; theta_index < theta_index_max; theta_index++)
     {
-        double theta = theta_index * theta_precision;
+        float theta = (float)theta_index * theta_precision;
         cosd_table[theta_index] = cosd(theta);
         sind_table[theta_index] = sind(theta);
     }
@@ -59,7 +59,7 @@ float populate_acc_find_peak_theta(Matrix *src, Matrix *accumulator,
     {
         for (size_t w = 0; w < width; w++)
         {
-            const double pixel = *mat_unsafe_coef_ptr(src, h, w);
+            const float pixel = *mat_unsafe_coef_ptr(src, h, w);
             // if the pixel is not black, we skip it
             if (pixel != 0)
                 continue;
@@ -70,15 +70,15 @@ float populate_acc_find_peak_theta(Matrix *src, Matrix *accumulator,
             for (size_t theta_index = 0; theta_index < theta_index_max;
                  theta_index++)
             {
-                double r = (double)w * cosd_table[theta_index] +
-                           (double)h * sind_table[theta_index];
+                float r = (float)w * cosd_table[theta_index] +
+                           (float)h * sind_table[theta_index];
 
                 // since r can be at least -r_max, we shift it to an integer
                 // to have the index in the accumulator
                 // use cast and +0.5 as a round arithmetic operator (faster)
                 size_t r_index = (size_t)(r + r_max + 0.5);
 
-                double *accumulator_cell =
+                float *accumulator_cell =
                     mat_unsafe_coef_ptr(accumulator, r_index, theta_index);
                 (*accumulator_cell)++;
 
