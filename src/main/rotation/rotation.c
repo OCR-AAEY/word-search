@@ -16,10 +16,10 @@ Matrix *rotate_matrix(const Matrix *src, float angle)
     float cos_angle = cosd(angle);
     float sin_angle = sind(angle);
 
-    size_t nw = (size_t)(fabs((float)w * cos_angle) +
-                         fabs((float)h * sin_angle) + 0.5);
-    size_t nh = (size_t)(fabs((float)h * cos_angle) +
-                         fabs((float)w * sin_angle) + 0.5);
+    size_t nw =
+        (size_t)(fabs((float)w * cos_angle) + fabs((float)h * sin_angle) + 0.5);
+    size_t nh =
+        (size_t)(fabs((float)h * cos_angle) + fabs((float)w * sin_angle) + 0.5);
 
     Matrix *rotated = mat_create_zero(nh, nw);
 
@@ -40,8 +40,10 @@ Matrix *rotate_matrix(const Matrix *src, float angle)
     {
         for (size_t x = 0; x < nw; x++)
         {
-            float tx = ((float)x - ncx) * cos_angle - ((float)y - ncy) * sin_angle + cx;
-            float ty = ((float)x - ncx) * sin_angle + ((float)y - ncy) * cos_angle + cy;
+            float tx = ((float)x - ncx) * cos_angle -
+                       ((float)y - ncy) * sin_angle + cx;
+            float ty = ((float)x - ncx) * sin_angle +
+                       ((float)y - ncy) * cos_angle + cy;
 
             if (tx >= 0.0f && tx < (float)w && ty >= 0.0f && ty < (float)h)
             {
@@ -65,8 +67,10 @@ ImageData *rotate_image(ImageData *img, float angle)
     float cos_angle = cosd(angle);
     float sin_angle = sind(angle);
 
-    int nw = (int)(fabs((float)w * cos_angle) + fabs((float)h * sin_angle) + 0.5);
-    int nh = (int)(fabs((float)h * cos_angle) + fabs((float)w * sin_angle) + 0.5);
+    int nw =
+        (int)(fabs((float)w * cos_angle) + fabs((float)h * sin_angle) + 0.5);
+    int nh =
+        (int)(fabs((float)h * cos_angle) + fabs((float)w * sin_angle) + 0.5);
 
     Pixel *np = calloc(nw * nh, sizeof(Pixel));
     if (np == NULL)
@@ -90,8 +94,10 @@ ImageData *rotate_image(ImageData *img, float angle)
     {
         for (int x = 0; x < nw; x++)
         {
-            float tx = ((float)x - ncx) * cos_angle - ((float)y - ncy) * sin_angle + cx;
-            float ty = ((float)x - ncx) * sin_angle + ((float)y - ncy) * cos_angle + cy;
+            float tx = ((float)x - ncx) * cos_angle -
+                       ((float)y - ncy) * sin_angle + cx;
+            float ty = ((float)x - ncx) * sin_angle +
+                       ((float)y - ncy) * cos_angle + cy;
 
             if (tx >= 0.0f && tx < (float)w && ty >= 0.0f && ty < (float)h)
             {
