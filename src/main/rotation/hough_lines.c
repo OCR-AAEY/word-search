@@ -71,7 +71,7 @@ float populate_acc_find_peak_theta(Matrix *src, Matrix *accumulator,
                  theta_index++)
             {
                 float r = (float)w * cosd_table[theta_index] +
-                           (float)h * sind_table[theta_index];
+                          (float)h * sind_table[theta_index];
 
                 // since r can be at least -r_max, we shift it to an integer
                 // to have the index in the accumulator
