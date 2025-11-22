@@ -121,7 +121,7 @@ ImageData *rotate_image(ImageData *img, float angle)
     return out;
 }
 
-Matrix *auto_rotate_matrix(Matrix *img)
+Matrix *auto_deskew_matrix(Matrix *img)
 {
     float theta_angle = hough_transform_find_peak_angle(img, 1.0f);
 
