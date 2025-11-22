@@ -1,8 +1,7 @@
 #include "rotation.h"
-#include "pretreatment/visualization.h"
+#include "rotation/hough_lines.h"
+#include "utils/math/trigo.h"
 #include <err.h>
-#include <math.h>
-#include <stdlib.h>
 
 Matrix *rotate_matrix(const Matrix *src, float angle)
 {
@@ -14,22 +13,15 @@ Matrix *rotate_matrix(const Matrix *src, float angle)
     size_t w = mat_width(src);
     size_t h = mat_height(src);
 
-    float rad = angle * M_PI / 180.0f;
+    float cos_angle = cosd(angle);
+    float sin_angle = sind(angle);
 
-    size_t nw = (size_t)(fabsf((float)w * cosf(rad)) +
-                         fabsf((float)h * sinf(rad)) + 0.5f);
-    size_t nh = (size_t)(fabsf((float)h * cosf(rad)) +
-                         fabsf((float)w * sinf(rad)) + 0.5f);
+    size_t nw =
+        (size_t)(fabs((float)w * cos_angle) + fabs((float)h * sin_angle) + 0.5);
+    size_t nh =
+        (size_t)(fabs((float)h * cos_angle) + fabs((float)w * sin_angle) + 0.5);
 
-    Matrix *rotated = mat_create_zero(nh, nw);
-
-    for (size_t y = 0; y < nh; y++)
-    {
-        for (size_t x = 0; x < nw; x++)
-        {
-            *mat_coef_ptr(rotated, y, x) = 255.0f;
-        }
-    }
+    Matrix *rotated = mat_create(nh, nw, 255.0f);
 
     float cx = (float)w / 2.0f;
     float cy = (float)h / 2.0f;
@@ -40,10 +32,10 @@ Matrix *rotate_matrix(const Matrix *src, float angle)
     {
         for (size_t x = 0; x < nw; x++)
         {
-            float tx = ((float)x - ncx) * cosf(rad) -
-                       ((float)y - ncy) * sinf(rad) + cx;
-            float ty = ((float)x - ncx) * sinf(rad) +
-                       ((float)y - ncy) * cosf(rad) + cy;
+            float tx = ((float)x - ncx) * cos_angle -
+                       ((float)y - ncy) * sin_angle + cx;
+            float ty = ((float)x - ncx) * sin_angle +
+                       ((float)y - ncy) * cos_angle + cy;
 
             if (tx >= 0.0f && tx < (float)w && ty >= 0.0f && ty < (float)h)
             {
@@ -64,15 +56,16 @@ ImageData *rotate_image(ImageData *img, float angle)
     int h = img->height;
     Pixel *p = img->pixels;
 
-    float rad = angle * M_PI / 180.0;
+    float cos_angle = cosd(angle);
+    float sin_angle = sind(angle);
 
     int nw =
-        (int)(fabsf((float)w * cosf(rad)) + fabsf((float)h * sinf(rad)) + 0.5f);
+        (int)(fabs((float)w * cos_angle) + fabs((float)h * sin_angle) + 0.5);
     int nh =
-        (int)(fabsf((float)h * cosf(rad)) + fabsf((float)w * sinf(rad)) + 0.5f);
+        (int)(fabs((float)h * cos_angle) + fabs((float)w * sin_angle) + 0.5);
 
     Pixel *np = calloc(nw * nh, sizeof(Pixel));
-    if (!np)
+    if (np == NULL)
     {
         errx(EXIT_FAILURE, "rotate_image malloc fail");
     }
@@ -93,12 +86,12 @@ ImageData *rotate_image(ImageData *img, float angle)
     {
         for (int x = 0; x < nw; x++)
         {
-            float tx = ((float)x - ncx) * cosf(rad) -
-                       ((float)y - ncy) * sinf(rad) + cx;
-            float ty = ((float)x - ncx) * sinf(rad) +
-                       ((float)y - ncy) * cosf(rad) + cy;
+            float tx = ((float)x - ncx) * cos_angle -
+                       ((float)y - ncy) * sin_angle + cx;
+            float ty = ((float)x - ncx) * sin_angle +
+                       ((float)y - ncy) * cos_angle + cy;
 
-            if (tx >= 0 && tx < w && ty >= 0 && ty < h)
+            if (tx >= 0.0f && tx < (float)w && ty >= 0.0f && ty < (float)h)
             {
                 int ix = (int)tx;
                 int iy = (int)ty;
@@ -118,4 +111,19 @@ ImageData *rotate_image(ImageData *img, float angle)
     out->pixels = np;
 
     return out;
+}
+
+Matrix *auto_deskew_matrix(Matrix *img)
+{
+    float theta_angle = hough_transform_find_peak_angle(img, 1.0f);
+
+    float rotation_angle = fmodf(theta_angle, 90.0f);
+    if (rotation_angle > 45)
+    {
+        rotation_angle = rotation_angle - 90.0f;
+    }
+    // printf("Rotation applied :%f\n", rotation_angle);
+
+    Matrix *rotated = rotate_matrix(img, rotation_angle);
+    return rotated;
 }
