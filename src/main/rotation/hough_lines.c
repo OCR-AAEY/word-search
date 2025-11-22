@@ -7,7 +7,7 @@
 Matrix *create_hough_accumulator_rotation(size_t height, size_t width,
                                           float theta_precision)
 {
-    if (theta_precision <= 0)
+    if (theta_precision <= 0.0f)
         errx(EXIT_FAILURE, "Theta precision must be strictly positive");
 
     // Maximum possible distance from the origin of the image (image diagonal)
@@ -19,7 +19,7 @@ Matrix *create_hough_accumulator_rotation(size_t height, size_t width,
     size_t acc_height = 2 * r_max + 1;
 
     // Number of columns = number of theta steps (0°..180° exclusive)
-    size_t acc_width = (size_t)round(180.0 / theta_precision);
+    size_t acc_width = (size_t)round(180.0f / theta_precision);
 
     // columns are the theta values, and lines are the r values
     Matrix *accumulator = mat_create_zero(acc_height, acc_width);
@@ -28,29 +28,26 @@ Matrix *create_hough_accumulator_rotation(size_t height, size_t width,
 }
 
 float populate_acc_find_peak_theta(Matrix *src, Matrix *accumulator,
-                                     float theta_precision)
+                                   float theta_precision)
 {
-    if (src == NULL)
-        errx(EXIT_FAILURE, "The source matrix is NULL");
-
     if (accumulator == NULL)
         errx(EXIT_FAILURE, "The accumulator matrix is NULL");
 
     size_t height = mat_height(src);
     size_t width = mat_width(src);
-    size_t theta_max = mat_width(accumulator);
+    size_t theta_index_max = mat_width(accumulator);
     // according to the definition of the accumulator height
     size_t r_max = (mat_height(accumulator) - 1) / 2;
 
     // pre compute cos and sin values, like a cache
-    double *cosd_table = malloc(theta_max * sizeof(double));
-    double *sind_table = malloc(theta_max * sizeof(double));
+    double *cosd_table = malloc(theta_index_max * sizeof(double));
+    double *sind_table = malloc(theta_index_max * sizeof(double));
 
-    for (size_t t = 0; t < theta_max; t++)
+    for (size_t theta_index = 0; theta_index < theta_index_max; theta_index++)
     {
-        double theta = t * theta_precision;
-        cosd_table[t] = cosd(theta);
-        sind_table[t] = sind(theta);
+        double theta = theta_index * theta_precision;
+        cosd_table[theta_index] = cosd(theta);
+        sind_table[theta_index] = sind(theta);
     }
 
     // initialize the max_theta value and the max_count of votes to keep track
@@ -65,16 +62,14 @@ float populate_acc_find_peak_theta(Matrix *src, Matrix *accumulator,
             const double pixel = *mat_unsafe_coef_ptr(src, h, w);
             // if the pixel is not black, we skip it
             if (pixel != 0)
-            {
                 continue;
-            }
+
             // for all the theta possible we calculate the r associated
             // this is derived from conversion between cartesian and polar
             // coordinates
-            for (size_t theta_index = 0; theta_index < theta_max; theta_index++)
+            for (size_t theta_index = 0; theta_index < theta_index_max;
+                 theta_index++)
             {
-                // theta_max is the maximum index for theta in the accumulator
-                // since we have a step of theta_precision, we have :
                 double r = (double)w * cosd_table[theta_index] +
                            (double)h * sind_table[theta_index];
 

@@ -29,6 +29,7 @@ float hough_transform_find_peak_angle(Matrix *src, float theta_precision);
 /// @throw Throws if `theta_precision <= 0`.
 Matrix *create_hough_accumulator_rotation(size_t height, size_t width,
                                           float theta_precision);
+
 /// @brief Populates a Hough accumulator from a source image.
 /// For each pixel that is black (`0`), increment the r values corresponding to
 /// all theta angles possible. And returns the angle for the most voted line.
@@ -39,7 +40,7 @@ Matrix *create_hough_accumulator_rotation(size_t height, size_t width,
 /// strictly positive.
 /// @returns The theta angle of the line with the highest vote count in the
 /// accumulator.
-/// @throw Throws if `src` or `accumulator` are NULL.
+/// @throw Throws if `accumulator` is NULL.
 float populate_acc_find_peak_theta(Matrix *src, Matrix *accumulator,
-                                     float theta_precision);
+                                   float theta_precision);
 #endif
