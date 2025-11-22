@@ -117,7 +117,7 @@ ImageData *rotate_image(ImageData *img, double angle)
 
 Matrix *auto_rotate_matrix(Matrix *img)
 {
-    float theta_angle = hough_transform_lines_top_angle(img, 1.0f);
+    float theta_angle = hough_transform_find_peak_angle(img, 1.0f);
 
     float rotation_angle = fmodf(theta_angle, 90);
     if (rotation_angle > 45)
