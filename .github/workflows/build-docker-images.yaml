@@ -1,0 +1,60 @@
+name: Build Docker images
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-docker-images:
+    name: Build Docker images
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if Dockerfiles have changed
+        id: check
+        run: |
+          FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.github/docker/.*\.Dockerfile$' || true)
+
+          if [[ -z "$FILES" ]]; then
+            echo "No Dockerfile changes detected."
+            echo "should_build=false" >> $GITHUB_OUTPUT
+          else
+            echo "Dockerfile changes detected:"
+            echo "$FILES"
+            echo "should_build=true" >> $GITHUB_OUTPUT
+            echo "FILES=$FILES" >> $GITHUB_ENV
+          fi
+
+      - name: Log in to GHCR
+        if: steps.check.outputs.should_build == 'true'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Build and push Docker images
+        if: steps.check.outputs.should_build == 'true'
+        run: |
+          for file in $FILES; do
+            IMAGE_NAME="${file%.Dockerfile}"
+            IMAGE_NAME="$(basename "$IMAGE_NAME")"
+            IMAGE_BASE="ghcr.io/ocr-aaey/$IMAGE_NAME"
+            COMMIT_TAG=${GITHUB_SHA::8}
+
+            echo "Building $IMAGE_BASE from $file"
+
+            docker build -t "$IMAGE_BASE:latest" -t "$IMAGE_BASE:$COMMIT_TAG" -f "$file" .
+            docker push "$IMAGE_BASE:latest"
+            docker push "$IMAGE_BASE:$COMMIT_TAG"
+          done
