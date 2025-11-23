@@ -45,12 +45,12 @@ void on_solve_clicked(GtkWidget *widget, gpointer data, GtkImage *image)
     open_file(widget, data, image);
 }
 
-void on_steps_clicked(GtkWidget *widget, gpointer data)
+void on_steps_clicked()
 {
     g_print("Steps clicked\n");
 }
 
-void on_exit_clicked(GtkWidget *widget, gpointer data)
+void on_exit_clicked()
 {
 
     g_print("Exiting application...\n");
