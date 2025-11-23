@@ -251,7 +251,6 @@ Matrix *erosion(const Matrix *src, size_t kernel_size)
 
     if (src == NULL)
         errx(EXIT_FAILURE, "The source matrix is NULL");
-
     Matrix *tmp =
         morph_transformation_1d(src, kernel_size, Erosion, Horizontal);
     Matrix *eroded =
@@ -273,6 +272,7 @@ Matrix *dilation(const Matrix *src, size_t kernel_size)
         morph_transformation_1d(tmp, kernel_size, Dilation, Vertical);
 
     mat_free(tmp);
+    
     return dilated;
 }
 
