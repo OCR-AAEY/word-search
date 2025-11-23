@@ -3,7 +3,6 @@
 void image_loading(GtkImage *image, gchar *path)
 {
 
-    g_print("yeah");
     gtk_image_set_from_file(image, path);
 
     if (!image)
@@ -45,10 +44,7 @@ void on_solve_clicked(GtkWidget *widget, gpointer data, GtkImage *image)
     open_file(widget, data, image);
 }
 
-void on_steps_clicked()
-{
-    g_print("Steps clicked\n");
-}
+void on_steps_clicked() { g_print("Steps clicked\n"); }
 
 void on_exit_clicked()
 {
@@ -77,6 +73,7 @@ void window_creation(GtkWidget **window)
     gtk_window_set_title(GTK_WINDOW(*window), "Word Search Solver");
     gtk_window_set_default_size(GTK_WINDOW(*window), 400, 300);
 }
+#ifndef UNIT_TEST
 
 int main(int argc, char *argv[])
 {
@@ -85,7 +82,7 @@ int main(int argc, char *argv[])
     GtkImage *image; // Image widget
     GtkWidget *button_box;
     GtkWidget *solve_b, *step_b, *exit_b;
-    //    GtkWidget *img_cont;
+
     // Initialize GTK:
     gtk_init(&argc, &argv);
 
@@ -134,3 +131,4 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+#endif
