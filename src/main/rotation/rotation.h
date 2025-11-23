@@ -1,7 +1,6 @@
 #ifndef ROTATION_H
 #define ROTATION_H
 
-#include "bounding_boxes/pretreatment.h"
 #include "image_loader/image_loading.h"
 #include "matrix/matrix.h"
 
@@ -16,7 +15,7 @@
  * @return Pointer to a new Matrix containing the rotated data.
  *         Returns NULL on failure (e.g., memory allocation error).
  */
-Matrix *rotate_matrix(const Matrix *src, double angle);
+Matrix *rotate_matrix(const Matrix *src, float angle);
 
 /**
  * @brief Rotates a full color image by a specified angle.
@@ -30,6 +29,13 @@ Matrix *rotate_matrix(const Matrix *src, double angle);
  * @return Pointer to a new ImageData containing the rotated image.
  *         Returns NULL on failure (e.g., memory allocation error).
  */
-ImageData *rotate_image(ImageData *img, double angle);
+ImageData *rotate_image(ImageData *img, float angle);
+
+/// @brief Deskews automatically the image, using hough lines to detect the
+/// rotated angle of the grid.
+/// @param img Pointer to the matrix of the image to rotate automatically
+/// @return Returns a pointer to a newly allocated Matrix rerpesenting the
+/// deskewed image.
+Matrix *auto_deskew_matrix(Matrix *img);
 
 #endif

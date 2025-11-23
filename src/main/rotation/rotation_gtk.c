@@ -1,8 +1,8 @@
-
+/*
 #ifndef UNIT_TEST
-#include "bounding_boxes/pretreatment.h"
-#include "bounding_boxes/visualization.h"
 #include "matrix/matrix.h"
+#include "pretreatment/pretreatment.h"
+#include "pretreatment/visualization.h"
 #include "rotation.h"
 #include <err.h>
 #include <gtk/gtk.h>
@@ -220,3 +220,4 @@ int main(int argc, char **argv)
 }
 
 #endif
+*/

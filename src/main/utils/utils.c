@@ -1,6 +1,5 @@
 #include "utils/utils.h"
 #include <err.h>
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -31,7 +30,3 @@ int execute_command(const char *cmd)
         errx(EXIT_FAILURE, "Command %s failed", cmd);
     }
 }
-
-double sind(double degrees) { return sin(DEG2RAD(degrees)); }
-
-double cosd(double degrees) { return cos(DEG2RAD(degrees)); }

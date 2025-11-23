@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-/// @brief A 2D matrix of double-precision floating point numbers.
+/// @brief A 2D matrix of single-precision floating point numbers.
 typedef struct Matrix Matrix;
 
 /// @brief Returns the height (number of rows) of the given matrix.
@@ -16,13 +16,23 @@ size_t mat_height(const Matrix *m);
 /// @return The number of columns in the matrix.
 size_t mat_width(const Matrix *m);
 
+/// @brief Creates a  matrix initialized with teh given value on the heap.
+/// @param[in] height Number of rows in the new matrix (must be non-zero).
+/// @param[in] width Number of columns in the new matrix (must be non-zero).
+/// @param[in] value The value to which the coefficients of the matrix will be
+/// initialized. If value is 0, `mat_create_zero` should be used instead.
+/// @return A pointer to a newly allocated matrix.
+/// @throw Terminates the program if height or width is zero, or if memory
+/// allocation fails.
+Matrix *mat_create(size_t height, size_t width, float value);
+
 /// @brief Creates an empty matrix (initialized with zeros) on the heap.
 /// @param[in] height Number of rows in the new matrix (must be non-zero).
 /// @param[in] width Number of columns in the new matrix (must be non-zero).
 /// @return A pointer to a newly allocated zero-filled matrix.
 /// @throw Terminates the program if height or width is zero, or if memory
 /// allocation fails.
-Matrix *mat_create_empty(size_t height, size_t width);
+Matrix *mat_create_zero(size_t height, size_t width);
 
 /// @brief Creates a new matrix using an existing array as its content.
 /// @param[in] height Number of rows in the matrix (must be non-zero).
@@ -32,7 +42,7 @@ Matrix *mat_create_empty(size_t height, size_t width);
 /// @return A pointer to the new matrix structure.
 /// @throw Terminates the program if memory allocation for the Matrix structure
 /// fails.
-Matrix *mat_create_from_arr(size_t height, size_t width, const double *content);
+Matrix *mat_create_from_arr(size_t height, size_t width, const float *content);
 
 /// @brief Creates a new matrix filled with uniformly distributed random values.
 /// Allocates a new matrix of size @p height × @p width, where each element is
@@ -48,8 +58,8 @@ Matrix *mat_create_from_arr(size_t height, size_t width, const double *content);
 /// is zero or memory allocation fails for the matrix or its contents.
 /// @note The caller is responsible for freeing the returned matrix using
 /// `mat_free()` when it is no longer needed.
-Matrix *mat_create_uniform_random(size_t height, size_t width, double min,
-                                  double max);
+Matrix *mat_create_uniform_random(size_t height, size_t width, float min,
+                                  float max);
 
 /// @brief Creates a new matrix with random Gaussian-distributed elements.
 /// @param[in] height Number of rows in the matrix (must be non-zero).
@@ -69,12 +79,13 @@ Matrix *mat_create_gaussian_random(size_t height, size_t width);
 /// @param[in] stddev The standard deviation (σ) of the normal distribution.
 /// @return [out] A pointer to a newly allocated `Matrix` structure filled with
 /// random values following N(mean, stddev²).
-/// @throw The program terminates with `errx(1, ...)` if `height == 0` or `width
+/// @throw The program terminates with `errx(EXIT_FAILURE, ...)` if `height ==
+/// 0` or `width
 /// == 0` or memory allocation for the matrix or its content fails.
 /// @note The caller is responsible for freeing the returned matrix using
 /// `mat_free()`.
-Matrix *mat_create_normal_random(size_t height, size_t width, double mean,
-                                 double stddev);
+Matrix *mat_create_normal_random(size_t height, size_t width, float mean,
+                                 float stddev);
 
 /// @brief Frees a matrix and its associated memory.
 /// @param[in] matrix Pointer to the matrix to be freed.
@@ -110,21 +121,21 @@ Matrix *mat_deepcopy(const Matrix *m);
 /// @param[in] h Row index.
 /// @param[in] w Column index.
 /// @return Pointer to the coefficient at (h, w) without bounds checking.
-double *mat_unsafe_coef_ptr(const Matrix *m, size_t h, size_t w);
+float *mat_unsafe_coef_ptr(const Matrix *m, size_t h, size_t w);
 
 /// @brief Returns the address of the coefficient at position (h, w).
 /// @param[in] m Pointer to the matrix.
 /// @param[in] h Row index (0 ≤ h < height).
 /// @param[in] w Column index (0 ≤ w < width).
 /// @return A pointer to the coefficient at position (h, w).
-double *mat_coef_ptr(const Matrix *m, size_t h, size_t w);
+float *mat_coef_ptr(const Matrix *m, size_t h, size_t w);
 
 /// @brief Returns the coefficient at position (h, w).
 /// @param[in] m Pointer to the matrix.
 /// @param[in] h Row index (0 ≤ h < height).
 /// @param[in] w Column index (0 ≤ w < width).
 /// @return The value of the coefficient at position (h, w).
-double mat_coef(const Matrix *m, size_t h, size_t w);
+float mat_coef(const Matrix *m, size_t h, size_t w);
 
 /// @brief Performs element-wise addition of two matrices.
 /// @param[in] a Pointer to the first matrix.
@@ -147,26 +158,26 @@ void mat_inplace_addition(Matrix *a, const Matrix *b);
 /// @param[in] a Pointer to the first Matrix (minuend).
 /// @param[in] b Pointer to the second Matrix (subtrahend).
 /// @return Pointer to a newly allocated Matrix containing the result of a - b.
-Matrix *mat_substraction(const Matrix *a, const Matrix *b);
+Matrix *mat_subtraction(const Matrix *a, const Matrix *b);
 
 /// @brief Performs element-wise subtraction of matrix b from matrix a in-place.
 /// @param[in, out] a Pointer to the Matrix that will be modified (minuend).
 /// @param[in] b Pointer to the Matrix to subtract (subtrahend).
-void mat_inplace_substraction(Matrix *a, const Matrix *b);
+void mat_inplace_subtraction(Matrix *a, const Matrix *b);
 
 /// @brief Multiplies a matrix by a scalar value and returns the result.
 /// @param[in] m Pointer to the input matrix.
 /// @param[in] a Scalar value to multiply each element by.
 /// @return A new matrix representing m * a.
 /// @throw Terminates the program if memory allocation fails.
-Matrix *mat_scalar_multiplication(const Matrix *m, double a);
+Matrix *mat_scalar_multiplication(const Matrix *m, float a);
 
 /// @brief Multiplies every coefficient of a matrix by a scalar value
 /// (in-place).
 /// @param[in,out] m Pointer to the matrix to be modified.
 /// @param[in] a Scalar value to multiply each element by.
 /// @return Pointer to the modified matrix (same as input).
-void mat_inplace_scalar_multiplication(Matrix *m, double a);
+void mat_inplace_scalar_multiplication(Matrix *m, float a);
 
 /// @brief Computes the matrix product of two matrices.
 /// @param[in] a Pointer to the left matrix (A).
@@ -220,10 +231,10 @@ void mat_inplace_sigmoid_derivative(Matrix *m);
 /// @brief Computes the mean squared error (MSE) between two matrices.
 /// @param[in] actual Pointer to the matrix containing actual values.
 /// @param[in] expected Pointer to the matrix containing expected values.
-/// @return The mean squared error between the two matrices as a double.
+/// @return The mean squared error between the two matrices as a float.
 /// @throw Exits the program with an error if the matrices have mismatched
 /// dimensions.
-double mat_mean_squared_error(Matrix *actual, Matrix *expected);
+float mat_mean_squared_error(Matrix *actual, Matrix *expected);
 
 /// @brief Returns the transpose of a matrix as a new matrix.
 /// @param[in] m Pointer to the input Matrix.
@@ -273,28 +284,28 @@ void mat_inplace_normalize(Matrix *m);
 
 /// @brief Applies a user-defined function element-wise to a matrix.
 /// @param[in] m Pointer to the input matrix.
-/// @param[in] f Function pointer taking a double and returning a double.
+/// @param[in] f Function pointer taking a float and returning a float.
 /// @return A new matrix where each element is f(original_element).
 /// @throw Terminates the program if memory allocation fails.
-Matrix *mat_map(const Matrix *m, double (*f)(double));
+Matrix *mat_map(const Matrix *m, float (*f)(float));
 
 /// @brief Applies a function to every element of a matrix (in place).
 /// @param[in,out] m The matrix whose elements will be modified in place.
-/// @param[in] f A pointer to a function that takes a double and returns a
-/// double.
+/// @param[in] f A pointer to a function that takes a float and returns a
+/// float.
 /// @note This function directly modifies the contents of m.
 /// No new memory is allocated.
-void mat_inplace_map(Matrix *m, double (*f)(double));
+void mat_inplace_map(Matrix *m, float (*f)(float));
 
 /// @brief Applies a user-defined function element-wise to a matrix, with access
 /// to element indexes.
 /// @param[in] m Pointer to the input matrix.
 /// @param[in] f Function pointer taking (value, row_index, column_index) and
-/// returning a double.
+/// returning a float.
 /// @return A new matrix where each element is f(original_value, row, col).
 /// @throw Terminates the program if memory allocation fails.
 Matrix *mat_map_with_indexes(const Matrix *m,
-                             double (*f)(double, size_t, size_t));
+                             float (*f)(float, size_t, size_t));
 
 /// @brief Applies a function to each element of a matrix (in place), passing
 /// element coordinates. This function iterates over all elements of the matrix
@@ -304,12 +315,11 @@ Matrix *mat_map_with_indexes(const Matrix *m,
 /// @param[in,out] m The matrix whose elements will be modified in place.
 /// @param[in] f A pointer to a function taking the current element value, its
 /// row index (h), and its column index (w), and returning the new value to
-/// store at that position. Signature: `double f(double value, size_t h, size_t
+/// store at that position. Signature: `float f(float value, size_t h, size_t
 /// w)`.
 /// @note This function modifies @p m directly and does not allocate new memory.
 /// Useful for applying coordinate-dependent transformations.
-void mat_inplace_map_with_indexes(Matrix *m,
-                                  double (*f)(double, size_t, size_t));
+void mat_inplace_map_with_indexes(Matrix *m, float (*f)(float, size_t, size_t));
 
 /// @brief Prints the contents of a matrix to stdout in a formatted 2D layout.
 /// @param[in] m Pointer to the matrix to print.

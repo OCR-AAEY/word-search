@@ -1,32 +1,9 @@
+#ifndef UNIT_TEST
+
 #include <err.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "grid.h"
-#include "naive_solver.h"
-#include "solver.h"
-
-/// @brief Edits the given string and makes it upper case.
-/// @param[in,out] word The NULL-terminated array of character to make upper
-/// case.
-/// @throw Throws if the word contains any not letter character.
-void to_upper_case(char *word)
-{
-    size_t i = 0;
-    while (*(word + i) != '\0')
-    {
-        if ('a' <= *(word + i) && *(word + i) <= 'z')
-        {
-            *(word + i) = *(word + i) - 'a' + 'A';
-        }
-        else if (*(word + i) < 'A' || 'Z' < *(word + i))
-        {
-            errx(1, "Non-letter character found in the given word: '%c'.",
-                 *(word + i));
-        }
-        i++;
-    }
-}
 
 /// @brief Prints the result of the solver as required by the book of
 /// specifications.
@@ -52,40 +29,34 @@ void print_result(int start_height, int start_width, int end_height,
     }
 }
 
-#ifndef UNIT_TEST
-
 int main(int argc, char **argv)
 {
     if (argc < 2)
     {
-        errx(1, "Missing arguments grid and word.");
+        errx(EXIT_FAILURE, "Missing arguments grid and word.");
     }
     if (argc < 3)
     {
-        errx(1, "Missing argument word.");
+        errx(EXIT_FAILURE, "Missing argument word.");
     }
-    // Not necessary. Can be removed.
     if (argc > 3)
     {
-        errx(1, "Too many arguments.");
+        errx(EXIT_FAILURE, "Too many arguments.");
     }
 
     // Extract arguments.
     char *file_name = *(argv + 1);
     char *word = *(argv + 2);
 
-    to_upper_case(word);
+    Grid *grid = grid_load_from_file(file_name);
 
-    Grid *grid = load_grid(file_name);
+    int start_h, start_w, end_h, end_w;
 
-    int start_height, start_width, end_height, end_width;
+    grid_solve(grid, word, &start_h, &start_w, &end_h, &end_w);
 
-    naive_solve(grid, word, &start_height, &start_width, &end_height,
-                &end_width);
+    grid_free(grid);
 
-    free_grid(grid);
-
-    print_result(start_height, start_width, end_height, end_width);
+    print_result(start_h, start_w, end_h, end_w);
 
     return 0;
 }

@@ -1,10 +1,10 @@
-#include "bounding_boxes/visualization.h"
-#include "utils/utils.h"
+#include "pretreatment/visualization.h"
+#include "utils/math/trigo.h"
 #include <err.h>
 #include <gtk/gtk.h>
 #include <math.h>
 
-void draw_point(cairo_t *cr, double x, double y, double radius)
+void draw_point(cairo_t *cr, float x, float y, float radius)
 {
     cairo_arc(cr, x, y, radius, 0, 2 * M_PI);
     cairo_fill(cr);
@@ -36,26 +36,26 @@ void draw_points_on_img(Point **points, size_t height, size_t width,
 
 void draw_line(cairo_t *cr, Line *line, int width, int height)
 {
-    double theta = line->theta;
-    double r = line->r;
+    float theta = line->theta;
+    float r = line->r;
     // if (r < 0)
     // {
     //     r = -r;
     //     theta = fmod(theta + 180, 360);
     // }
-    double ct = cosd(theta);
-    double st = sind(theta);
+    float ct = cosd(theta);
+    float st = sind(theta);
 
     // Possible intersections
-    double x[2], y[2];
+    float x[2], y[2];
     int i = 0;
 
     // Left border (x=0)
-    if (fabs(st) > 1e-9)
+    if (fabsf(st) > 1e-9f)
     {
-        double y0 = r / st;
+        float y0 = r / st;
         // printf("left border : y = %f, height = %i\n", y0, height);
-        if (y0 >= 0 && y0 <= height)
+        if (y0 >= 0.0f && y0 <= (float)height)
         {
             x[i] = 0;
             y[i] = y0;
@@ -64,11 +64,11 @@ void draw_line(cairo_t *cr, Line *line, int width, int height)
     }
 
     // Right border (x=W)
-    if (fabs(st) > 1e-9)
+    if (fabsf(st) > 1e-9f)
     {
-        double y1 = (r - width * ct) / st;
+        float y1 = (r - (float)width * ct) / st;
         // printf("right border : y = %f, height = %i\n", y1, height);
-        if (y1 >= 0 && y1 <= height)
+        if (y1 >= 0.0f && y1 <= (float)height)
         {
             x[i] = width;
             y[i] = y1;
@@ -77,11 +77,11 @@ void draw_line(cairo_t *cr, Line *line, int width, int height)
     }
 
     // Top border (y=0)
-    if (fabs(ct) > 1e-9)
+    if (fabsf(ct) > 1e-9f)
     {
-        double x0 = r / ct;
+        float x0 = r / ct;
         // printf("top border : x = %f, width = %i\n", x0, width);
-        if (x0 >= 0 && x0 <= width)
+        if (x0 >= 0.0f && x0 <= (float)width)
         {
             x[i] = x0;
             y[i] = 0;
@@ -90,11 +90,11 @@ void draw_line(cairo_t *cr, Line *line, int width, int height)
     }
 
     // Bottom border (y=H)
-    if (fabs(ct) > 1e-9)
+    if (fabs(ct) > 1e-9f)
     {
-        double x1 = (r - height * st) / ct;
+        float x1 = (r - (float)height * st) / ct;
         // printf("bottom border : x = %f, width = %i\n", x1, width);
-        if (x1 >= 0 && x1 <= width)
+        if (x1 >= 0.0f && x1 <= (float)width)
         {
             x[i] = x1;
             y[i] = height;
@@ -268,7 +268,7 @@ ImageData *pixel_matrix_to_image(Matrix *matrix)
     {
         for (size_t w = 0; w < width; w++)
         {
-            double gray_scaled_pixel = mat_coef(matrix, h, w);
+            float gray_scaled_pixel = mat_coef(matrix, h, w);
 
             if ((int)gray_scaled_pixel < 0 || (int)gray_scaled_pixel > 255)
             {
@@ -278,8 +278,8 @@ ImageData *pixel_matrix_to_image(Matrix *matrix)
             }
 
             Pixel *pixel = &pixels[h * width + w];
-            // Convert the grayscale double to a uint8_t (with rounding)
-            uint8_t gray = (uint8_t)floor(gray_scaled_pixel + 0.5);
+            // Convert the grayscale float to a uint8_t (with rounding)
+            uint8_t gray = (uint8_t)floorf(gray_scaled_pixel + 0.5);
             pixel->r = gray;
             pixel->g = gray;
             pixel->b = gray;

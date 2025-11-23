@@ -1,8 +1,7 @@
-#include "bounding_boxes/location.h"
-#include "bounding_boxes/hough_lines.h"
-#include "bounding_boxes/pretreatment.h"
-#include "bounding_boxes/visualization.h"
+#include "location/location.h"
 #include "extract_char/extract_char.h"
+#include "pretreatment/pretreatment.h"
+#include "pretreatment/visualization.h"
 #include "rotation/rotation.h"
 #include "utils/utils.h"
 #include <stdio.h>
@@ -144,8 +143,8 @@ size_t *histogram_horizontal(Matrix *src, BoundingBox *area, size_t *size_out)
     {
         for (size_t w = 0; w < vert_size; w++)
         {
-            double pixel = mat_coef(src, h + area->tl.y, w + area->tl.x);
-            if (pixel == 0)
+            float pixel = mat_coef(src, h + area->tl.y, w + area->tl.x);
+            if (pixel == 0.0f)
             {
                 histogram[h] += 1;
             }
@@ -284,8 +283,8 @@ size_t *histogram_vertical(Matrix *src, BoundingBox *area, size_t *size_out)
     {
         for (size_t w = 0; w < *size_out; w++)
         {
-            double pixel = mat_coef(src, h + area->tl.y, w + area->tl.x);
-            if (pixel == 0)
+            float pixel = mat_coef(src, h + area->tl.y, w + area->tl.x);
+            if (pixel == 0.0f)
             {
                 histogram[w] += 1;
             }
@@ -493,6 +492,7 @@ void setup_words_folders(size_t nb_words)
     }
 }
 
+/*
 #ifndef UNIT_TEST
 
 int main(int argc, char **argv)
@@ -534,10 +534,10 @@ int main(int argc, char **argv)
     if (image != 1 && image != 2)
         errx(EXIT_FAILURE, "The image argument must be either 1 or 2");
 
-    double angle;
+    float angle;
     // char *angle_arg = argv[3];
-    // double angle = atof(angle_arg);
-    // if (ABS(angle) > 180)
+    // float angle = atof(angle_arg);
+    // if (ABS(angle) > 180.0f)
     //     errx(EXIT_FAILURE,
     //          "The angle argument must be a float between -180 and 180");
 
@@ -653,3 +653,4 @@ int main(int argc, char **argv)
 }
 
 #endif
+*/
