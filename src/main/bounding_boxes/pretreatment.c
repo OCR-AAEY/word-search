@@ -272,7 +272,7 @@ Matrix *dilation(const Matrix *src, size_t kernel_size)
         morph_transformation_1d(tmp, kernel_size, Dilation, Vertical);
 
     mat_free(tmp);
-    
+
     return dilated;
 }
 
