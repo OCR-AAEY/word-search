@@ -1,4 +1,3 @@
-/*
 #include <dirent.h>
 #include <err.h>
 #include <stdio.h>
@@ -10,6 +9,7 @@
 #include "image_loader/image_loading.h"
 #include "matrix/matrix.h"
 
+/*
 int main(void)
 {
 
@@ -97,7 +97,9 @@ int main(void)
 
     return EXIT_SUCCESS;
 }
+*/
 
+/*
 void process_file(const char *filepath, const char *filename)
 {
     ImageData *img = load_image(filepath);
@@ -116,10 +118,11 @@ void process_file(const char *filepath, const char *filename)
 
     m = mat_strip_margins(m);
     m = mat_scale_to_28(m);
+    mat_inplace_to_one_hot(m);
 
     char newpath[1024];
     snprintf(newpath, sizeof(newpath),
-"./assets/ocr-training-dataset/matrices/%s", filename);
+             "./assets/ocr-training-dataset/matrices/%s", filename);
 
     mat_save_to_file(m, newpath);
 }

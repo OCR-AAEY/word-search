@@ -55,7 +55,7 @@ CC = gcc
 endif
 
 # C flags.
-CFLAGS         = -Wall -Wextra -fsanitize=address -I$(MAIN_DIR)
+CFLAGS         = -Wall -Wextra -fsanitize=address -fsanitize=undefined -I$(MAIN_DIR)
 # Additional C flags.
 XCFLAGS        =
 # C flags for unit testing.
@@ -64,6 +64,12 @@ TEST_FLAGS     = -DUNIT_TEST -I$(TEST_DIR)
 TEST_LIB_FLAGS = $(shell pkg-config --cflags --libs criterion)
 # C flags for libraries import.
 LIB_FLAGS      = -lm $(shell pkg-config --cflags --libs gtk+-3.0)
+
+# SIMD (AVX) flags.
+USE_AVX ?= 0
+ifneq ($(USE_AVX),0)
+CFLAGS := $(CFLAGS) -mavx2 -DUSE_AVX -DUSE_AVX$(USE_AVX)
+endif
 
 # Source files located in the main directory.
 SRC_MAIN = $(shell find $(MAIN_DIR) -name '*.c' -and -not -name '*_main.c')
@@ -78,13 +84,15 @@ OBJ_MAIN_FOR_TEST = $(SRC_MAIN:$(MAIN_DIR)/%.c=$(BUILD_DIR)/main_for_test/%.o)
 OBJ_TEST_FOR_TEST = $(SRC_TEST:$(TEST_DIR)/%.c=$(BUILD_DIR)/test/%.o)
 
 # Solver executable.
-BIN_SOLVER = solver
+BIN_SOLVER      = solver
 # OCR neural network training executable.
-BIN_OCR    = ocr_train
+BIN_OCR         = ocr_train
+# OCR dataset generation script.
+BIN_OCR_DATASET = ocr_dataset
 # Main application executable.
-BIN_APP    = app
+BIN_APP         = app
 # Unit tests executable.
-BIN_TEST   = run_tests
+BIN_TEST        = run_tests
 
 define import
 $(foreach dir,$(1),$(filter $(BUILD_MAIN_DIR)/$(dir)/%.o,$(OBJ_MAIN)))
@@ -104,6 +112,11 @@ $(BIN_OCR): $(call import,ocr matrix utils) $(BUILD_MAIN_DIR)/ocr/ocr_train_main
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 	@echo "$(BIN_OCR): \033[32mCompilation succeeded\033[0m"
 
+# # OCR dataset generation target.
+# $(BIN_OCR_DATASET): $(OBJ_MAIN) $(BUILD_MAIN_DIR)/ocr/ocr_dataset_main.o
+# 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+# 	@echo "$(BIN_OCR_DATASET): \033[32mCompilation succeeded\033[0m"
+
 # Main app target.
 $(BIN_APP): $(OBJ_MAIN) $(BUILD_MAIN_DIR)/app/app_main.o
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
@@ -113,10 +126,6 @@ $(BIN_APP): $(OBJ_MAIN) $(BUILD_MAIN_DIR)/app/app_main.o
 $(BIN_TEST): $(OBJ_MAIN_FOR_TEST) $(OBJ_TEST_FOR_TEST)
 	$(CC) $(CFLAGS) $(XCFLAGS) $(TEST_FLAGS) $^ -o $@ $(LIB_FLAGS) $(TEST_LIB_FLAGS)
 	@echo "$(BIN_TEST): \033[32mCompilation succeeded\033[0m"
-
-# ocr_training_data: $(OBJ_MAIN) $(BUILD_MAIN_DIR)/ocr/ocr_training_data.o
-# 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-# 	@echo "$(BIN_OCR): \033[32mCompilation succeeded\033[0m"
 
 ##############################
 #        PATTERN RULES       #
@@ -159,7 +168,12 @@ clean:
 	@echo "Cleaning executables..."
 	@rm -rf $(BIN_SOLVER)
 	@rm -rf $(BIN_OCR)
+	@rm -rf $(BIN_OCR_DATASET)
+	@rm -rf $(BIN_APP)
 	@rm -rf $(BIN_TEST)
+	@echo "Cleaning test files..."
+	@rm -rf save_and_load_random_test.matrix
+	@rm -rf save_and_load_test.matrix
 	@echo "Cleaning misc files..."
 	@rm -rf extracted/
 	@echo "\033[32mClean succeeded\033[0m"
