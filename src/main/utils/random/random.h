@@ -5,6 +5,8 @@
 #define M_PI 3.14159265358979323846 /* Pi */
 #endif
 
+void rand_seed();
+
 /// @brief Generates a uniformly distributed unsigned long integer in the range
 /// [0, max].
 /// @param max The maximum value (inclusive).
@@ -44,6 +46,6 @@ float rand_f_gaussian();
 /// @param stddev The standard deviation of the normal distribution.
 /// @return A random float sampled from a normal distribution with specified
 /// mean and standard deviation.
-float rand_d_normal(float mean, float stddev);
+float rand_f_normal(float mean, float stddev);
 
 #endif

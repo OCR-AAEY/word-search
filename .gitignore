@@ -1,11 +1,12 @@
+# Dataset
+/assets/ocr-training-dataset
+
 # Tests
 venv/
 extracted/
 
 # Build
 /build
-xnor.net
-/solver
 
 # Executables
 /image_loader

@@ -74,10 +74,12 @@ Neural_Network *net_create_empty(size_t layer_number, size_t *layer_heights)
     net->biases[0] = NULL;
     for (size_t i = 1; i < layer_number; i++)
     {
-        net->weights[i] = mat_create_uniform_random(
-            layer_heights[i], layer_heights[i - 1], -1.0, 1.0);
-        net->biases[i] =
-            mat_create_uniform_random(layer_heights[i], 1, -1.0, 1.0);
+        // Use He initialization for weights.
+        net->weights[i] = mat_create_random_normal(
+            layer_heights[i], layer_heights[i - 1], 0.0f,
+            sqrtf(2.0f / (float)net->layer_heights[i - 1]));
+        // Use zero initialization for biases.
+        net->biases[i] = mat_create_filled(layer_heights[i], 1, 0.01f);
     }
 
     return net;
@@ -386,16 +388,6 @@ Matrix *net_feed_forward(const Neural_Network *net, Matrix *input,
         prev_activation = curr_activation;
     }
 
-    /*
-    // Makes the result a probability distribution: the sum of the coefficient
-    // of all classes is equal to 1. The result of the neural network can
-    // therefore be seen as probabilities rather than activation coefficients.
-    // Avoids to normalize a bit output (matrix of 1 by 1) which would always
-    // result in 1 as output.
-    if (mat_height(prev_activation) > 1 || mat_width(prev_activation) > 1)
-        mat_inplace_normalize(prev_activation);
-    */
-
     return prev_activation;
 }
 
@@ -427,11 +419,11 @@ void net_back_propagation(Neural_Network *net, Matrix *expected,
     mat_free(a);
 
     // delta_nabla_b = delta
-    delta_nabla_b[net->layer_number - 1] = delta;
+    delta_nabla_b[net->layer_number - 1] = mat_deepcopy(delta); // data; FIXME: mem leaks for test
 
     // Compute the error column matrix for each layer i starting from the
     // penultimate layer to the first one (excluding the input layer).
-    for (size_t i = net->layer_number - 2; i > 0; i--)
+    for (ssize_t i = (ssize_t)net->layer_number - 2; i > 0; --i)
     {
         // delta = ((net.weights[i + 1])^T × delta) ⊙ relu'(res[i])
         a = mat_transpose(net->weights[i + 1]);
@@ -449,7 +441,7 @@ void net_back_propagation(Neural_Network *net, Matrix *expected,
         mat_free(a);
 
         // delta_nabla_b = delta
-        delta_nabla_b[i] = delta;
+        delta_nabla_b[i] = mat_deepcopy(delta); // data; FIXME: mem leaks for test
     }
 
     delta_nabla_w[0] = NULL;
@@ -461,10 +453,12 @@ void net_update(Neural_Network *net, Matrix **nabla_w, Matrix **nabla_b,
 {
     for (size_t i = 1; i < net->layer_number; i++)
     {
+        /*
         mat_inplace_scalar_multiplication(nabla_w[i],
                                           learning_rate / (float)batch_size);
         mat_inplace_scalar_multiplication(nabla_b[i],
                                           learning_rate / (float)batch_size);
+        */
 
         mat_inplace_subtraction(net->weights[i], nabla_w[i]);
         mat_inplace_subtraction(net->biases[i], nabla_b[i]);
@@ -528,6 +522,7 @@ void net_train(Neural_Network *net, Dataset *dataset, size_t epochs,
             mat_free_matrix_array(nabla_b, net->layer_number);
         }
 
+        /*
         if ((epoch + 1) % 10 == 0)
         {
             size_t successes = 0;
@@ -545,6 +540,7 @@ void net_train(Neural_Network *net, Dataset *dataset, size_t epochs,
                    100.0f * (float)successes / (float)ds_size(dataset),
                    successes, ds_size(dataset));
         }
+        */
     }
 }
 
@@ -553,7 +549,7 @@ void net_print(Neural_Network *net, unsigned int precision)
     printf("/---------[WEIGHTS]----------\n");
     for (size_t i = 1; i < net->layer_number; i++)
     {
-        mat_print(net->weights[i], precision);
+        mat_print_n_first(net->weights[i], 10, precision);
         if (i != net->layer_number - 1)
             printf("\n");
     }
@@ -561,7 +557,7 @@ void net_print(Neural_Network *net, unsigned int precision)
     printf("/---------[BIASES ]----------\n");
     for (size_t i = 1; i < net->layer_number; i++)
     {
-        mat_print(net->biases[i], precision);
+        mat_print_n_first(net->biases[i], 10, precision);
         if (i != net->layer_number - 1)
             printf("\n");
     }
