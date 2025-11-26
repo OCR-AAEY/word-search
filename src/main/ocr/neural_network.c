@@ -458,7 +458,7 @@ void net_update(Neural_Network *net, Matrix **nabla_w, Matrix **nabla_b,
                                           learning_rate / (float)batch_size);
         mat_inplace_scalar_multiplication(nabla_b[i],
                                           learning_rate / (float)batch_size);
-        
+
         mat_inplace_subtraction(net->weights[i], nabla_w[i]);
         mat_inplace_subtraction(net->biases[i], nabla_b[i]);
     }
