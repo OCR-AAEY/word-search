@@ -1,6 +1,5 @@
 #include "location/location.h"
 #include "extract_char/extract_char.h"
-#include "location/hough_lines.h"
 #include "pretreatment/pretreatment.h"
 #include "pretreatment/visualization.h"
 #include "rotation/rotation.h"
