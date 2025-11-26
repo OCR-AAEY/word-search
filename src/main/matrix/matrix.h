@@ -255,20 +255,22 @@ Matrix *mat_transpose(const Matrix *m);
 // /// @brief Transposes a matrix in-place. Supports both square and non-square
 // /// matrices.
 // /// @param[in, out] m Pointer to the Matrix to be transposed in-place.
-// /// @throw None. The function assumes the matrix pointer is valid and memory is
+// /// @throw None. The function assumes the matrix pointer is valid and memory
+// is
 // /// properly allocated.
 // void mat_inplace_transpose(Matrix *m);
 
 // /// @brief Creates a flattened (1×N) copy of the given matrix (row vector).
 // /// @param[in] m Pointer to the input matrix.
-// /// @return A new 1-row matrix containing the flattened elements of the input.
-// Matrix *mat_vertical_flatten(const Matrix *m);
+// /// @return A new 1-row matrix containing the flattened elements of the
+// input. Matrix *mat_vertical_flatten(const Matrix *m);
 
 /// @brief Flattens a matrix into a single column in-place (vertical flatten).
 /// @param[in, out] m Pointer to the Matrix to be flattened.
 void mat_inplace_vertical_flatten(Matrix *m);
 
-// /// @brief Creates a flattened (N×1) copy of the given matrix (column vector).
+// /// @brief Creates a flattened (N×1) copy of the given matrix (column
+// vector).
 // /// @param[in] m Pointer to the input matrix.
 // /// @return A new 1-column matrix containing the flattened elements of the
 // /// input.
