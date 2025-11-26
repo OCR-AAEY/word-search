@@ -32,8 +32,8 @@ Training_Data *td_create(Matrix *input, size_t expected_class)
 
 void td_free(Training_Data *td)
 {
-    free(td->input);
-    free(td->expected);
+    mat_free(td->input);
+    mat_free(td->expected);
     free(td);
 }
 
@@ -123,5 +123,6 @@ void ds_free(Dataset *dataset)
 {
     for (size_t i = 0; i < dataset->size; i++)
         td_free(dataset->content[i]);
+    free(dataset->content);
     free(dataset);
 }

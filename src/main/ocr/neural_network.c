@@ -346,9 +346,7 @@ Matrix *net_feed_forward(const Neural_Network *net, Matrix *input,
     if (mat_width(input) != 1)
         errx(EXIT_FAILURE, "TODO");
     if ((layers_results == NULL) != (layers_activations == NULL))
-    {
         errx(EXIT_FAILURE, "TODO");
-    }
 
     // Whether layers_results and layers_activations should be filled.
     int out_params = layers_results != NULL;
@@ -419,7 +417,7 @@ void net_back_propagation(Neural_Network *net, Matrix *expected,
     mat_free(a);
 
     // delta_nabla_b = delta
-    delta_nabla_b[net->layer_number - 1] = mat_deepcopy(delta); // data; FIXME: mem leaks for test
+    delta_nabla_b[net->layer_number - 1] = delta;
 
     // Compute the error column matrix for each layer i starting from the
     // penultimate layer to the first one (excluding the input layer).
@@ -441,7 +439,7 @@ void net_back_propagation(Neural_Network *net, Matrix *expected,
         mat_free(a);
 
         // delta_nabla_b = delta
-        delta_nabla_b[i] = mat_deepcopy(delta); // data; FIXME: mem leaks for test
+        delta_nabla_b[i] = delta;
     }
 
     delta_nabla_w[0] = NULL;
@@ -453,13 +451,14 @@ void net_update(Neural_Network *net, Matrix **nabla_w, Matrix **nabla_b,
 {
     for (size_t i = 1; i < net->layer_number; i++)
     {
-        /*
+        // mat_inplace_scalar_multiplication(nabla_w[i], learning_rate);
+        // mat_inplace_scalar_multiplication(nabla_b[i], learning_rate);
+
         mat_inplace_scalar_multiplication(nabla_w[i],
                                           learning_rate / (float)batch_size);
         mat_inplace_scalar_multiplication(nabla_b[i],
                                           learning_rate / (float)batch_size);
-        */
-
+        
         mat_inplace_subtraction(net->weights[i], nabla_w[i]);
         mat_inplace_subtraction(net->biases[i], nabla_b[i]);
     }
@@ -521,26 +520,6 @@ void net_train(Neural_Network *net, Dataset *dataset, size_t epochs,
             mat_free_matrix_array(nabla_w, net->layer_number);
             mat_free_matrix_array(nabla_b, net->layer_number);
         }
-
-        /*
-        if ((epoch + 1) % 10 == 0)
-        {
-            size_t successes = 0;
-            for (size_t i = 0; i < ds_size(dataset); i++)
-            {
-                Training_Data *td = ds_get_data(dataset, i);
-                Matrix *output = net_feed_forward(net, td->input, NULL, NULL);
-                if (mat_max_h(output) == td->expected_class)
-                    successes++;
-                mat_free(output);
-            }
-            printf("Epoch %zu / %zu completed with accuracy %.2lf%% (%zu / "
-                   "%zu).\n",
-                   epoch + 1, epochs,
-                   100.0f * (float)successes / (float)ds_size(dataset),
-                   successes, ds_size(dataset));
-        }
-        */
     }
 }
 

@@ -1372,7 +1372,7 @@ Matrix *mat_load_from_file(const char *filename)
         errx(EXIT_FAILURE, "Invalid file %s: failed to read matrix's width.",
              filename);
 
-    Matrix *res = mat_create_zero(height, width);
+    Matrix *res = alloc_matrix(height, width);
 
     // Read the matrix content.
     for (size_t i = 0; i < height * width; ++i)
@@ -1384,6 +1384,9 @@ Matrix *mat_load_from_file(const char *filename)
                  "%zuth coefficient.",
                  filename, i);
     }
+
+    if (getc(file_stream) != EOF)
+        printf("WARNING: matrix %s is larger than expected.", filename);
 
     fclose(file_stream);
 
