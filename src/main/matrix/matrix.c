@@ -11,18 +11,18 @@
 
 // // Temporary macro definition.
 // #define USE_AVX
-// #define USE_AVX2
-// // #define USE_AVX512
+// #define USE_AVX_2
+// // #define USE_AVX_512
 
 // SIMD macro handling.
 #if defined(USE_AVX)
-#if defined(USE_AVX512)
+#if defined(USE_AVX_512)
 #include <immintrin.h>
 #define avx_vect_t __m512
 #define avx_vect_len 16
 #define avlm1 15
 #define avx(op, ...) _mm512_##op##_ps(__VA_ARGS__)
-#elif defined(USE_AVX2)
+#elif defined(USE_AVX_2)
 #include <immintrin.h>
 #define avx_vect_t __m256
 #define avx(op, ...) _mm256_##op##_ps(__VA_ARGS__)
@@ -30,16 +30,16 @@
 #define avlm1 7
 #else
 #error                                                                         \
-    "USE_AVX has been defined but neither USE_AVX2 nor USE_AVX512 has been defined."
+    "USE_AVX has been defined but neither USE_AVX_2 nor USE_AVX_512 has been defined."
 #endif
-#elif defined(USE_AVX512)
+#elif defined(USE_AVX_512)
 #warning                                                                       \
-    "USE_AVX512 has been defined but USE_AVX has not, therefore it will be ignored."
-#undef USE_AVX512
-#elif defined(USE_AVX2)
+    "USE_AVX_512 has been defined but USE_AVX has not, therefore it will be ignored."
+#undef USE_AVX_512
+#elif defined(USE_AVX_2)
 #warning                                                                       \
-    "USE_AVX2 has been defined but USE_AVX has not, therefore it will be ignored."
-#undef USE_AVX2
+    "USE_AVX_2 has been defined but USE_AVX has not, therefore it will be ignored."
+#undef USE_AVX_2
 #endif
 
 /// @brief A 2D matrix of single-precision floating point numbers.
@@ -719,10 +719,10 @@ void mat_inplace_relu_derivative(Matrix *m)
 
 // HERE
 
-#if defined(USE_AVX512)
+#if defined(USE_AVX_512)
 // static avx_vect_t _mm256_exp_ps(){}
 #error "AVX_512 is not supported yet."
-#elif defined(USE_AVX2)
+#elif defined(USE_AVX_2)
 static avx_vect_t _mm256_exp_ps(avx_vect_t x)
 {
     const avx_vect_t ln2 = avx(set1, 0.69314718056f);
@@ -1005,7 +1005,7 @@ void mat_inplace_to_one_hot(Matrix *m)
 // }
 
 #ifdef USE_AVX
-#if 0 // def USE_AVX512
+#if 0 // def USE_AVX_512
 #else
 static inline void transpose_block(const float *src, float *dst,
                                    size_t src_width, size_t dst_width)
