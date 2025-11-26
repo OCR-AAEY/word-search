@@ -21,7 +21,7 @@ Matrix *rotate_matrix(const Matrix *src, float angle)
     size_t nh =
         (size_t)(fabs((float)h * cos_angle) + fabs((float)w * sin_angle) + 0.5);
 
-    Matrix *rotated = mat_create(nh, nw, 255.0f);
+    Matrix *rotated = mat_create_filled(nh, nw, 255.0f);
 
     float cx = (float)w / 2.0f;
     float cy = (float)h / 2.0f;

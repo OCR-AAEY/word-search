@@ -66,9 +66,13 @@ TEST_LIB_FLAGS = $(shell pkg-config --cflags --libs criterion)
 LIB_FLAGS      = -lm $(shell pkg-config --cflags --libs gtk+-3.0)
 
 # SIMD (AVX) flags.
-USE_AVX ?= 0
-ifneq ($(USE_AVX),0)
-CFLAGS := $(CFLAGS) -mavx2 -DUSE_AVX -DUSE_AVX$(USE_AVX)
+AVX ?= 0
+ifeq ($(AVX),2)
+CFLAGS := $(CFLAGS) -mavx2 -DUSE_AVX -DUSE_AVX_2
+else ifeq ($(AVX),512)
+CFLAGS := $(CFLAGS) -mavx512 -DUSE_AVX -DUSE_AVX_512
+else ifneq ($(AVX), 0)
+$(error AVX macro has been set to an unrecognized value. Expected '2' or '512' and got $(AVX))
 endif
 
 # Source files located in the main directory.
@@ -96,6 +100,12 @@ BIN_APP         = app
 # Unit tests executable.
 BIN_TEST        = run_tests
 
+# Use to add a dependency to a main function in a make rule. The parameter is the source file containing the main function. You must not provide the extension '.c'.
+define main
+$(BUILD_MAIN_DIR)/$(1).o
+endef
+
+# Use to add a dependency to a directory in a make rule. The parameter is a space separated list of directories to be included. Their path must be given from the 'src/main' directory.
 define import
 $(foreach dir,$(1),$(filter $(BUILD_MAIN_DIR)/$(dir)/%.o,$(OBJ_MAIN)))
 endef
@@ -105,27 +115,27 @@ endef
 ##############################
 
 # Solver target.
-$(BIN_SOLVER): $(call import,solver) $(BUILD_MAIN_DIR)/solver/solver_main.o
+$(BIN_SOLVER): $(call import,solver) $(call main,solver/solver_main)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 	@echo "$(BIN_SOLVER): \033[32mCompilation succeeded\033[0m"
 
 # OCR neural network training target.
-$(BIN_OCR): $(call import,ocr matrix utils) $(BUILD_MAIN_DIR)/ocr/ocr_train_main.o
+$(BIN_OCR): $(call import,ocr matrix utils) $(call main,ocr/ocr_train_main)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 	@echo "$(BIN_OCR): \033[32mCompilation succeeded\033[0m"
 
-# # OCR dataset generation target.
-# $(BIN_OCR_DATASET): $(OBJ_MAIN) $(BUILD_MAIN_DIR)/ocr/ocr_dataset_main.o
-# 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-# 	@echo "$(BIN_OCR_DATASET): \033[32mCompilation succeeded\033[0m"
+# OCR dataset generation target.
+$(BIN_OCR_DATASET): $(call import,matrix image_loader) $(call main,ocr/ocr_dataset_main)
+	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+	@echo "$(BIN_OCR_DATASET): \033[32mCompilation succeeded\033[0m"
 
 # Auto rotation target.
-# $(BIN_AUTO_ROTATE): $(filter $(BUILD_MAIN_DIR)/rotation/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/pretreatment/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/image_loader/%.o,$(OBJ_MAIN))  $(filter $(BUILD_MAIN_DIR)/utils/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/matrix/%.o,$(OBJ_MAIN)) $(BUILD_MAIN_DIR)/rotation/rotate_main.o
-# 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-# 	@echo "$(BIN_AUTO_ROTATE): \033[32mCompilation succeeded\033[0m"
+$(BIN_AUTO_ROTATE): $(call import,rotation pretreatment image_loader utils matrix) $(call main,rotation/rotate_main)
+	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+	@echo "$(BIN_AUTO_ROTATE): \033[32mCompilation succeeded\033[0m"
 
 # Main app target.
-$(BIN_APP): $(OBJ_MAIN) $(BUILD_MAIN_DIR)/app/app_main.o
+$(BIN_APP): $(call import,...) $(call main,...)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 	@echo "$(BIN_APP): \033[32mCompilation succeeded\033[0m"
 
@@ -176,6 +186,7 @@ clean:
 	@rm -rf $(BIN_SOLVER)
 	@rm -rf $(BIN_OCR)
 	@rm -rf $(BIN_OCR_DATASET)
+	@rm -rf $(BIN_AUTO_ROTATE)
 	@rm -rf $(BIN_APP)
 	@rm -rf $(BIN_TEST)
 	@echo "Cleaning test files..."
