@@ -89,6 +89,8 @@ BIN_SOLVER      = solver
 BIN_OCR         = ocr_train
 # OCR dataset generation script.
 BIN_OCR_DATASET = ocr_dataset
+# Rotate test executable.
+BIN_AUTO_ROTATE = rotate
 # Main application executable.
 BIN_APP         = app
 # Unit tests executable.
@@ -116,6 +118,11 @@ $(BIN_OCR): $(call import,ocr matrix utils) $(BUILD_MAIN_DIR)/ocr/ocr_train_main
 # $(BIN_OCR_DATASET): $(OBJ_MAIN) $(BUILD_MAIN_DIR)/ocr/ocr_dataset_main.o
 # 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 # 	@echo "$(BIN_OCR_DATASET): \033[32mCompilation succeeded\033[0m"
+
+# Auto rotation target.
+# $(BIN_AUTO_ROTATE): $(filter $(BUILD_MAIN_DIR)/rotation/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/pretreatment/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/image_loader/%.o,$(OBJ_MAIN))  $(filter $(BUILD_MAIN_DIR)/utils/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/matrix/%.o,$(OBJ_MAIN)) $(BUILD_MAIN_DIR)/rotation/rotate_main.o
+# 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+# 	@echo "$(BIN_AUTO_ROTATE): \033[32mCompilation succeeded\033[0m"
 
 # Main app target.
 $(BIN_APP): $(OBJ_MAIN) $(BUILD_MAIN_DIR)/app/app_main.o
