@@ -43,10 +43,21 @@ void populate_hough_lines(Matrix *src, Matrix *accumulator,
 
     size_t height = mat_height(src);
     size_t width = mat_width(src);
-    size_t theta_max = mat_width(accumulator);
+    size_t theta_index_max = mat_width(accumulator);
     // according to the definition of the accumulator height
     size_t r_max = (mat_height(accumulator) - 1) / 2;
     *max_count = 0;
+
+    // pre compute cos and sin values, like a cache
+    float *cosd_table = malloc(theta_index_max * sizeof(float));
+    float *sind_table = malloc(theta_index_max * sizeof(float));
+
+    for (size_t theta_index = 0; theta_index < theta_index_max; theta_index++)
+    {
+        float theta = (float)theta_index * theta_precision;
+        cosd_table[theta_index] = cosd(theta);
+        sind_table[theta_index] = sind(theta);
+    }
 
     for (size_t h = 0; h < height; h++)
     {
@@ -61,13 +72,13 @@ void populate_hough_lines(Matrix *src, Matrix *accumulator,
             // for all the theta possible we calculate the r associated
             // this is derived from conversion between cartesian and polar
             // coordinates
-            for (size_t theta_index = 0; theta_index < theta_max; theta_index++)
+            for (size_t theta_index = 0; theta_index < theta_index_max;
+                 theta_index++)
             {
                 // theta_max is the maximum index for theta in the accumulator
                 // since we have a step of theta_precision, we have :
-                float r =
-                    (float)w * cosd((float)theta_index * theta_precision) +
-                    (float)h * sind((float)theta_index * theta_precision);
+                float r = (float)w * cosd_table[theta_index] +
+                          (float)h * sind_table[theta_index];
 
                 // since r can be at least -r_max, we shift it to an integer
                 // to have the index in the accumulator
@@ -83,6 +94,9 @@ void populate_hough_lines(Matrix *src, Matrix *accumulator,
             }
         }
     }
+
+    free(cosd_table);
+    free(sind_table);
 }
 
 void statistics_on_accumulator(Matrix *accumulator, float *stddev_out,
