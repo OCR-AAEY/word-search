@@ -309,7 +309,7 @@ BoundingBox **find_letters_histogram_threshold(BoundingBox *area,
 
     for (size_t i = 0; i < size; i++)
     {
-        if (histogram[i] <= threshold)
+        if (histogram[i] < threshold)
         {
             if (current_box != NULL)
             {
@@ -363,12 +363,12 @@ BoundingBox ***get_bounding_box_letters(Matrix *src, BoundingBox **words_boxes,
         if (words_boxes[i] == NULL)
             errx(EXIT_FAILURE, "The current word box is NULL");
 
-        size_t *histogram_horiz =
+        size_t *histogram_vert =
             histogram_vertical(src, words_boxes[i], &histo_size);
         letters_boxes[i] = find_letters_histogram_threshold(
-            words_boxes[i], histogram_horiz, histo_size, threshold,
+            words_boxes[i], histogram_vert, histo_size, threshold,
             (*size_out) + i);
-        free(histogram_horiz);
+        free(histogram_vert);
     }
 
     return letters_boxes;
