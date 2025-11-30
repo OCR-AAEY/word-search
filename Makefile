@@ -36,6 +36,12 @@
 # Whether gcc commands should be displayed during compilation or not.
 VERBOSE ?= 0
 
+# The number of iteration for the random tests.
+TEST_ITERATION ?= 100
+ifeq ($(TEST_ITERATION),0)
+$(error Macro TEST_ITERATION has been set 0)
+endif
+
 # Source directory.
 SRC_DIR   = src
 # Main directory.
@@ -59,7 +65,7 @@ CFLAGS         = -Wall -Wextra -fsanitize=address -fsanitize=undefined -I$(MAIN_
 # Additional C flags.
 XCFLAGS        =
 # C flags for unit testing.
-TEST_FLAGS     = -DUNIT_TEST -I$(TEST_DIR)
+TEST_FLAGS     = -DUNIT_TEST -D TEST_ITERATION=$(TEST_ITERATION) -I$(TEST_DIR)
 # C flags for unit test libraries import.
 TEST_LIB_FLAGS = $(shell pkg-config --cflags --libs criterion)
 # C flags for libraries import.
@@ -89,6 +95,8 @@ OBJ_TEST_FOR_TEST = $(SRC_TEST:$(TEST_DIR)/%.c=$(BUILD_DIR)/test/%.o)
 
 # Solver executable.
 BIN_SOLVER      = solver
+# A executable file that displays a matrix from a matrix file.
+BIN_MAT_DISPLAY = mat_display
 # OCR neural network training executable.
 BIN_OCR         = ocr_train
 # OCR dataset generation script.
@@ -117,32 +125,37 @@ endef
 # Solver target.
 $(BIN_SOLVER): $(call import,solver) $(call main,solver/solver_main)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-	@echo "$(BIN_SOLVER): \033[32mCompilation succeeded\033[0m"
+	@echo "$@: \033[32mCompilation succeeded\033[0m"
+
+# Matrix display target.
+$(BIN_MAT_DISPLAY): $(call import,matrix utils/random) $(call main,matrix/mat_display_main)
+	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
 # OCR neural network training target.
 $(BIN_OCR): $(call import,ocr matrix utils) $(call main,ocr/ocr_train_main)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-	@echo "$(BIN_OCR): \033[32mCompilation succeeded\033[0m"
+	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
 # OCR dataset generation target.
-$(BIN_OCR_DATASET): $(call import,matrix image_loader) $(call main,ocr/ocr_dataset_main)
+$(BIN_OCR_DATASET): $(call import,matrix image_loader utils pretreatment) $(call main,ocr/ocr_dataset_main)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-	@echo "$(BIN_OCR_DATASET): \033[32mCompilation succeeded\033[0m"
+	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
 # Auto rotation target.
 $(BIN_AUTO_ROTATE): $(call import,rotation pretreatment image_loader utils matrix) $(call main,rotation/rotate_main)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-	@echo "$(BIN_AUTO_ROTATE): \033[32mCompilation succeeded\033[0m"
+	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
 # Main app target.
 $(BIN_APP): $(call import,...) $(call main,...)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-	@echo "$(BIN_APP): \033[32mCompilation succeeded\033[0m"
+	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
 # Unit tests target.
 $(BIN_TEST): $(OBJ_MAIN_FOR_TEST) $(OBJ_TEST_FOR_TEST)
 	$(CC) $(CFLAGS) $(XCFLAGS) $(TEST_FLAGS) $^ -o $@ $(LIB_FLAGS) $(TEST_LIB_FLAGS)
-	@echo "$(BIN_TEST): \033[32mCompilation succeeded\033[0m"
+	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
 ##############################
 #        PATTERN RULES       #
