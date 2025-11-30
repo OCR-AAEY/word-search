@@ -35,6 +35,52 @@ Test(matrix, mat_create_zero_test)
     mat_free(m);
 }
 
+Test(matrix, mat_create_filled_test)
+{
+    Matrix *m = mat_create_filled(45, 90, 3.14f);
+
+    cr_assert_eq(mat_height(m), 45);
+    cr_assert_eq(mat_width(m), 90);
+
+    float *content = mat_coef_ptr(m, 0, 0);
+    for (size_t i = 0; i < mat_height(m) * mat_width(m); i++)
+    {
+        cr_assert_float_eq(content[i], 3.14f, EPSILON);
+    }
+
+    mat_free(m);
+}
+
+Test(matrix, mat_create_filled_random_test)
+{
+    REPEAT
+    {
+        size_t height = rand() % 400 + 100;
+        size_t width = rand() % 400 + 100;
+
+        Matrix *m1 = mat_create_random_uniform(height, width, -1E10f, 1E10f);
+        Matrix *m2 = mat_create_random_uniform(height, width, -1E10f, 1E10f);
+
+        Matrix *res = mat_addition(m1, m2);
+
+        cr_assert_eq(mat_height(res), height);
+        cr_assert_eq(mat_width(res), width);
+
+        Matrix *m = mat_create_filled(45, 90, 3.14f);
+
+        cr_assert_eq(mat_height(m), 45);
+        cr_assert_eq(mat_width(m), 90);
+
+        float *content = mat_coef_ptr(m, 0, 0);
+        for (size_t i = 0; i < mat_height(m) * mat_width(m); i++)
+        {
+            cr_assert_float_eq(content[i], 3.14f, EPSILON);
+        }
+
+        mat_free(m);
+    }
+}
+
 Test(matrix, mat_create_from_arr_test)
 {
     Matrix *m = mat_create_from_arr(3, 2, (float[]){0, 1, 2, 3, 4, 5});

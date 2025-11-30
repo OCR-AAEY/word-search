@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include "matrix.h"
+#include "utils/math/clamp.h"
 #include "utils/math/gcd.h"
 #include "utils/math/sigmoid.h"
 #include "utils/random/random.h"
@@ -12,34 +13,32 @@
 // // Temporary macro definition.
 // #define USE_AVX
 // #define USE_AVX_2
-// // #define USE_AVX_512
 
 // SIMD macro handling.
-#if defined(USE_AVX)
+#if !defined(USE_AVX)
 #if defined(USE_AVX_512)
-#include <immintrin.h>
-#define avx_vect_t __m512
-#define avx_vect_len 16
-#define avlm1 15
-#define avx(op, ...) _mm512_##op##_ps(__VA_ARGS__)
+#error "USE_AVX_512 has been defined but USE_AVX has not."
 #elif defined(USE_AVX_2)
-#include <immintrin.h>
-#define avx_vect_t __m256
-#define avx(op, ...) _mm256_##op##_ps(__VA_ARGS__)
-#define avx_vect_len 8
-#define avlm1 7
+#error "USE_AVX_2 has been defined but USE_AVX has not."
+#endif
 #else
+#if !defined(USE_AVX_512) && !defined(USE_AVX_2)
 #error                                                                         \
     "USE_AVX has been defined but neither USE_AVX_2 nor USE_AVX_512 has been defined."
 #endif
-#elif defined(USE_AVX_512)
-#warning                                                                       \
-    "USE_AVX_512 has been defined but USE_AVX has not, therefore it will be ignored."
-#undef USE_AVX_512
+// Define AVX macros
+#include <immintrin.h>
+#if defined(USE_AVX_512)
+#define avx_vect_t __m512
+#define avx(op, ...) _mm512_##op##_ps(__VA_ARGS__)
+#define avx_vect_len 16
 #elif defined(USE_AVX_2)
-#warning                                                                       \
-    "USE_AVX_2 has been defined but USE_AVX has not, therefore it will be ignored."
-#undef USE_AVX_2
+#define avx_vect_t __m256
+#define avx(op, ...) _mm256_##op##_ps(__VA_ARGS__)
+#define avx_vect_len 8
+#endif
+#define avx_for(counter, length)                                               \
+    for (; counter <= length - avx_vect_len; counter += avx_vect_len)
 #endif
 
 /// @brief A 2D matrix of single-precision floating point numbers.
@@ -49,21 +48,14 @@ struct Matrix
     size_t height;
     /// @brief Number of columns (width) of the matrix.
     size_t width;
+    size_t size;
     /// @brief The matrix elements stored in a contiguous row-major array.
     float *content;
 };
 
 static inline float *alloc_content(size_t length)
 {
-#ifdef USE_AVX
-    float *content;
-    int err = posix_memalign((void **)&content, 32, length * sizeof(float));
-    if (err)
-        errx(EXIT_FAILURE, "Call of posix_memalign failed with error code %i.",
-             err);
-#else
     float *content = malloc(length * sizeof(float));
-#endif
 
     if (content == NULL)
         errx(EXIT_FAILURE, "Memory allocation failed in alloc_content.");
@@ -79,7 +71,8 @@ static inline Matrix *alloc_matrix(size_t height, size_t width)
 
     m->height = height;
     m->width = width;
-    m->content = alloc_content(height * width);
+    m->size = height * width;
+    m->content = alloc_content(m->size);
 
     return m;
 }
@@ -118,7 +111,7 @@ Matrix *mat_create_zero(size_t height, size_t width)
              width);
 
     Matrix *m = alloc_matrix(height, width);
-    memset(m->content, 0, height * width * sizeof(float));
+    memset(m->content, 0, m->size * sizeof(float));
 
     return m;
 }
@@ -142,13 +135,14 @@ Matrix *mat_create_filled(size_t height, size_t width, float value)
 
 #if defined(USE_AVX)
     avx_vect_t v = avx(set1, value);
+
     size_t i = 0;
-    for (; i + avlm1 < height * width; i += avx_vect_len)
-        avx(storeu, &c[i], v);
-    for (; i < height * width; ++i)
+    avx_for(i, m->size) avx(storeu, &c[i], v);
+
+    for (; i < m->size; ++i)
         c[i] = value;
 #else
-    for (size_t i = 0; i < height * width; ++i)
+    for (size_t i = 0; i < m->size; ++i)
         c[i] = value;
 #endif
 
@@ -170,7 +164,7 @@ Matrix *mat_create_from_arr(size_t height, size_t width, const float *content)
 
     Matrix *m = alloc_matrix(height, width);
 
-    memcpy(m->content, content, height * width * sizeof(float));
+    memcpy(m->content, content, m->size * sizeof(float));
 
     return m;
 }
@@ -214,7 +208,7 @@ Matrix *mat_create_random_uniform(size_t height, size_t width, float min,
     Matrix *m = alloc_matrix(height, width);
 
     float *c = m->content;
-    for (size_t i = 0; i < height * width; ++i)
+    for (size_t i = 0; i < m->size; ++i)
         c[i] = rand_f_uniform_nm(min, max);
 
     return m;
@@ -236,7 +230,7 @@ Matrix *mat_create_random_gaussian(size_t height, size_t width)
     Matrix *m = alloc_matrix(height, width);
 
     float *c = m->content;
-    for (size_t i = 0; i < height * width; ++i)
+    for (size_t i = 0; i < m->size; ++i)
         c[i] = rand_f_gaussian();
 
     return m;
@@ -259,7 +253,7 @@ Matrix *mat_create_random_normal(size_t height, size_t width, float mean,
     Matrix *m = alloc_matrix(height, width);
 
     float *c = m->content;
-    for (size_t i = 0; i < height * width; ++i)
+    for (size_t i = 0; i < m->size; ++i)
         c[i] = rand_f_normal(mean, stddev);
 
     return m;
@@ -349,7 +343,7 @@ Matrix *mat_addition(const Matrix *a, const Matrix *b)
     Matrix *res = alloc_matrix(a->height, b->width);
 #ifdef USE_AVX
     size_t i = 0;
-    for (; i + avlm1 < res->height * res->width; i += avx_vect_len)
+    avx_for(i, res->size)
     {
         avx_vect_t a_v = avx(loadu, &a->content[i]);
         avx_vect_t b_v = avx(loadu, &b->content[i]);
@@ -378,7 +372,7 @@ void mat_inplace_addition(Matrix *a, const Matrix *b)
 
 #ifdef USE_AVX
     size_t i = 0;
-    for (; i + avlm1 < a->height * a->width; i += avx_vect_len)
+    avx_for(i, a->size)
     {
         avx_vect_t a_v = avx(loadu, &a->content[i]);
         avx_vect_t b_v = avx(loadu, &b->content[i]);
@@ -407,7 +401,7 @@ Matrix *mat_subtraction(const Matrix *a, const Matrix *b)
     Matrix *res = alloc_matrix(a->height, b->width);
 #ifdef USE_AVX
     size_t i = 0;
-    for (; i + avlm1 < res->height * res->width; i += avx_vect_len)
+    avx_for(i, res->size)
     {
         avx_vect_t a_v = avx(loadu, &a->content[i]);
         avx_vect_t b_v = avx(loadu, &b->content[i]);
@@ -436,7 +430,7 @@ void mat_inplace_subtraction(Matrix *a, const Matrix *b)
 
 #ifdef USE_AVX
     size_t i = 0;
-    for (; i + avlm1 < a->height * a->width; i += avx_vect_len)
+    avx_for(i, a->size)
     {
         avx_vect_t a_v = avx(loadu, &a->content[i]);
         avx_vect_t b_v = avx(loadu, &b->content[i]);
@@ -458,7 +452,7 @@ Matrix *mat_scalar_multiplication(const Matrix *m, float a)
 #ifdef USE_AVX
     avx_vect_t a_v = avx(set1, a);
     size_t i = 0;
-    for (; i + avlm1 < m->height * m->width; i += avx_vect_len)
+    avx_for(i, m->size)
     {
         avx_vect_t m_v = avx(loadu, &m->content[i]);
         avx_vect_t r_v = avx(mul, a_v, m_v);
@@ -479,7 +473,7 @@ void mat_inplace_scalar_multiplication(Matrix *m, float a)
 #ifdef USE_AVX
     avx_vect_t a_v = avx(set1, a);
     size_t i = 0;
-    for (; i + avlm1 < m->height * m->width; i += avx_vect_len)
+    avx_for(i, m->size)
     {
         avx_vect_t m_v = avx(loadu, &m->content[i]);
         avx_vect_t r_v = avx(mul, a_v, m_v);
@@ -519,7 +513,7 @@ Matrix *mat_multiplication(const Matrix *a, const Matrix *b)
             avx_vect_t sum = avx(setzero);
 
             size_t k = 0;
-            for (; k + avlm1 < middle_dim; k += avx_vect_len)
+            avx_for(k, middle_dim)
             {
                 avx_vect_t a_v = avx(loadu, &a_row[k]);
                 avx_vect_t b_v = avx(loadu, &b_col[k]);
@@ -577,7 +571,7 @@ Matrix *mat_hadamard(const Matrix *a, const Matrix *b)
     Matrix *res = alloc_matrix(a->height, a->width);
 #ifdef USE_AVX
     size_t i = 0;
-    for (; i + avlm1 < res->height * res->width; i += avx_vect_len)
+    avx_for(i, res->size)
     {
         avx_vect_t a_v = avx(loadu, &a->content[i]);
         avx_vect_t b_v = avx(loadu, &b->content[i]);
@@ -606,7 +600,7 @@ void mat_inplace_hadamard(Matrix *a, const Matrix *b)
 
 #ifdef USE_AVX
     size_t i = 0;
-    for (; i + avlm1 < a->height * a->width; i += avx_vect_len)
+    avx_for(i, a->size)
     {
         avx_vect_t a_v = avx(loadu, &a->content[i]);
         avx_vect_t b_v = avx(loadu, &b->content[i]);
@@ -631,7 +625,7 @@ Matrix *mat_relu(Matrix *m)
     avx_vect_t zero = avx(setzero);
 
     size_t i = 0;
-    for (; i + avlm1 < m->height * m->width; i += avx_vect_len)
+    avx_for(i, m->size)
     {
         avx_vect_t a_v = avx(loadu, &m_c[i]);
         avx_vect_t r_v = avx(max, a_v, zero);
@@ -653,7 +647,7 @@ void mat_inplace_relu(Matrix *m)
     avx_vect_t zero = avx(setzero);
 
     size_t i = 0;
-    for (; i + avlm1 < m->height * m->width; i += avx_vect_len)
+    avx_for(i, m->size)
     {
         avx_vect_t a_v = avx(loadu, &m_c[i]);
         avx_vect_t r_v = avx(max, a_v, zero);
@@ -678,7 +672,7 @@ Matrix *mat_relu_derivative(Matrix *m)
     avx_vect_t one = avx(set1, 1.0f);
 
     size_t i = 0;
-    for (; i + avlm1 < m->height * m->width; i += avx_vect_len)
+    avx_for(i, m->size)
     {
         avx_vect_t v = avx(loadu, src + i);
         avx_vect_t mask = avx(cmp, v, zero, _CMP_GT_OQ);
@@ -702,7 +696,7 @@ void mat_inplace_relu_derivative(Matrix *m)
     avx_vect_t one = avx(set1, 1.0f);
 
     size_t i = 0;
-    for (; i + avlm1 < m->height * m->width; i += avx_vect_len)
+    avx_for(i, m->size)
     {
         avx_vect_t v = avx(loadu, c + i);
         avx_vect_t mask = avx(cmp, v, zero, _CMP_GT_OQ);
@@ -781,6 +775,12 @@ void mat_inplace_softmax(Matrix *m)
         m->content[i] /= sum;
 }
 
+void mat_inplace_toggle(Matrix *m)
+{
+    for (size_t i = 0; i < m->size; ++i)
+        m->content[i] = m->content[i] < 0.5f ? 1.0f : 0.0f;
+}
+
 Matrix *mat_strip_margins(const Matrix *m)
 {
     // Whether an activated (<=> black <=> 1.0f) pixel has been found.
@@ -825,7 +825,7 @@ Matrix *mat_strip_margins(const Matrix *m)
     w_f++;
 
     if (h_i > h_f || w_i > w_f)
-        errx(EXIT_FAILURE, "Matrix empty.");
+        return NULL;
 
     Matrix *res = mat_create_zero(h_f - h_i + 1, w_f - w_i + 1);
     for (size_t h = 0; h < res->height; ++h)
@@ -835,39 +835,40 @@ Matrix *mat_strip_margins(const Matrix *m)
     return res;
 }
 
-Matrix *mat_scale_to_28(const Matrix *m)
+Matrix *mat_scale_to_28(const Matrix *m, float fill_value)
 {
-    const size_t TARGET = 28;
-    Matrix *res = mat_create_zero(TARGET, TARGET);
+    const size_t dim = 28;
+    Matrix *res = mat_create_filled(dim, dim, fill_value);
 
     // Compute scaling factors for height and width
-    float scale_h = (float)m->height / (float)TARGET;
-    float scale_w = (float)m->width / (float)TARGET;
+    float scale_h = (float)m->height / (float)dim;
+    float scale_w = (float)m->width / (float)dim;
 
     // Use the larger scale to preserve aspect ratio
     float factor = (scale_h > scale_w) ? scale_h : scale_w;
 
     // Compute offset to center the content
-    float h_offset = ((TARGET * factor) - m->height) / 2.0f;
-    float w_offset = ((TARGET * factor) - m->width) / 2.0f;
+    float h_offset = ((dim * factor) - m->height) / 2.0f;
+    float w_offset = ((dim * factor) - m->width) / 2.0f;
 
-    for (size_t h = 0; h < TARGET; ++h)
+    for (size_t h = 0; h < dim; ++h)
     {
-        for (size_t w = 0; w < TARGET; ++w)
+        for (size_t w = 0; w < dim; ++w)
         {
             // Map target pixel to source matrix coordinates
             float sh = h * factor - h_offset;
             float sw = w * factor - w_offset;
 
             // Clamp to valid source range
-            if (sh < 0)
-                sh = 0;
-            if (sw < 0)
-                sw = 0;
-            if (sh > m->height - 1)
-                sh = m->height - 1;
-            if (sw > m->width - 1)
-                sw = m->width - 1;
+            if (sh < 0 || sw < 0 || sh > m->height - 1 || sw > m->width - 1)
+                continue;
+            //     sh = 0;
+            // if (sw < 0)
+            //     sw = 0;
+            // if (sh > m->height - 1)
+            //     sh = m->height - 1;
+            // if (sw > m->width - 1)
+            //     sw = m->width - 1;
 
             // Split into integer and fractional parts
             float sh_frac, sw_frac, sh_int, sw_int;
@@ -1348,6 +1349,40 @@ void mat_print_n_first(const Matrix *m, size_t n, unsigned int precision)
     printf("\n");
 }
 
+void mat_display(const Matrix *m)
+{
+    char top_ansi[64];
+    char bot_ansi[64];
+
+    for (size_t h = 0; h < m->height; h += 2)
+    {
+        for (size_t w = 0; w < m->width; ++w)
+        {
+            int top_grey = clamp(
+                (int)(*mat_unsafe_coef_ptr(m, h, w) * 255.0f + 0.5f), 0, 255);
+            snprintf(top_ansi, 64, "\x1b[38;2;%i;%i;%im", top_grey, top_grey,
+                     top_grey);
+
+            if (h >= m->height)
+            {
+                bot_ansi[0] = '\0';
+            }
+            else
+            {
+                int bot_grey = clamp(
+                    (int)(*mat_unsafe_coef_ptr(m, h + 1, w) * 255.0f + 0.5f), 0,
+                    255);
+                snprintf(bot_ansi, 64, "\x1b[48;2;%i;%i;%im", bot_grey,
+                         bot_grey, bot_grey);
+            }
+
+            printf("%s%s▀", top_ansi, bot_ansi);
+        }
+
+        printf("\x1b[0m\n");
+    }
+}
+
 Matrix *mat_load_from_file(const char *filename)
 {
     FILE *file_stream = fopen(filename, "r");
@@ -1375,7 +1410,7 @@ Matrix *mat_load_from_file(const char *filename)
     Matrix *res = alloc_matrix(height, width);
 
     // Read the matrix content.
-    for (size_t i = 0; i < height * width; ++i)
+    for (size_t i = 0; i < res->size; ++i)
     {
         r_out = read(fd, &res->content[i], sizeof(float));
         if (r_out != sizeof(float))
