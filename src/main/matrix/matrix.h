@@ -232,9 +232,11 @@ Matrix *mat_relu_derivative(Matrix *m);
 
 void mat_inplace_softmax(Matrix *m);
 
+void mat_inplace_toggle(Matrix *m);
+
 Matrix *mat_strip_margins(const Matrix *m);
 
-Matrix *mat_scale_to_28(const Matrix *m);
+Matrix *mat_scale_to_28(const Matrix *m, float fill_value);
 
 void mat_inplace_to_one_hot(Matrix *m);
 
@@ -340,6 +342,8 @@ void mat_inplace_map_with_indexes(Matrix *m, float (*f)(float, size_t, size_t));
 void mat_print(const Matrix *m, unsigned int precision);
 
 void mat_print_n_first(const Matrix *m, size_t n, unsigned int precision);
+
+void mat_display(const Matrix *m);
 
 Matrix *mat_load_from_file(const char *filename);
 
