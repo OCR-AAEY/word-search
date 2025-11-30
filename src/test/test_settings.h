@@ -6,6 +6,6 @@
 
 /** The number of times random test will be repeated. */
 #define REPEAT                                                                 \
-    for (size_t repeat_counter = 0; repeat_counter < 10; repeat_counter++)
+    for (size_t repeat_counter = 0; repeat_counter < TEST_ITERATION; repeat_counter++)
 
 #endif
