@@ -6,16 +6,16 @@
 
 #include "random.h"
 
-/// @brief Ensures that a seed for rand has been set at least once.
-static void seed_once()
-{
-    static int has_been_seeded = 0;
-    if (!has_been_seeded)
-    {
-        srand((unsigned int)time(NULL));
-        has_been_seeded = 1;
-    }
-}
+// /// @brief Ensures that a seed for rand has been set at least once.
+// static void seed_once()
+// {
+//     static int has_been_seeded = 0;
+//     if (!has_been_seeded)
+//     {
+//         srand((unsigned int)time(NULL));
+//         has_been_seeded = 1;
+//     }
+// }
 
 void rand_seed() { srand((unsigned int)time(NULL)); }
 
@@ -23,6 +23,8 @@ unsigned long rand_ul_uniform(unsigned long max)
 {
     if (max == 0)
         return 0;
+    if (max == ULONG_MAX)
+        max--;
 
     unsigned long limit = RAND_MAX - (RAND_MAX % (max + 1));
     unsigned long r;
