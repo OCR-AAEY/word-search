@@ -18,18 +18,20 @@ int main()
 {
     rand_seed();
 
+    char filename[1024];
+
     Dataset *dataset =
-        ds_load_from_directory("./assets/ocr-training-dataset/matrices/");
+        ds_load_from_directory("./assets/ocr_dataset/real/matrices/");
 
     Neural_Network *net = net_create_empty(3, (size_t[]){784, 128, 26});
 
     float accuracy = 0.0f;
     size_t epochs = 0;
 
-    while (accuracy < 0.99f)
+    while (accuracy < 0.90f)
     {
         // Train.
-        net_train(net, dataset, EPOCH_STEP, 32, 0.01);
+        net_train(net, dataset, EPOCH_STEP, 64, 0.01);
         epochs += EPOCH_STEP;
 
         // Measure accuracy.
@@ -52,9 +54,12 @@ int main()
                time_str, epochs, 100.0f * accuracy, successes,
                ds_size(dataset));
         fflush(stdout);
+
+        snprintf(filename, 1024, "ocr_real_%.3f.nn", accuracy);
+        net_save_to_file(net, filename);
     }
 
-    net_save_to_file(net, "ocr.nn");
+    net_save_to_file(net, "ocr_real_final.nn");
 
     net_free(net);
 
