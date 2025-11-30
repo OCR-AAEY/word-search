@@ -1383,6 +1383,35 @@ void mat_display(const Matrix *m)
     }
 }
 
+Matrix *mat_load_from_fd(int fd)
+{
+    int r_out;
+    size_t height, width;
+
+    r_out = read(fd, &height, sizeof(size_t));
+    if (r_out != sizeof(size_t))
+        errx(EXIT_FAILURE, "Invalid file: failed to read matrix's height.");
+
+    r_out = read(fd, &width, sizeof(size_t));
+    if (r_out != sizeof(size_t))
+        errx(EXIT_FAILURE, "Invalid file: failed to read matrix's width.");
+
+    Matrix *res = alloc_matrix(height, width);
+
+    // Read the matrix content.
+    for (size_t i = 0; i < res->size; ++i)
+    {
+        r_out = read(fd, &res->content[i], sizeof(float));
+        if (r_out != sizeof(float))
+            errx(EXIT_FAILURE,
+                 "Invalid file: failed to read matrix's "
+                 "%zuth coefficient.",
+                 i);
+    }
+
+    return res;
+}
+
 Matrix *mat_load_from_file(const char *filename)
 {
     FILE *file_stream = fopen(filename, "r");
@@ -1394,31 +1423,7 @@ Matrix *mat_load_from_file(const char *filename)
         errx(EXIT_FAILURE, "Failed to open file descriptor of file %s.",
              filename);
 
-    int r_out;
-    size_t height, width;
-
-    r_out = read(fd, &height, sizeof(size_t));
-    if (r_out != sizeof(size_t))
-        errx(EXIT_FAILURE, "Invalid file %s: failed to read matrix's height.",
-             filename);
-
-    r_out = read(fd, &width, sizeof(size_t));
-    if (r_out != sizeof(size_t))
-        errx(EXIT_FAILURE, "Invalid file %s: failed to read matrix's width.",
-             filename);
-
-    Matrix *res = alloc_matrix(height, width);
-
-    // Read the matrix content.
-    for (size_t i = 0; i < res->size; ++i)
-    {
-        r_out = read(fd, &res->content[i], sizeof(float));
-        if (r_out != sizeof(float))
-            errx(EXIT_FAILURE,
-                 "Invalid file %s: failed to read matrix's "
-                 "%zuth coefficient.",
-                 filename, i);
-    }
+    Matrix *res = mat_load_from_fd(fd);
 
     if (getc(file_stream) != EOF)
         printf("WARNING: matrix %s is larger than expected.", filename);
@@ -1426,6 +1431,35 @@ Matrix *mat_load_from_file(const char *filename)
     fclose(file_stream);
 
     return res;
+}
+
+void mat_save_to_fd(const Matrix *m, int fd)
+{
+    int w_out;
+
+    w_out = write(fd, &m->height, sizeof(size_t));
+    if (w_out != sizeof(size_t))
+        errx(EXIT_FAILURE,
+             "Failed to write file: failed to write matrix's height.");
+
+    w_out = write(fd, &m->width, sizeof(size_t));
+    if (w_out != sizeof(size_t))
+        errx(EXIT_FAILURE,
+             "Failed to write file: failed to write matrix's width.");
+
+    // Write the matrix content.
+    for (size_t h = 0; h < m->height; ++h)
+    {
+        for (size_t w = 0; w < m->width; ++w)
+        {
+            w_out = write(fd, mat_unsafe_coef_ptr(m, h, w), sizeof(float));
+            if (w_out != sizeof(float))
+                errx(EXIT_FAILURE,
+                     "Failed to write file: failed to write matrix's "
+                     "coefficient at position (h:%zu, w:%zu).",
+                     h, w);
+        }
+    }
 }
 
 void mat_save_to_file(const Matrix *m, const char *filename)
@@ -1439,33 +1473,7 @@ void mat_save_to_file(const Matrix *m, const char *filename)
         errx(EXIT_FAILURE, "Failed to open file descriptor of file %s.",
              filename);
 
-    int w_out;
-
-    w_out = write(fd, &m->height, sizeof(size_t));
-    if (w_out != sizeof(size_t))
-        errx(EXIT_FAILURE,
-             "Failed to write file %s: failed to write matrix's height.",
-             filename);
-
-    w_out = write(fd, &m->width, sizeof(size_t));
-    if (w_out != sizeof(size_t))
-        errx(EXIT_FAILURE,
-             "Failed to write file %s: failed to write matrix's width.",
-             filename);
-
-    // Write the matrix content.
-    for (size_t h = 0; h < m->height; ++h)
-    {
-        for (size_t w = 0; w < m->width; ++w)
-        {
-            w_out = write(fd, mat_unsafe_coef_ptr(m, h, w), sizeof(float));
-            if (w_out != sizeof(float))
-                errx(EXIT_FAILURE,
-                     "Failed to write file %s: failed to write matrix's "
-                     "coefficient at position (h:%zu, w:%zu).",
-                     filename, h, w);
-        }
-    }
+    mat_save_to_fd(m, fd);
 
     fclose(file_stream);
 }

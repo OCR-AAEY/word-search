@@ -28,6 +28,10 @@ void ds_add_tuple(Dataset *dataset, Training_Data *tuple);
 
 Dataset *ds_load_from_directory(char *dirname);
 
+Dataset *ds_load_from_file(char *filename);
+
+void ds_save_to_file(Dataset *ds, char *filename);
+
 void ds_shuffle(Dataset *dataset);
 
 Training_Data *ds_get_data(Dataset *dataset, size_t i);

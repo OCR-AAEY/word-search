@@ -345,7 +345,11 @@ void mat_print_n_first(const Matrix *m, size_t n, unsigned int precision);
 
 void mat_display(const Matrix *m);
 
+Matrix *mat_load_from_fd(int fd);
+
 Matrix *mat_load_from_file(const char *filename);
+
+void mat_save_to_fd(const Matrix *m, int fd);
 
 void mat_save_to_file(const Matrix *m, const char *filename);
 

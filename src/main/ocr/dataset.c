@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #include "dataset.h"
 #include "utils/random/shuffle_array.h"
@@ -107,6 +108,67 @@ Dataset *ds_load_from_directory(char *dirname)
     closedir(dir);
 
     return dataset;
+}
+
+Dataset *ds_load_from_file(char *filename)
+{
+    FILE *file_stream = fopen(filename, "r");
+    if (file_stream == NULL)
+        errx(EXIT_FAILURE, "Failed to open file %s", filename);
+
+    int fd = fileno(file_stream);
+
+    int r;
+    size_t size;
+    size_t class;
+    Matrix *m;
+
+    r = read(fd, &size, sizeof(size_t));
+    if (r < sizeof(size_t))
+        errx(EXIT_FAILURE, "Failed to read dataset size");
+
+    Dataset *ds = malloc(sizeof(Dataset));
+    if (ds == NULL)
+        errx(EXIT_FAILURE, "Memory allocation failed");
+    ds->content = malloc(size * sizeof(Training_Data *));
+    if (ds->content == NULL)
+        errx(EXIT_FAILURE, "Memory allocation failed");
+    ds->max_size = size;
+    ds->size = size;
+
+    for (size_t i = 0; i < size; ++i)
+    {
+        r = read(fd, &class, sizeof(size_t));
+        if (r < sizeof(size_t))
+            errx(EXIT_FAILURE, "Failed to read class");
+        m = mat_load_from_fd(fd);
+        ds->content[i] = td_create(m, class);
+    }
+
+    return ds;
+}
+
+void ds_save_to_file(Dataset *ds, char *filename)
+{
+    FILE *file_stream = fopen(filename, "w");
+    if (file_stream == NULL)
+        errx(EXIT_FAILURE, "Failed to open file %s", filename);
+
+    int fd = fileno(file_stream);
+
+    int w;
+    w = write(fd, &ds->size, sizeof(size_t));
+    if (w < sizeof(size_t))
+        errx(EXIT_FAILURE, "Failed to write dataset size");
+
+    for (size_t i = 0; i < ds->size; ++i)
+    {
+        Training_Data *td = ds->content[i];
+        w = write(fd, &td->expected_class, sizeof(size_t));
+        if (w < sizeof(size_t))
+            errx(EXIT_FAILURE, "Failed to write class");
+        mat_save_to_fd(td->input, fd);
+    }
 }
 
 void ds_shuffle(Dataset *dataset)
