@@ -8,6 +8,9 @@
 
 #include "image_loader/image_loading.h"
 #include "matrix/matrix.h"
+#include "pretreatment/pretreatment.h"
+
+#define PATH_LEN 1024
 
 /*
 int main(void)
@@ -97,9 +100,7 @@ int main(void)
 
     return EXIT_SUCCESS;
 }
-*/
 
-/*
 void process_file(const char *filepath, const char *filename)
 {
     ImageData *img = load_image(filepath);
@@ -165,3 +166,165 @@ int main(void)
     closedir(dir);
 }
 */
+
+void dataset_images_to_matrices(const char *input_dir_name)
+{
+    // The error status variable.
+    int e;
+
+    // File status buffer.
+    struct stat stat_buff;
+    // Image file entry.
+    struct dirent *img_file;
+
+    // The alphabet (the 26 classes for the OCR classification neural network).
+    char *alphabet = "abcdefghijklmnopqrstuvwxyz";
+
+    // <input_dir_name>/images/
+    char img_dir_path[PATH_LEN];
+    // <input_dir_name>/matrices/
+    char mat_dir_path[PATH_LEN];
+    // <input_dir_name>/images/<letter>/
+    char img_letter_dir_path[PATH_LEN];
+    // <input_dir_name>/matrices/<letter>/
+    char mat_letter_dir_path[PATH_LEN];
+    // The image file name that is being processed.
+    char *img_file_name;
+    // The path of the image file name that is being processed.
+    char img_file_path[PATH_LEN];
+    // The matrix file name corresponding to the image file name that is being
+    // processed.
+    char mat_file_name[PATH_LEN];
+    // The path of the matrix file name corresponding to the image file name
+    // that is being processed.
+    char mat_file_path[PATH_LEN];
+
+    e = snprintf(img_dir_path, PATH_LEN, "%s/images/", input_dir_name);
+    if (e < -1)
+        errx(EXIT_FAILURE, "Failed to concat into img_dir_path.");
+
+    e = snprintf(mat_dir_path, PATH_LEN, "%s/matrices/", input_dir_name);
+    if (e < -1)
+        errx(EXIT_FAILURE, "Failed to concat into mat_dir_path.");
+
+    if (stat(mat_dir_path, &stat_buff) == -1)
+    {
+        e = mkdir(mat_dir_path, 0700);
+        if (e < 0)
+            errx(EXIT_FAILURE, "Failed to call mkdir.");
+    }
+
+    for (size_t i = 0; i < 26; ++i)
+    {
+        char letter = alphabet[i];
+
+        e = snprintf(img_letter_dir_path, PATH_LEN, "%s/%c/", img_dir_path,
+                     letter);
+        if (e < 0)
+            errx(EXIT_FAILURE, "Failed to concat into img_letter_dir_path.");
+
+        e = snprintf(mat_letter_dir_path, PATH_LEN, "%s/%c/", mat_dir_path,
+                     letter);
+        if (e < 0)
+            errx(EXIT_FAILURE, "Failed to concat into mat_letter_dir_path.");
+
+        if (stat(mat_letter_dir_path, &stat_buff) == -1)
+        {
+            e = mkdir(mat_letter_dir_path, 0700);
+            if (e < 0)
+                errx(EXIT_FAILURE, "Failed to call mkdir.");
+
+            if (stat(mat_letter_dir_path, &stat_buff) == -1)
+                errx(EXIT_FAILURE,
+                     "Failed to stat newly created dir mat_letter_dir_path");
+        }
+
+        if (!S_ISDIR(stat_buff.st_mode))
+            errx(EXIT_FAILURE,
+                 "Expected mat_letter_dir_path (%s) to be a directory but "
+                 "found something else.",
+                 mat_letter_dir_path);
+
+        DIR *img_letter_dir_stream = opendir(img_letter_dir_path);
+        if (img_letter_dir_stream == NULL)
+            errx(EXIT_FAILURE, "Failed to open sub directory %s/%c.",
+                 img_dir_path, letter);
+
+        while ((img_file = readdir(img_letter_dir_stream)) != NULL)
+        {
+            if (strcmp(img_file->d_name, ".") == 0 ||
+                strcmp(img_file->d_name, "..") == 0)
+                continue;
+
+            img_file_name = img_file->d_name;
+            e = snprintf(img_file_path, sizeof(img_file_path), "%s/%s",
+                         img_letter_dir_path, img_file_name);
+            if (e < 0)
+                errx(EXIT_FAILURE,
+                     "Failed to write in buffer img_file_path %s/%s.",
+                     img_letter_dir_path, img_file_name);
+
+            if (stat(img_file_path, &stat_buff) == -1)
+                errx(EXIT_FAILURE, "Failed to stat file %s.", img_file_path);
+
+            if (!S_ISREG(stat_buff.st_mode))
+                printf("Non regular file %s has been skipped.\n",
+                       img_file_path);
+
+            // Build mat_file_name.
+            strcpy(mat_file_name, img_file_name);
+            char *dot = strrchr(mat_file_name, '.');
+            if (dot != NULL)
+                *dot = '\0';
+            strcat(mat_file_name, ".matrix");
+
+            // Build mat_file_path.
+            e = snprintf(mat_file_path, sizeof(mat_file_path), "%s/%s",
+                         mat_letter_dir_path, mat_file_name);
+
+            // Process image.
+            ImageData *img = load_image(img_file_path);
+
+            Matrix *m, *tmp;
+            m = image_to_grayscale(img);
+            free_image(img);
+
+            tmp = adaptative_gaussian_thresholding(m, 1.0f, 11, 10, 5);
+            mat_free(m);
+            m = tmp;
+
+            mat_inplace_to_one_hot(m);
+
+            mat_inplace_toggle(m);
+
+            tmp = morph_transform(m, 2, Closing);
+            mat_free(m);
+            m = tmp;
+
+            tmp = morph_transform(m, 2, Opening);
+            mat_free(m);
+            m = tmp;
+
+            tmp = mat_strip_margins(m);
+            if (tmp == NULL)
+            {
+                mat_free(m);
+                continue;
+            }
+            mat_free(m);
+            m = tmp;
+
+            tmp = mat_scale_to_28(m, 0.0f);
+            mat_free(m);
+            m = tmp;
+
+            mat_save_to_file(m, mat_file_path);
+
+            mat_free(m);
+        }
+
+        closedir(img_letter_dir_stream);
+    }
+}
+
+int main(void) { dataset_images_to_matrices("assets/ocr_dataset/real/"); }
