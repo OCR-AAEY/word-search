@@ -13,14 +13,13 @@
 // SIMD macro handling.
 #if !defined(USE_AVX)
 #if defined(USE_AVX_512)
-#error "USE_AVX_512 has been defined but USE_AVX has not."
+#error "USE_AVX_512 was defined but USE_AVX was not."
 #elif defined(USE_AVX_2)
-#error "USE_AVX_2 has been defined but USE_AVX has not."
+#error "USE_AVX_2 was defined but USE_AVX was not."
 #endif
 #else
 #if !defined(USE_AVX_512) && !defined(USE_AVX_2)
-#error                                                                         \
-    "USE_AVX has been defined but neither USE_AVX_2 nor USE_AVX_512 has been defined."
+#error "USE_AVX was defined but neither USE_AVX_2 nor USE_AVX_512 was defined."
 #endif
 // Define AVX macros
 #include <immintrin.h>
