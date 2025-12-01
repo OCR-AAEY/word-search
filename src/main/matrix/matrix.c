@@ -712,42 +712,42 @@ void mat_inplace_relu_derivative(Matrix *m)
 // static avx_vect_t _mm256_exp_ps(){}
 #error "AVX_512 is not supported yet."
 #elif defined(USE_AVX_2)
-static avx_vect_t _mm256_exp_ps(avx_vect_t x)
-{
-    const avx_vect_t ln2 = avx(set1, 0.69314718056f);
-    const avx_vect_t inv_ln2 = avx(set1, 1.44269504089f);
+// static avx_vect_t _mm256_exp_ps(avx_vect_t x)
+// {
+//     const avx_vect_t ln2 = avx(set1, 0.69314718056f);
+//     const avx_vect_t inv_ln2 = avx(set1, 1.44269504089f);
 
-    // Range reduction: x = n*ln2 + r, where r in [-ln2/2, ln2/2]
-    avx_vect_t n = avx(mul, x, inv_ln2);
-    n = avx(round, n, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
+//     // Range reduction: x = n*ln2 + r, where r in [-ln2/2, ln2/2]
+//     avx_vect_t n = avx(mul, x, inv_ln2);
+//     n = avx(round, n, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
 
-    avx_vect_t y = avx(mul, n, ln2);
-    avx_vect_t r = avx(sub, x, y);
+//     avx_vect_t y = avx(mul, n, ln2);
+//     avx_vect_t r = avx(sub, x, y);
 
-    // Polynomial approximation of exp(r)
-    const avx_vect_t c1 = avx(set1, 1.0f);
-    const avx_vect_t c2 = avx(set1, 0.4999999403953552f);
-    const avx_vect_t c3 = avx(set1, 0.16666594183444977f);
-    const avx_vect_t c4 = avx(set1, 0.041657347708940506f);
-    const avx_vect_t c5 = avx(set1, 0.008301359802305698f);
-    const avx_vect_t c6 = avx(set1, 0.0013298822781072855f);
+//     // Polynomial approximation of exp(r)
+//     const avx_vect_t c1 = avx(set1, 1.0f);
+//     const avx_vect_t c2 = avx(set1, 0.4999999403953552f);
+//     const avx_vect_t c3 = avx(set1, 0.16666594183444977f);
+//     const avx_vect_t c4 = avx(set1, 0.041657347708940506f);
+//     const avx_vect_t c5 = avx(set1, 0.008301359802305698f);
+//     const avx_vect_t c6 = avx(set1, 0.0013298822781072855f);
 
-    avx_vect_t r2 = avx(mul, r, r);
-    avx_vect_t poly = c6;
-    poly = avx(fmadd, poly, r, c5);
-    poly = avx(fmadd, poly, r, c4);
-    poly = avx(fmadd, poly, r, c3);
-    poly = avx(fmadd, poly, r, c2);
-    poly = avx(fmadd, poly, r2, r);
-    poly = avx(add, poly, c1);
+//     avx_vect_t r2 = avx(mul, r, r);
+//     avx_vect_t poly = c6;
+//     poly = avx(fmadd, poly, r, c5);
+//     poly = avx(fmadd, poly, r, c4);
+//     poly = avx(fmadd, poly, r, c3);
+//     poly = avx(fmadd, poly, r, c2);
+//     poly = avx(fmadd, poly, r2, r);
+//     poly = avx(add, poly, c1);
 
-    // Reconstruct exp(x) = exp(r) * 2^n
-    __m256i pow2n = _mm256_slli_epi32(
-        _mm256_add_epi32(_mm256_cvtps_epi32(n), _mm256_set1_epi32(127)), 23);
-    avx_vect_t pow2 = avx(castsi256, pow2n);
+//     // Reconstruct exp(x) = exp(r) * 2^n
+//     __m256i pow2n = _mm256_slli_epi32(
+//         _mm256_add_epi32(_mm256_cvtps_epi32(n), _mm256_set1_epi32(127)), 23);
+//     avx_vect_t pow2 = avx(castsi256, pow2n);
 
-    return avx(mul, poly, pow2);
-}
+//     return avx(mul, poly, pow2);
+// }
 #endif
 
 void mat_inplace_softmax(Matrix *m)
