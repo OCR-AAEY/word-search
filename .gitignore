@@ -1,5 +1,6 @@
-# Dataset
-/assets/ocr-training-dataset
+# Raw datasets
+/assets/dataset/real/
+/assets/dataset/cheat/
 
 # Tests
 venv/
