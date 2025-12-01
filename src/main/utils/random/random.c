@@ -17,7 +17,12 @@
 //     }
 // }
 
-void rand_seed() { srand((unsigned int)time(NULL)); }
+unsigned int rand_seed()
+{
+    unsigned int seed = (unsigned int)time(NULL);
+    srand(seed);
+    return seed;
+}
 
 unsigned long rand_ul_uniform(unsigned long max)
 {

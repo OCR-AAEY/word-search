@@ -5,7 +5,7 @@
 #define M_PI 3.14159265358979323846 /* Pi */
 #endif
 
-void rand_seed();
+unsigned int rand_seed();
 
 /// @brief Generates a uniformly distributed unsigned long integer in the range
 /// [0, max].
