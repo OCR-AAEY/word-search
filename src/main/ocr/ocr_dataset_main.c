@@ -9,6 +9,7 @@
 #include "image_loader/image_loading.h"
 #include "matrix/matrix.h"
 #include "pretreatment/pretreatment.h"
+#include "ocr/dataset.h"
 
 #define PATH_LEN 1024
 
@@ -327,4 +328,11 @@ void dataset_images_to_matrices(const char *input_dir_name)
     }
 }
 
-int main(void) { dataset_images_to_matrices("assets/ocr_dataset/real/"); }
+void save_to_file(char *dirname)
+{
+    Dataset *ds = ds_load_from_nested_directory(dirname);
+    ds_save_to_compressed_file(ds, "assets/ocr_dataset/real/real_compressed.dataset");
+    ds_free(ds);
+}
+
+int main(void) { save_to_file("assets/ocr_dataset/real/filtered_matrices/"); }

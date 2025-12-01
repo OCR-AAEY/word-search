@@ -110,6 +110,85 @@ Dataset *ds_load_from_directory(char *dirname)
     return dataset;
 }
 
+Dataset *ds_load_from_nested_directory(char *dirname)
+{
+    Dataset *dataset = ds_create_empty();
+    DIR *dir = opendir(dirname);
+
+    if (dir == NULL)
+        errx(EXIT_FAILURE, "failed to opendir: %s", dirname);
+
+    struct dirent *entry;
+    char subdir_path[1024];
+
+    while ((entry = readdir(dir)) != NULL)
+    {
+        // Skip . and ..
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
+
+        // Expect subdirectories named a to z
+        if (strlen(entry->d_name) != 1)
+            continue;
+
+        char c = entry->d_name[0];
+        if (c < 'a' || c > 'z')
+            continue;
+
+        // Full path to the subdirectory
+        snprintf(subdir_path, sizeof(subdir_path), "%s/%s", dirname,
+                 entry->d_name);
+
+        struct stat st;
+        if (stat(subdir_path, &st) == -1)
+            errx(EXIT_FAILURE, "failed to stat: %s", subdir_path);
+
+        // Skip non-directories
+        if (!S_ISDIR(st.st_mode))
+            continue;
+
+        // Open subdirectory
+        DIR *subdir = opendir(subdir_path);
+        if (subdir == NULL)
+            errx(EXIT_FAILURE, "failed to opendir: %s", subdir_path);
+
+        struct dirent *file_entry;
+        char file_path[2048];
+
+        while ((file_entry = readdir(subdir)) != NULL)
+        {
+            if (strcmp(file_entry->d_name, ".") == 0 ||
+                strcmp(file_entry->d_name, "..") == 0)
+                continue;
+
+            snprintf(file_path, sizeof(file_path), "%s/%s", subdir_path,
+                     file_entry->d_name);
+
+            struct stat fst;
+            if (stat(file_path, &fst) == -1)
+                errx(EXIT_FAILURE, "failed to stat: %s", file_path);
+
+            if (!S_ISREG(fst.st_mode))
+                continue;
+
+            // Load matrix
+            Matrix *input = mat_load_from_file(file_path);
+            mat_inplace_vertical_flatten(input);
+
+            // Label = directory name ('a' → 0, etc.)
+            int label = c - 'a';
+
+            Training_Data *tuple = td_create(input, label);
+            ds_add_tuple(dataset, tuple);
+        }
+
+        closedir(subdir);
+    }
+
+    closedir(dir);
+    return dataset;
+}
+
 Dataset *ds_load_from_file(char *filename)
 {
     FILE *file_stream = fopen(filename, "r");
@@ -124,7 +203,7 @@ Dataset *ds_load_from_file(char *filename)
     Matrix *m;
 
     r = read(fd, &size, sizeof(size_t));
-    if (r < sizeof(size_t))
+    if (r != sizeof(size_t))
         errx(EXIT_FAILURE, "Failed to read dataset size");
 
     Dataset *ds = malloc(sizeof(Dataset));
@@ -139,7 +218,7 @@ Dataset *ds_load_from_file(char *filename)
     for (size_t i = 0; i < size; ++i)
     {
         r = read(fd, &class, sizeof(size_t));
-        if (r < sizeof(size_t))
+        if (r != sizeof(size_t))
             errx(EXIT_FAILURE, "Failed to read class");
         m = mat_load_from_fd(fd);
         ds->content[i] = td_create(m, class);
@@ -158,17 +237,119 @@ void ds_save_to_file(Dataset *ds, char *filename)
 
     int w;
     w = write(fd, &ds->size, sizeof(size_t));
-    if (w < sizeof(size_t))
+    if (w != sizeof(size_t))
         errx(EXIT_FAILURE, "Failed to write dataset size");
 
     for (size_t i = 0; i < ds->size; ++i)
     {
         Training_Data *td = ds->content[i];
         w = write(fd, &td->expected_class, sizeof(size_t));
-        if (w < sizeof(size_t))
+        if (w != sizeof(size_t))
             errx(EXIT_FAILURE, "Failed to write class");
         mat_save_to_fd(td->input, fd);
     }
+}
+
+Dataset *ds_load_from_compressed_file(char *filename)
+{
+    FILE *file_stream = fopen(filename, "rb");
+    if (file_stream == NULL)
+        errx(EXIT_FAILURE, "Failed to open file %s", filename);
+
+    int fd = fileno(file_stream);
+
+    int r;
+    size_t size;
+    char class;
+    char buff;
+    Matrix *m;
+    float *c;
+
+    r = read(fd, &size, sizeof(size_t));
+    if (r != sizeof(size_t))
+        errx(EXIT_FAILURE, "Failed to read dataset size");
+
+    Dataset *ds = malloc(sizeof(Dataset));
+    if (ds == NULL)
+        errx(EXIT_FAILURE, "Memory allocation failed");
+    ds->content = malloc(size * sizeof(Training_Data *));
+    if (ds->content == NULL)
+        errx(EXIT_FAILURE, "Memory allocation failed");
+    ds->max_size = size;
+    ds->size = size;
+
+    for (size_t i = 0; i < size; ++i)
+    {
+        r = read(fd, &class, sizeof(char));
+        if (r != sizeof(char))
+            errx(EXIT_FAILURE, "Failed to read class");
+
+        m = mat_create(28, 28);
+        c = mat_coef_ptr(m, 0, 0);
+        for (size_t j = 0; j < 28 * 28; j += 8)
+        {
+            r = read(fd, &buff, sizeof(char));
+            if (r != sizeof(char))
+                errx(EXIT_FAILURE, "Failed to read class");
+
+            c[j + 0] = (buff & (1 << 7)) == 0 ? 0.0f : 1.0f;
+            c[j + 1] = (buff & (1 << 6)) == 0 ? 0.0f : 1.0f;
+            c[j + 2] = (buff & (1 << 5)) == 0 ? 0.0f : 1.0f;
+            c[j + 3] = (buff & (1 << 4)) == 0 ? 0.0f : 1.0f;
+            c[j + 4] = (buff & (1 << 3)) == 0 ? 0.0f : 1.0f;
+            c[j + 5] = (buff & (1 << 2)) == 0 ? 0.0f : 1.0f;
+            c[j + 6] = (buff & (1 << 1)) == 0 ? 0.0f : 1.0f;
+            c[j + 7] = (buff & (1 << 0)) == 0 ? 0.0f : 1.0f;
+        }
+
+        ds->content[i] = td_create(m, class);
+    }
+
+    fclose(file_stream);
+
+    return ds;
+}
+
+void ds_save_to_compressed_file(Dataset *ds, const char *filename)
+{
+    FILE *file_stream = fopen(filename, "wb");
+    if (file_stream == NULL)
+        errx(EXIT_FAILURE, "Failed to open file for writing: %s", filename);
+
+    int fd = fileno(file_stream);
+
+    ssize_t w = write(fd, &ds->size, sizeof(size_t));
+    if (w != sizeof(size_t))
+        errx(EXIT_FAILURE, "Failed to write dataset size");
+
+    for (size_t i = 0; i < ds->size; ++i)
+    {
+        Training_Data *td = ds->content[i];
+        Matrix *m = td->input;
+        float *c = mat_coef_ptr(m, 0, 0);
+
+        char class = (char)td->expected_class;
+
+        w = write(fd, &class, sizeof(char));
+        if (w != sizeof(char))
+            errx(EXIT_FAILURE, "Failed to write class byte");
+
+        unsigned char buff;
+        for (size_t j = 0; j < 28 * 28; j += 8)
+        {
+            buff = 0;
+            for (int b = 0; b < 8; b++)
+            {
+                buff <<= 1;
+                buff |= (c[j + b] > 0.5f);
+            }
+            write(fd, &buff, 1);
+            if (w != sizeof(buff))
+                errx(EXIT_FAILURE, "Failed to write compressed pixel block");
+        }
+    }
+
+    fclose(file_stream);
 }
 
 void ds_shuffle(Dataset *dataset)

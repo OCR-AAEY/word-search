@@ -138,7 +138,7 @@ $(BIN_OCR): $(call import,ocr matrix utils) $(call main,ocr/ocr_train_main)
 	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
 # OCR dataset generation target.
-$(BIN_OCR_DATASET): $(call import,matrix image_loader utils pretreatment) $(call main,ocr/ocr_dataset_main)
+$(BIN_OCR_DATASET): $(call import,matrix image_loader utils pretreatment ocr) $(call main,ocr/ocr_dataset_main)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
@@ -205,6 +205,7 @@ clean:
 	@echo "Cleaning test files..."
 	@rm -rf save_and_load_random_test.matrix
 	@rm -rf save_and_load_test.matrix
+	@rm -rf save_and_load_random_test.dataset
 	@echo "Cleaning misc files..."
 	@rm -rf extracted/
 	@echo "\033[32mClean succeeded\033[0m"
