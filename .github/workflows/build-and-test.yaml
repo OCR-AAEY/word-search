@@ -26,9 +26,9 @@ jobs:
             echo "avx2=1" >> $GITHUB_OUTPUT
           fi
 
-          # if lscpu | grep -iqo avx512 && lscpu | grep -iqo fma; then
-          #   echo "avx512=1" >> $GITHUB_OUTPUT
-          # fi
+          if lscpu | grep -iqo avx512 && lscpu | grep -iqo fma; then
+            echo "avx512=1" >> $GITHUB_OUTPUT
+          fi
 
       - name: Build and test project
         shell: bash
