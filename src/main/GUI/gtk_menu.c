@@ -1,4 +1,17 @@
 #include <gtk/gtk.h>
+// Function to set the background image
+void set_background_image(GtkWidget **window) {
+    // Create a GtkFixed container to position the background image
+    GtkWidget *fixed = gtk_fixed_new();
+    gtk_container_add(GTK_CONTAINER(*window), fixed);
+
+    // Create a GtkImage widget and set it to display the image
+    GtkWidget *background_image = gtk_image_new_from_file("assets/logo/image.png");
+
+    // Set the background image widget to the fixed container
+    gtk_fixed_put(GTK_FIXED(fixed), background_image, 0, 0);
+    gtk_widget_set_size_request(background_image, 800, 600); // Adjust size as needed
+}
 
 void image_loading(GtkImage *image, gchar *path)
 {
@@ -28,8 +41,8 @@ void open_file(GtkWidget *widget, gpointer label, GtkImage *image)
     {
         filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
         gtk_label_set_text(GTK_LABEL(label),
-                           filename); // Update the label with the filename
-        g_print("%s\n", filename);
+                          filename); // Update the label with the filename
+      
         image_loading(image, filename); // Load the image
         g_free(filename);
     }
@@ -73,16 +86,21 @@ void window_creation(GtkWidget **window)
     gtk_window_set_title(GTK_WINDOW(*window), "Word Search Solver");
     gtk_window_set_default_size(GTK_WINDOW(*window), 400, 300);
 }
+
+
+
 #ifndef UNIT_TEST
 
 int main(int argc, char *argv[])
 {
+
+ 
     GtkWidget *window;
     GtkWidget *box;
     GtkImage *image; // Image widget
     GtkWidget *button_box;
     GtkWidget *solve_b, *step_b, *exit_b;
-
+    GError* error;
     // Initialize GTK:
     gtk_init(&argc, &argv);
 
@@ -94,10 +112,14 @@ int main(int argc, char *argv[])
     box = gtk_box_new(GTK_ORIENTATION_VERTICAL,
                       10); // 10px spacing between elements
     gtk_container_add(GTK_CONTAINER(window), box);
+    gtk_window_set_default_icon_from_file ("assets/logo/image.png",  &error);
+
+
 
     image = GTK_IMAGE(gtk_image_new()); // Initialize the image widget
 
     image_loading(image, "assets/logo/image.png");
+    set_background_image(&window);
 
     // Add the image above the buttons
     gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(image), FALSE, FALSE,
@@ -125,6 +147,8 @@ int main(int argc, char *argv[])
 
     // Show all widgets
     gtk_widget_show_all(window);
+
+
 
     // Start the GTK main loop
     gtk_main();
