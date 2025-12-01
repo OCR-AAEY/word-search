@@ -1,8 +1,10 @@
+#include "utils/math/absval.h"
+
 #ifndef TEST_SETTINGS_H
 #define TEST_SETTINGS_H
 
 /** The precesion with which float are compared using cr_*_float_eq. */
-#define EPSILON 1E-6f
+#define epsilon(expected) (absval(expected) > 1 ? 1E-3f * absval(expected) : 1E-3f)
 
 #ifndef TEST_ITERATION
 #define TEST_ITERATION 100

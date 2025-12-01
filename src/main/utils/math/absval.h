@@ -1,1 +1,1 @@
-#define absval(x) (x < 0 ? -x : x)
+#define absval(x) ((x) < 0 ? -(x) : (x))

@@ -33,7 +33,7 @@
 #define avx_vect_len 8
 #endif
 #define avx_for(counter, length)                                               \
-    for (; counter <= length - avx_vect_len; counter += avx_vect_len)
+    for (; counter + avx_vect_len <= length; counter += avx_vect_len)
 #endif
 
 /// @brief A 2D matrix of single-precision floating point numbers.
