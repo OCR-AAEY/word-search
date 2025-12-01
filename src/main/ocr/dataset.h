@@ -18,6 +18,8 @@ typedef struct Training_Data Training_Data;
 
 typedef struct Dataset Dataset;
 
+Training_Data *td_create(Matrix *input, size_t expected_class);
+
 void td_free(Training_Data *td);
 
 size_t ds_size(Dataset *dataset);
@@ -28,9 +30,15 @@ void ds_add_tuple(Dataset *dataset, Training_Data *tuple);
 
 Dataset *ds_load_from_directory(char *dirname);
 
+Dataset *ds_load_from_nested_directory(char *dirname);
+
 Dataset *ds_load_from_file(char *filename);
 
 void ds_save_to_file(Dataset *ds, char *filename);
+
+Dataset *ds_load_from_compressed_file(char *filename);
+
+void ds_save_to_compressed_file(Dataset *ds, const char *filename);
 
 void ds_shuffle(Dataset *dataset);
 
