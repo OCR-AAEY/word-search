@@ -330,9 +330,9 @@ void dataset_images_to_matrices(const char *input_dir_name)
 
 void save_to_file(char *dirname)
 {
-    Dataset *ds = ds_load_from_nested_directory(dirname);
-    ds_save_to_compressed_file(ds, "assets/ocr_dataset/real/real_compressed.dataset");
+    Dataset *ds = ds_load_from_directory(dirname);
+    ds_save_to_compressed_file(ds, "assets/dataset/cheat_compressed.dataset");
     ds_free(ds);
 }
 
-int main(void) { save_to_file("assets/ocr_dataset/real/filtered_matrices/"); }
+int main(void) { save_to_file("assets/dataset/cheat/matrices/"); }
