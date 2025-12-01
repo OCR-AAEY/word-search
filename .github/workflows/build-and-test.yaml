@@ -33,16 +33,19 @@ jobs:
       - name: Build and test project
         shell: bash
         run: |
+          make clean
           make VERBOSE=1 XCFLAGS=-Werror test
 
       - name: Build and test project (with AVX2)
         if: ${{ steps.avx-compatibility.outputs.avx2 }} == '1'
         shell: bash
         run: |
+          make clean
           make VERBOSE=1 XCFLAGS=-Werror AVX=2 test
 
       # - name: Build and test project (with AVX512)
       #   if: ${{ steps.avx-compatibility.outputs.avx512 }} == '1'
       #   shell: bash
       #   run: |
+      #     make clean
       #     make VERBOSE=1 XCFLAGS=-Werror AVX=512 test
