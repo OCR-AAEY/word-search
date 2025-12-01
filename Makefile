@@ -74,9 +74,10 @@ LIB_FLAGS      = -lm $(shell pkg-config --cflags --libs gtk+-3.0)
 # SIMD (AVX) flags.
 AVX ?= 0
 ifeq ($(AVX),2)
-CFLAGS := $(CFLAGS) -mavx2 -DUSE_AVX -DUSE_AVX_2
+CFLAGS := $(CFLAGS) -mavx2 -mfma -DUSE_AVX -DUSE_AVX_2
 else ifeq ($(AVX),512)
-CFLAGS := $(CFLAGS) -mavx512 -DUSE_AVX -DUSE_AVX_512
+$(error AVX 512 is not supported yet)
+CFLAGS := $(CFLAGS) -mavx512 -mfma -DUSE_AVX -DUSE_AVX_512
 else ifneq ($(AVX), 0)
 $(error AVX macro has been set to an unrecognized value. Expected '2' or '512' and got $(AVX))
 endif

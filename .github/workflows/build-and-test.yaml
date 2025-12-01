@@ -22,13 +22,13 @@ jobs:
         id: avx-compatibility
         shell: bash
         run: |
-          if lscpu | grep -iqo avx2; then
+          if lscpu | grep -iqo avx2 && lscpu | grep -iqo fma; then
             echo "avx2=1" >> $GITHUB_OUTPUT
           fi
 
-          if lscpu | grep -iqo avx512; then
-            echo "avx512=1" >> $GITHUB_OUTPUT
-          fi
+          # if lscpu | grep -iqo avx512 && lscpu | grep -iqo fma; then
+          #   echo "avx512=1" >> $GITHUB_OUTPUT
+          # fi
 
       - name: Build and test project
         shell: bash
@@ -41,8 +41,8 @@ jobs:
         run: |
           make VERBOSE=1 XCFLAGS=-Werror AVX=2 test
 
-      - name: Build and test project (with AVX512)
-        if: ${{ steps.avx-compatibility.outputs.avx512 }} == '1'
-        shell: bash
-        run: |
-          make VERBOSE=1 XCFLAGS=-Werror AVX=512 test
+      # - name: Build and test project (with AVX512)
+      #   if: ${{ steps.avx-compatibility.outputs.avx512 }} == '1'
+      #   shell: bash
+      #   run: |
+      #     make VERBOSE=1 XCFLAGS=-Werror AVX=512 test
