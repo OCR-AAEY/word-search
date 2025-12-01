@@ -8,8 +8,8 @@
 
 #include "image_loader/image_loading.h"
 #include "matrix/matrix.h"
-#include "pretreatment/pretreatment.h"
 #include "ocr/dataset.h"
+#include "pretreatment/pretreatment.h"
 
 #define PATH_LEN 1024
 
