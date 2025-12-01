@@ -197,6 +197,7 @@ clean:
 	@rm -rf $(BUILD_DIR)
 	@echo "Cleaning executables..."
 	@rm -rf $(BIN_SOLVER)
+	@rm -rf $(BIN_MAT_DISPLAY)
 	@rm -rf $(BIN_OCR)
 	@rm -rf $(BIN_OCR_DATASET)
 	@rm -rf $(BIN_AUTO_ROTATE)
