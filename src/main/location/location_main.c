@@ -1,5 +1,7 @@
-#include "extract_char/extract_char.h"
 #include "location/location.h"
+#include "location/location_grid.h"
+#include "location/location_word_letters.h"
+
 #include "pretreatment/pretreatment.h"
 #include "pretreatment/visualization.h"
 #include "rotation/rotation.h"
@@ -82,7 +84,6 @@ int main(int argc, char **argv)
     export_matrix(threshold, THRESHOLDED_FILENAME);
     mat_free(gray);
 
-    // TODO: threshold first
     Matrix *rotated = auto_deskew_matrix(threshold);
     export_matrix(rotated, ROTATED_FILENAME);
     mat_free(threshold);
