@@ -57,40 +57,43 @@ BoundingBox ***detect_split_large_letters(BoundingBox ***letters_boxes,
         {
             letter_width = letters_boxes[word][letter]->br.x -
                            letters_boxes[word][letter]->tl.x;
-            if (letter_width / avg_letter_width >= 2)
+
+            if (letter_width / avg_letter_width < 2)
+                continue;
+
+            size_t nb_parts = (size_t)(letter_width / avg_letter_width);
+            BoundingBox **split_boxes =
+                split_large_letter(letters_boxes[word][letter], nb_parts);
+            size_t new_word_size = word_nb_letters[word] + nb_parts - 1;
+            BoundingBox **new_word =
+                malloc(new_word_size * sizeof(BoundingBox *));
+
+            for (size_t prev_old_letters_index = 0;
+                 prev_old_letters_index < letter; prev_old_letters_index++)
             {
-                size_t nb_parts = (size_t)(letter_width / avg_letter_width);
-                BoundingBox **split_boxes =
-                    split_large_letter(letters_boxes[word][letter], nb_parts);
-                size_t new_word_size = word_nb_letters[word] + nb_parts - 1;
-                BoundingBox **new_word =
-                    malloc(new_word_size * sizeof(BoundingBox *));
-                for (size_t prev_old_letters_index = 0;
-                     prev_old_letters_index < letter; prev_old_letters_index++)
-                {
-                    new_word[prev_old_letters_index] =
-                        letters_boxes[word][prev_old_letters_index];
-                }
-
-                for (size_t new_letters_index = 0; new_letters_index < nb_parts;
-                     new_letters_index++)
-                {
-                    new_word[letter + new_letters_index] =
-                        split_boxes[new_letters_index];
-                }
-
-                for (size_t remaining_letters_index = letter + 1;
-                     remaining_letters_index < word_nb_letters[word];
-                     remaining_letters_index++)
-                {
-                    new_word[letter + nb_parts + remaining_letters_index] =
-                        letters_boxes[word][remaining_letters_index];
-                }
-                free(split_boxes);
-                free(letters_boxes[word]);
-                letters_boxes[word] = new_word;
-                word_nb_letters[word] = new_word_size;
+                new_word[prev_old_letters_index] =
+                    letters_boxes[word][prev_old_letters_index];
             }
+
+            for (size_t new_letters_index = 0; new_letters_index < nb_parts;
+                 new_letters_index++)
+            {
+                new_word[letter + new_letters_index] =
+                    split_boxes[new_letters_index];
+            }
+
+            for (size_t remaining_letters_index = letter + 1;
+                 remaining_letters_index < word_nb_letters[word];
+                 remaining_letters_index++)
+            {
+                new_word[nb_parts + remaining_letters_index - 1] =
+                    letters_boxes[word][remaining_letters_index];
+            }
+            free(split_boxes);
+            free(letters_boxes[word][letter]);
+            free(letters_boxes[word]);
+            letters_boxes[word] = new_word;
+            word_nb_letters[word] = new_word_size;
         }
     }
     return letters_boxes;
