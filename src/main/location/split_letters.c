@@ -1,4 +1,5 @@
 #include "location/split_letters.h"
+#include <err.h>
 
 unsigned int get_average_letter_width(BoundingBox ***letters_boxes,
                                       size_t nb_words, size_t *word_nb_letters)
