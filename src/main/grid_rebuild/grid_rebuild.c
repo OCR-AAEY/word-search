@@ -7,7 +7,7 @@
 
 #include "image_loader/image_loading.h"
 #include "matrix/matrix.h"
-#include "neural_network/neural_network.h"
+#include "ocr/neural_network.h"
 #include "pretreatment/pretreatment.h"
 
 #define MAX_PATH 512

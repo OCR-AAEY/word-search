@@ -1,7 +1,7 @@
 #ifndef GRID_REBUILD_H
 #define GRID_REBUILD_H
 
-#include "neural_network/neural_network.h"
+#include "ocr/neural_network.h"
 #include "solver/grid.h"
 #include <stdlib.h>
 
