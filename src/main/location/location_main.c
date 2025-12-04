@@ -1,11 +1,13 @@
 #include "location/location.h"
 #include "location/location_grid.h"
 #include "location/location_word_letters.h"
+#include "location/split_letters.h"
 
 #include "pretreatment/pretreatment.h"
 #include "pretreatment/visualization.h"
 #include "rotation/rotation.h"
 #include "utils/utils.h"
+#include <err.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -80,7 +82,7 @@ int main(int argc, char **argv)
     export_matrix(gray, GRAYSCALED_FILENAME);
     free_image(img);
 
-    Matrix *threshold = adaptative_gaussian_thresholding(gray, 255, 7, 3, 2);
+    Matrix *threshold = adaptative_gaussian_thresholding(gray, 255, 11, 7, 4);
     export_matrix(threshold, THRESHOLDED_FILENAME);
     mat_free(gray);
 
@@ -134,6 +136,9 @@ int main(int argc, char **argv)
     size_t *word_nb_letters;
     BoundingBox ***letters_boxes = get_bounding_box_letters(
         opening, words_boxes, nb_words, 2, &word_nb_letters);
+
+    letters_boxes =
+        detect_split_large_letters(letters_boxes, nb_words, word_nb_letters);
 
     draw_2d_boundingboxes_on_img(letters_boxes, nb_words, word_nb_letters,
                                  POSTTREATMENT_FILENAME,
