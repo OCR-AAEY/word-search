@@ -6,9 +6,12 @@
 
 int main(int argc, char **argv)
 {
-    if (argc < 5) {
-        fprintf(stderr, "Usage: %s <model_path> <cells_folder> <rows> <cols>\n", argv[0]);
-        fprintf(stderr, "Example: %s assets/model.bin grid_rebuild 15 15\n", argv[0]);
+    if (argc < 5)
+    {
+        fprintf(stderr, "Usage: %s <model_path> <cells_folder> <rows> <cols>\n",
+                argv[0]);
+        fprintf(stderr, "Example: %s assets/model.bin grid_rebuild 15 15\n",
+                argv[0]);
         return 1;
     }
 
@@ -18,7 +21,8 @@ int main(int argc, char **argv)
     size_t cols = (size_t)atoi(argv[4]);
 
     Grid *g = grid_rebuild_from_folder_with_model(folder, rows, cols, model);
-    if (!g) {
+    if (!g)
+    {
         fprintf(stderr, "grid_rebuild failed\n");
         return 2;
     }
