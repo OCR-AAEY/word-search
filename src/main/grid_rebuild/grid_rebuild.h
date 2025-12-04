@@ -30,5 +30,4 @@ char recognize_letter_from_png(const char *path, Neural_Network *net);
  */
 Grid *grid_rebuild_from_folder_with_model(const char *folder, size_t rows,
                                           size_t cols, const char *model_path);
-
 #endif /* GRID_REBUILD_H */
