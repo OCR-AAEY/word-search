@@ -352,9 +352,43 @@ void ds_save_to_compressed_file(Dataset *ds, const char *filename)
     fclose(file_stream);
 }
 
-void ds_shuffle(Dataset *dataset)
+inline void ds_shuffle(Dataset *dataset)
 {
     shuffle_array(dataset->content, sizeof(Training_Data *), dataset->size);
+}
+
+void ds_split(Dataset *dataset, float test_percentage, Dataset **out_train, Dataset **out_test)
+{
+    *out_train = ds_create_empty();
+    *out_test = ds_create_empty();
+
+    size_t nb_samples[26] = {};
+    for (size_t i = 0; i < dataset->size; ++i)
+        nb_samples[dataset->content[i]->expected_class]++;
+
+    ds_shuffle(dataset);
+
+    size_t nb_test[26] = {};
+    for (size_t i = 0; i < 26; ++i)
+        nb_test[i] = (size_t)(test_percentage * nb_samples[i]);
+
+    for (size_t i = 0; i < dataset->size; ++i)
+    {
+        Training_Data *td = dataset->content[i];
+        size_t class = td->expected_class;
+        if (nb_test[class] > 0)
+        {
+            ds_add_tuple(*out_test, td);
+            --nb_test[class];
+        }
+        else
+        {
+            ds_add_tuple(*out_train, td);
+        }
+    }
+
+    free(dataset->content);
+    free(dataset);
 }
 
 inline Training_Data *ds_get_data(Dataset *dataset, size_t i)
