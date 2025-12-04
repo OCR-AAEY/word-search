@@ -104,6 +104,8 @@ BIN_OCR         = ocr_train
 BIN_OCR_DATASET = ocr_dataset
 # Rotate test executable.
 BIN_AUTO_ROTATE = rotate
+#Grid rebuild test executable
+BIN_GRID_REBUILD = grid_rebuild
 # Main application executable.
 BIN_APP         = app
 # Unit tests executable.
@@ -147,6 +149,12 @@ $(BIN_OCR_DATASET): $(call import,matrix image_loader utils pretreatment ocr) $(
 $(BIN_AUTO_ROTATE): $(call import,rotation pretreatment image_loader utils matrix) $(call main,rotation/rotate_main)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 	@echo "$@: \033[32mCompilation succeeded\033[0m"
+
+#Grid rebuild Target.
+$(BIN_GRID_REBUILD): $(call import,grid_rebuild image_loader matrix ocr pretreatment utils solver) $(call main,grid_rebuild/grid_rebuild_test)
+	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+	@echo "$@: \033[32mCompilation succeeded\033[0m"
+
 
 # Main app target.
 $(BIN_APP): $(call import,...) $(call main,...)
@@ -202,6 +210,7 @@ clean:
 	@rm -rf $(BIN_OCR)
 	@rm -rf $(BIN_OCR_DATASET)
 	@rm -rf $(BIN_AUTO_ROTATE)
+	@rm -rf $(BIN_GRID_REBUILD)
 	@rm -rf $(BIN_APP)
 	@rm -rf $(BIN_TEST)
 	@echo "Cleaning test files..."

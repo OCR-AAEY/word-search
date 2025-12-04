@@ -38,7 +38,7 @@ static Matrix *mat_resize_nearest_square(const Matrix *src, size_t s)
 {
     if (!src)
         return NULL;
-    return mat_create_uniform_random(1, 1, 0, 0);
+    return mat_create_random_uniform(1, 1, 0, 0);
 }
 
 static Matrix *flatten_to_column(const Matrix *m)
