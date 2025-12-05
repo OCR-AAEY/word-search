@@ -151,7 +151,8 @@ $(BIN_AUTO_ROTATE): $(call import,rotation pretreatment image_loader utils matri
 	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
 #Grid rebuild Target.
-$(BIN_GRID_REBUILD): $(call import,grid_rebuild image_loader matrix ocr pretreatment utils solver) $(call main,grid_rebuild/grid_rebuild_test)
+$(BIN_GRID_REBUILD): $(call import,grid_rebuild image_loader matrix ocr pretreatment utils solver location rotation extract_char) $(call main,grid_rebuild/grid_rebuild_test)
+
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
