@@ -1,6 +1,5 @@
 # Raw datasets
-/assets/dataset/real/
-/assets/dataset/cheat/
+/assets/ocr/other
 
 # Tests
 venv/

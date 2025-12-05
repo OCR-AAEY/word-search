@@ -36,27 +36,30 @@ Neural_Network *net_create_empty(size_t layer_number, size_t *layer_heights)
 {
     // Check if arguments are valid.
     if (layer_number < 2)
-        errx(EXIT_FAILURE, "TODO");
+        errx(EXIT_FAILURE,
+             "Invalid given layer_number. Expected greater or equal to 2 and "
+             "got %zu.",
+             layer_number);
 
     // Allocations.
     Neural_Network *net = malloc(sizeof(Neural_Network));
     if (net == NULL)
     {
-        errx(EXIT_FAILURE, "TODO");
+        errx(EXIT_FAILURE, "malloc");
     }
     net->layer_number = layer_number;
     net->layer_heights = calloc(layer_number, sizeof(size_t));
     if (net->layer_heights == NULL)
     {
         free(net);
-        errx(EXIT_FAILURE, "TODO");
+        errx(EXIT_FAILURE, "calloc");
     }
     net->weights = calloc(layer_number, sizeof(Matrix *));
     if (net->weights == NULL)
     {
         free(net->layer_heights);
         free(net);
-        errx(EXIT_FAILURE, "TODO");
+        errx(EXIT_FAILURE, "calloc");
     }
     net->biases = calloc(layer_number, sizeof(Matrix *));
     if (net->biases == NULL)
@@ -64,7 +67,7 @@ Neural_Network *net_create_empty(size_t layer_number, size_t *layer_heights)
         free(net->layer_heights);
         free(net->weights);
         free(net);
-        errx(EXIT_FAILURE, "TODO");
+        errx(EXIT_FAILURE, "calloc");
     }
 
     for (size_t i = 0; i < layer_number; i++)
@@ -342,11 +345,16 @@ Matrix *net_feed_forward(const Neural_Network *net, Matrix *input,
                          Matrix *layers_activations[net_layer_number(net)])
 {
     if (mat_height(input) != net->layer_heights[0])
-        errx(EXIT_FAILURE, "TODO");
+        errx(EXIT_FAILURE,
+             "net_feed_forward: expected input height %zu but got %zu",
+             net->layer_heights[0], mat_height(input));
     if (mat_width(input) != 1)
-        errx(EXIT_FAILURE, "TODO");
+        errx(EXIT_FAILURE,
+             "net_feed_forward: expected input width 1 but got %zu",
+             mat_width(input));
     if ((layers_results == NULL) != (layers_activations == NULL))
-        errx(EXIT_FAILURE, "TODO");
+        errx(EXIT_FAILURE, "layers_results and layers_activations have to be "
+                           "null at the same time");
 
     // Whether layers_results and layers_activations should be filled.
     int out_params = layers_results != NULL;
@@ -396,9 +404,9 @@ void net_back_propagation(Neural_Network *net, Matrix *expected,
                           Matrix *delta_nabla_b[net_layer_number(net)])
 {
     if (delta_nabla_w == NULL)
-        errx(EXIT_FAILURE, "TODO");
+        errx(EXIT_FAILURE, "delta_nabla_w: null");
     if (delta_nabla_b == NULL)
-        errx(EXIT_FAILURE, "TODO");
+        errx(EXIT_FAILURE, "delta_nabla_b: null");
 
     // The error column matrix for the currently studied layer.
     Matrix *delta;

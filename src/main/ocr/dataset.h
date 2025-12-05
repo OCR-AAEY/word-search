@@ -42,6 +42,14 @@ void ds_save_to_compressed_file(Dataset *ds, const char *filename);
 
 void ds_shuffle(Dataset *dataset);
 
+/// @brief
+/// @param dataset This dataset is freed after the function call.
+/// @param test_percentage
+/// @param out_train
+/// @param out_test
+void ds_split(Dataset *dataset, float test_percentage, Dataset **out_train,
+              Dataset **out_test);
+
 Training_Data *ds_get_data(Dataset *dataset, size_t i);
 
 void ds_free(Dataset *dataset);
