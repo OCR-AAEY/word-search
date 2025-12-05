@@ -145,7 +145,7 @@ int main()
         epoch += EPOCH_STEP;
 
         accuracy = print_info(net, epoch, ds_test);
-    
+
         net_save_to_file(net, "ocr_grid.nn");
     }
 
