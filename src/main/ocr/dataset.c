@@ -359,7 +359,8 @@ inline void ds_shuffle(Dataset *dataset)
     shuffle_array(dataset->content, sizeof(Training_Data *), dataset->size);
 }
 
-void ds_split(Dataset *dataset, float test_percentage, Dataset **out_train, Dataset **out_test)
+void ds_split(Dataset *dataset, float test_percentage, Dataset **out_train,
+              Dataset **out_test)
 {
     *out_train = ds_create_empty();
     *out_test = ds_create_empty();

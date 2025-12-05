@@ -345,11 +345,16 @@ Matrix *net_feed_forward(const Neural_Network *net, Matrix *input,
                          Matrix *layers_activations[net_layer_number(net)])
 {
     if (mat_height(input) != net->layer_heights[0])
-        errx(EXIT_FAILURE, "net_feed_forward: expected input height %zu but got %zu", net->layer_heights[0], mat_height(input));
+        errx(EXIT_FAILURE,
+             "net_feed_forward: expected input height %zu but got %zu",
+             net->layer_heights[0], mat_height(input));
     if (mat_width(input) != 1)
-        errx(EXIT_FAILURE, "net_feed_forward: expected input width 1 but got %zu", mat_width(input));
+        errx(EXIT_FAILURE,
+             "net_feed_forward: expected input width 1 but got %zu",
+             mat_width(input));
     if ((layers_results == NULL) != (layers_activations == NULL))
-        errx(EXIT_FAILURE, "layers_results and layers_activations have to be null at the same time");
+        errx(EXIT_FAILURE, "layers_results and layers_activations have to be "
+                           "null at the same time");
 
     // Whether layers_results and layers_activations should be filled.
     int out_params = layers_results != NULL;
