@@ -221,6 +221,7 @@ Dataset *ds_load_from_file(char *filename)
         if (r != sizeof(size_t))
             errx(EXIT_FAILURE, "Failed to read class");
         m = mat_load_from_fd(fd);
+        mat_inplace_vertical_flatten(m);
         ds->content[i] = td_create(m, class);
     }
 
@@ -284,9 +285,9 @@ Dataset *ds_load_from_compressed_file(char *filename)
         if (r != sizeof(char))
             errx(EXIT_FAILURE, "Failed to read class");
 
-        m = mat_create(28, 28);
+        m = mat_create(784, 1);
         c = mat_coef_ptr(m, 0, 0);
-        for (size_t j = 0; j < 28 * 28; j += 8)
+        for (size_t j = 0; j < 784; j += 8)
         {
             r = read(fd, &buff, sizeof(char));
             if (r != sizeof(char))
@@ -302,6 +303,7 @@ Dataset *ds_load_from_compressed_file(char *filename)
             c[j + 7] = (buff & (1 << 0)) == 0 ? 0.0f : 1.0f;
         }
 
+        mat_inplace_vertical_flatten(m);
         ds->content[i] = td_create(m, class);
     }
 
