@@ -98,9 +98,19 @@ GtkWidget *create_menu_screen(GtkStack *stack, GtkWidget **steps_btn,
     gtk_widget_set_halign(menu_box, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(menu_box, GTK_ALIGN_CENTER);
 
-    // GtkWidget *menu_image = gtk_image_new_from_icon_name("image-x-generic",
-    // GTK_ICON_SIZE_DIALOG);
     GtkWidget *menu_label = gtk_label_new("Word Search Solver");
+
+    // Apply CSS to label
+    GtkCssProvider *provider = gtk_css_provider_new();
+    gtk_css_provider_load_from_data(
+        provider,
+
+        "#label { background-color: #D3D3D3 ; color: black ; padding: 8px; "
+        "border-radius: 4px; }",
+        -1, NULL);
+    GtkStyleContext *context = gtk_widget_get_style_context(menu_label);
+    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider),
+                                   GTK_STYLE_PROVIDER_PRIORITY_USER);
 
     *solve_btn = gtk_button_new_with_label("Solve");
     *steps_btn = gtk_button_new_with_label("Steps");
@@ -110,7 +120,6 @@ GtkWidget *create_menu_screen(GtkStack *stack, GtkWidget **steps_btn,
     gtk_widget_set_size_request(*steps_btn, 120, 30);
     gtk_widget_set_size_request(exit_btn, 120, 30);
 
-    // gtk_box_pack_start(GTK_BOX(menu_box), menu_image, FALSE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(menu_box), menu_label, FALSE, FALSE, 2);
     gtk_box_pack_start(GTK_BOX(menu_box), *solve_btn, FALSE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(menu_box), *steps_btn, FALSE, FALSE, 5);
@@ -128,6 +137,22 @@ GtkWidget *create_menu_screen(GtkStack *stack, GtkWidget **steps_btn,
     g_signal_connect(exit_btn, "clicked", G_CALLBACK(exit_app),
                      gtk_widget_get_toplevel(GTK_WIDGET(overlay)));
 
+    // Apply CSS for scaling background
+    /*GtkCssProvider *provider = gtk_css_provider_new();
+    const char *css =
+        "#menu_window {"
+        "  background-image: url('assets/logo/image.png');"
+        "  background-size: cover;"
+        "  background-repeat: no-repeat;"
+        "  background-position: center;"
+        "}";
+
+    gtk_css_provider_load_from_data(provider, css, -1, NULL);
+    GtkStyleContext *context = gtk_widget_get_style_context(overlay);
+    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider),
+    GTK_STYLE_PROVIDER_PRIORITY_APPLICATION); gtk_widget_set_name(overlay,
+    "menu_window");
+*/
     return overlay;
 }
 
@@ -271,7 +296,7 @@ int main(int argc, char *argv[])
 
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), "Word Search Solver");
-    gtk_window_set_default_size(GTK_WINDOW(window), 600, 400);
+    gtk_window_set_default_size(GTK_WINDOW(window), 500, 500);
 
     GtkWidget *stack_widget = gtk_stack_new();
     GtkStack *stack = GTK_STACK(stack_widget);
