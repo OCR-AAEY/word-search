@@ -1,4 +1,19 @@
+#include "../utils/utils.h"
 #include <gtk/gtk.h>
+
+/* ----------GLOBALS------------ */
+const char *step_image_paths[10] = {"assets/steps/1.png",
+                                    "assets/" ROTATED_FILENAME,
+                                    "assets/" POSTTREATMENT_FILENAME,
+                                    "assets/" HOUGHLINES_VISUALIZATION_FILENAME,
+                                    "assets/" WORDS_BOUNDING_BOXES_FILENAME,
+                                    "assets/" LETTERS_BOUNDING_BOXES_FILENAME,
+                                    "assets/steps/7.png",
+                                    "assets/steps/8.png",
+                                    "assets/steps/9.png",
+                                    "assets/solved.png"};
+GtkImage *step_images[10];
+GtkButton *step_load[10], *step_next_btn[10], *step_back_btn[10];
 
 /* ---------- STRUCTS ---------- */
 typedef struct
@@ -17,6 +32,12 @@ static void go_to_screen(GtkButton *b, gpointer stack_name)
 {
     GtkStack *stack = GTK_STACK(g_object_get_data(G_OBJECT(b), "stack"));
     gtk_stack_set_visible_child_name(stack, (const char *)stack_name);
+}
+
+static void reload_image(GtkImage *image, const char *path)
+{
+    gtk_image_clear(image);
+    gtk_image_set_from_file(image, path);
 }
 
 static void load_action(GtkButton *button, gpointer user_data)
@@ -39,17 +60,29 @@ static void load_action(GtkButton *button, gpointer user_data)
     {
         char *filename =
             gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-        gtk_image_set_from_file(data->current_image, filename);
+        /*gtk_image_set_from_file(data->current_image, filename);
         if (data->next_btn)
-            gtk_widget_set_sensitive(GTK_WIDGET(data->next_btn), TRUE);
+            gtk_widget_set_sensitive(GTK_WIDGET(data->next_btn), TRUE);*/
+        gtk_image_set_from_file(data->current_image, filename);
+        gtk_widget_set_sensitive(GTK_WIDGET(step_next_btn[0]), TRUE);
+        /* Reload all step images from disk */
+        for (int i = 1; i < 10; i++)
+        {
+            reload_image(step_images[i], step_image_paths[i]);
+
+            if (step_next_btn[i])
+                gtk_widget_set_sensitive(GTK_WIDGET(step_next_btn[i]), TRUE);
+        }
+
         g_free(filename);
     }
     gtk_widget_destroy(dialog);
+    // solver launch
 }
 
 static void next_action(GtkButton *button, gpointer user_data)
 {
-    // next scree
+    // next screen
     GtkStack *stack = GTK_STACK(user_data);
     const char *next_screen =
         (const char *)g_object_get_data(G_OBJECT(button), "next_screen");
@@ -319,14 +352,20 @@ int main(int argc, char *argv[])
                                  "step7_character_recognition",
                                  "step8_rebuilding",
                                  "step9_solving"};
-    const char *step_image_paths[10] = {
-        "assets/steps/1.png", "assets/steps/2.png", "assets/steps/3.png",
-        "assets/steps/4.png", "assets/steps/5.png", "assets/steps/6.png",
-        "assets/steps/7.png", "assets/steps/8.png", "assets/steps/9.png",
+    /*const char *step_image_paths[10] = {
+        "assets/logo/image.png",
+        "assets/"ROTATED_FILENAME,
+        "assets/"POSTTREATMENT_FILENAME ,
+        "assets/"HOUGHLINES_VISUALIZATION_FILENAME ,
+        "assets/"WORDS_BOUNDING_BOXES_FILENAME  ,
+        "assets/"LETTERS_BOUNDING_BOXES_FILENAME ,
+        "assets/steps/7.png",
+        "assets/steps/8.png",
+        "assets/steps/9.png",
         "assets/solved.png"};
-
-    GtkImage *step_images[10];
-    GtkButton *step_load[10], *step_next_btn[10], *step_back_btn[10];
+        */
+    // GtkImage *step_images[10];
+    // GtkButton *step_load[10], *step_next_btn[10], *step_back_btn[10];
 
     for (int i = 0; i < 10; i++)
     {
