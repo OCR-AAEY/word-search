@@ -263,7 +263,7 @@ GtkWidget *create_solve_screen(GtkStack *stack, const char *screen_name,
 
     return box;
 }
-
+#ifndef UNIT_TEST
 /* ---------- MAIN ---------- */
 int main(int argc, char *argv[])
 {
@@ -375,3 +375,4 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+#endif
