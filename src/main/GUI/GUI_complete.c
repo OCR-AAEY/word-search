@@ -1,31 +1,32 @@
 #include <gtk/gtk.h>
-//JUST a temp file to go back and forth
+// JUST a temp file to go back and forth
 /* ---------- STRUCTS ---------- */
-typedef struct {
+typedef struct
+{
     GtkImage *current_image;
     GtkButton *next_btn;
 } LoadNextData;
 
 /* ---------- CALLBACKS ---------- */
-static void exit_app(GtkButton *b, gpointer win) {
+static void exit_app(GtkButton *b, gpointer win)
+{
     gtk_widget_destroy(GTK_WIDGET(win));
 }
 
-static void go_to_screen(GtkButton *b, gpointer stack_name) {
+static void go_to_screen(GtkButton *b, gpointer stack_name)
+{
     GtkStack *stack = GTK_STACK(g_object_get_data(G_OBJECT(b), "stack"));
-    gtk_stack_set_visible_child_name(stack, (const char*)stack_name);
+    gtk_stack_set_visible_child_name(stack, (const char *)stack_name);
 }
 
-static void load_action(GtkButton *button, gpointer user_data) {
-    LoadNextData *data = (LoadNextData*)user_data;
+static void load_action(GtkButton *button, gpointer user_data)
+{
+    LoadNextData *data = (LoadNextData *)user_data;
     GtkWidget *window = gtk_widget_get_toplevel(GTK_WIDGET(button));
 
     GtkWidget *dialog = gtk_file_chooser_dialog_new(
         "Load Image", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_OPEN,
-        "_Cancel", GTK_RESPONSE_CANCEL,
-        "_Open", GTK_RESPONSE_ACCEPT,
-        NULL
-    );
+        "_Cancel", GTK_RESPONSE_CANCEL, "_Open", GTK_RESPONSE_ACCEPT, NULL);
 
     GtkFileFilter *filter = gtk_file_filter_new();
     gtk_file_filter_set_name(filter, "Images");
@@ -34,8 +35,10 @@ static void load_action(GtkButton *button, gpointer user_data) {
     gtk_file_filter_add_mime_type(filter, "image/jpg");
     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
 
-    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
-        char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
+    {
+        char *filename =
+            gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
         gtk_image_set_from_file(data->current_image, filename);
         gtk_widget_set_sensitive(GTK_WIDGET(data->next_btn), TRUE);
         g_free(filename);
@@ -43,16 +46,20 @@ static void load_action(GtkButton *button, gpointer user_data) {
     gtk_widget_destroy(dialog);
 }
 
-static void next_action(GtkButton *button, gpointer user_data) {
+static void next_action(GtkButton *button, gpointer user_data)
+{
     GtkStack *stack = GTK_STACK(user_data);
-    const char *next_screen = (const char*)g_object_get_data(G_OBJECT(button), "next_screen");
+    const char *next_screen =
+        (const char *)g_object_get_data(G_OBJECT(button), "next_screen");
     gtk_stack_set_visible_child_name(stack, next_screen);
 }
 
-static void save_image_action(GtkButton *button, gpointer user_data) {
+static void save_image_action(GtkButton *button, gpointer user_data)
+{
     GtkImage *image = GTK_IMAGE(user_data);
     GdkPixbuf *pixbuf = gtk_image_get_pixbuf(image);
-    if (!pixbuf) {
+    if (!pixbuf)
+    {
         g_print("No image loaded to save.\n");
         return;
     }
@@ -60,16 +67,16 @@ static void save_image_action(GtkButton *button, gpointer user_data) {
     GtkWidget *window = gtk_widget_get_toplevel(GTK_WIDGET(button));
     GtkWidget *dialog = gtk_file_chooser_dialog_new(
         "Save Image", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_SAVE,
-        "_Cancel", GTK_RESPONSE_CANCEL,
-        "_Save", GTK_RESPONSE_ACCEPT,
-        NULL
-    );
+        "_Cancel", GTK_RESPONSE_CANCEL, "_Save", GTK_RESPONSE_ACCEPT, NULL);
 
-    gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
+    gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog),
+                                                   TRUE);
     gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), "image.png");
 
-    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
-        char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
+    {
+        char *filename =
+            gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
         gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
         g_free(filename);
     }
@@ -77,7 +84,9 @@ static void save_image_action(GtkButton *button, gpointer user_data) {
 }
 
 /* ---------- SCREEN CREATION ---------- */
-GtkWidget* create_menu_screen(GtkStack *stack, GtkWidget **steps_btn, GtkWidget **solve_btn) {
+GtkWidget *create_menu_screen(GtkStack *stack, GtkWidget **steps_btn,
+                              GtkWidget **solve_btn)
+{
     GtkWidget *overlay = gtk_overlay_new();
 
     GtkWidget *bg_image = gtk_image_new_from_file("assets/logo/image.png");
@@ -89,7 +98,8 @@ GtkWidget* create_menu_screen(GtkStack *stack, GtkWidget **steps_btn, GtkWidget 
     gtk_widget_set_halign(menu_box, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(menu_box, GTK_ALIGN_CENTER);
 
-    //GtkWidget *menu_image = gtk_image_new_from_icon_name("image-x-generic", GTK_ICON_SIZE_DIALOG);
+    // GtkWidget *menu_image = gtk_image_new_from_icon_name("image-x-generic",
+    // GTK_ICON_SIZE_DIALOG);
     GtkWidget *menu_label = gtk_label_new("Word Search Solver");
 
     *solve_btn = gtk_button_new_with_label("Solve");
@@ -100,7 +110,7 @@ GtkWidget* create_menu_screen(GtkStack *stack, GtkWidget **steps_btn, GtkWidget 
     gtk_widget_set_size_request(*steps_btn, 120, 30);
     gtk_widget_set_size_request(exit_btn, 120, 30);
 
-    //gtk_box_pack_start(GTK_BOX(menu_box), menu_image, FALSE, FALSE, 5);
+    // gtk_box_pack_start(GTK_BOX(menu_box), menu_image, FALSE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(menu_box), menu_label, FALSE, FALSE, 2);
     gtk_box_pack_start(GTK_BOX(menu_box), *solve_btn, FALSE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(menu_box), *steps_btn, FALSE, FALSE, 5);
@@ -111,35 +121,43 @@ GtkWidget* create_menu_screen(GtkStack *stack, GtkWidget **steps_btn, GtkWidget 
 
     g_object_set_data(G_OBJECT(*solve_btn), "stack", stack);
     g_object_set_data(G_OBJECT(*steps_btn), "stack", stack);
-    g_signal_connect(*solve_btn, "clicked", G_CALLBACK(go_to_screen), (gpointer)"solve_load");
-    g_signal_connect(*steps_btn, "clicked", G_CALLBACK(go_to_screen), (gpointer)"step1_loading");
-    g_signal_connect(exit_btn, "clicked", G_CALLBACK(exit_app), gtk_widget_get_toplevel(GTK_WIDGET(overlay)));
+    g_signal_connect(*solve_btn, "clicked", G_CALLBACK(go_to_screen),
+                     (gpointer) "solve_load");
+    g_signal_connect(*steps_btn, "clicked", G_CALLBACK(go_to_screen),
+                     (gpointer) "step1_loading");
+    g_signal_connect(exit_btn, "clicked", G_CALLBACK(exit_app),
+                     gtk_widget_get_toplevel(GTK_WIDGET(overlay)));
 
     return overlay;
 }
 
-GtkWidget* create_step_screen(GtkStack *stack, const char* label_text,
-                              const char* screen_name, const char* next_screen_name,
-                              const char* back_screen_name, gboolean has_load,
+GtkWidget *create_step_screen(GtkStack *stack, const char *label_text,
+                              const char *screen_name,
+                              const char *next_screen_name,
+                              const char *back_screen_name, gboolean has_load,
                               GtkImage **out_image, GtkButton **out_load_btn,
-                              GtkButton **out_next_btn, GtkButton **out_back_btn) {
+                              GtkButton **out_next_btn,
+                              GtkButton **out_back_btn)
+{
 
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);
     gtk_widget_set_halign(box, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(box, GTK_ALIGN_CENTER);
 
-    GtkWidget *image = gtk_image_new_from_icon_name("image-x-generic", GTK_ICON_SIZE_DIALOG);
+    GtkWidget *image =
+        gtk_image_new_from_icon_name("image-x-generic", GTK_ICON_SIZE_DIALOG);
     GtkWidget *label = gtk_label_new(label_text);
 
     GtkWidget *next_btn = NULL;
-    if (next_screen_name && next_screen_name[0] != '\0') {
+    if (next_screen_name && next_screen_name[0] != '\0')
+    {
         next_btn = gtk_button_new_with_label("Next");
         gtk_widget_set_size_request(next_btn, 120, 30);
-        
-	if (next_btn) {
-	    gtk_widget_set_sensitive(next_btn, has_load ? FALSE : TRUE);
-	}
 
+        if (next_btn)
+        {
+            gtk_widget_set_sensitive(next_btn, has_load ? FALSE : TRUE);
+        }
     }
 
     GtkWidget *back_btn = gtk_button_new_with_label("Back");
@@ -149,7 +167,8 @@ GtkWidget* create_step_screen(GtkStack *stack, const char* label_text,
     gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 5);
 
     GtkWidget *load_btn = NULL;
-    if (has_load) {
+    if (has_load)
+    {
         load_btn = gtk_button_new_with_label("Load");
         gtk_widget_set_size_request(load_btn, 120, 30);
         gtk_box_pack_start(GTK_BOX(box), load_btn, FALSE, FALSE, 5);
@@ -166,32 +185,43 @@ GtkWidget* create_step_screen(GtkStack *stack, const char* label_text,
 
     gtk_stack_add_named(stack, box, screen_name);
 
-    if (next_btn) {
-        g_object_set_data(G_OBJECT(next_btn), "next_screen", (gpointer)next_screen_name);
+    if (next_btn)
+    {
+        g_object_set_data(G_OBJECT(next_btn), "next_screen",
+                          (gpointer)next_screen_name);
         g_signal_connect(next_btn, "clicked", G_CALLBACK(next_action), stack);
     }
 
     g_object_set_data(G_OBJECT(back_btn), "stack", stack);
-    g_signal_connect(back_btn, "clicked", G_CALLBACK(go_to_screen), (gpointer)back_screen_name);
+    g_signal_connect(back_btn, "clicked", G_CALLBACK(go_to_screen),
+                     (gpointer)back_screen_name);
 
-    if (out_image) *out_image = GTK_IMAGE(image);
-    if (out_load_btn) *out_load_btn = GTK_BUTTON(load_btn);
-    if (out_next_btn) *out_next_btn = GTK_BUTTON(next_btn);
-    if (out_back_btn) *out_back_btn = GTK_BUTTON(back_btn);
+    if (out_image)
+        *out_image = GTK_IMAGE(image);
+    if (out_load_btn)
+        *out_load_btn = GTK_BUTTON(load_btn);
+    if (out_next_btn)
+        *out_next_btn = GTK_BUTTON(next_btn);
+    if (out_back_btn)
+        *out_back_btn = GTK_BUTTON(back_btn);
 
     return box;
 }
 
-GtkWidget* create_solve_screen(GtkStack *stack, const char* screen_name,
-                               const char* next_screen_name, const char* back_screen_name,
+GtkWidget *create_solve_screen(GtkStack *stack, const char *screen_name,
+                               const char *next_screen_name,
+                               const char *back_screen_name,
                                GtkImage **out_image, GtkButton **out_load_btn,
-                               GtkButton **out_next_btn, GtkButton **out_back_btn) {
+                               GtkButton **out_next_btn,
+                               GtkButton **out_back_btn)
+{
 
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);
     gtk_widget_set_halign(box, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(box, GTK_ALIGN_CENTER);
 
-    GtkWidget *image = gtk_image_new_from_icon_name("image-x-generic", GTK_ICON_SIZE_DIALOG);
+    GtkWidget *image =
+        gtk_image_new_from_icon_name("image-x-generic", GTK_ICON_SIZE_DIALOG);
     GtkWidget *load_btn = gtk_button_new_with_label("Load");
     GtkWidget *next_btn = gtk_button_new_with_label("Next");
     GtkWidget *back_btn = gtk_button_new_with_label("Back");
@@ -214,22 +244,29 @@ GtkWidget* create_solve_screen(GtkStack *stack, const char* screen_name,
     data->next_btn = GTK_BUTTON(next_btn);
     g_signal_connect(load_btn, "clicked", G_CALLBACK(load_action), data);
 
-    g_object_set_data(G_OBJECT(next_btn), "next_screen", (gpointer)next_screen_name);
+    g_object_set_data(G_OBJECT(next_btn), "next_screen",
+                      (gpointer)next_screen_name);
     g_signal_connect(next_btn, "clicked", G_CALLBACK(next_action), stack);
 
     g_object_set_data(G_OBJECT(back_btn), "stack", stack);
-    g_signal_connect(back_btn, "clicked", G_CALLBACK(go_to_screen), (gpointer)back_screen_name);
+    g_signal_connect(back_btn, "clicked", G_CALLBACK(go_to_screen),
+                     (gpointer)back_screen_name);
 
-    if (out_image) *out_image = GTK_IMAGE(image);
-    if (out_load_btn) *out_load_btn = GTK_BUTTON(load_btn);
-    if (out_next_btn) *out_next_btn = GTK_BUTTON(next_btn);
-    if (out_back_btn) *out_back_btn = GTK_BUTTON(back_btn);
+    if (out_image)
+        *out_image = GTK_IMAGE(image);
+    if (out_load_btn)
+        *out_load_btn = GTK_BUTTON(load_btn);
+    if (out_next_btn)
+        *out_next_btn = GTK_BUTTON(next_btn);
+    if (out_back_btn)
+        *out_back_btn = GTK_BUTTON(back_btn);
 
     return box;
 }
 
 /* ---------- MAIN ---------- */
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     gtk_init(&argc, &argv);
 
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -238,7 +275,8 @@ int main(int argc, char *argv[]) {
 
     GtkWidget *stack_widget = gtk_stack_new();
     GtkStack *stack = GTK_STACK(stack_widget);
-    gtk_stack_set_transition_type(stack, GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
+    gtk_stack_set_transition_type(stack,
+                                  GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
     gtk_stack_set_transition_duration(stack, 300);
     gtk_container_add(GTK_CONTAINER(window), stack_widget);
 
@@ -247,42 +285,58 @@ int main(int argc, char *argv[]) {
     create_menu_screen(stack, &steps_btn, &solve_btn);
 
     /* ---------- Steps workflow (10 screens) ---------- */
-    const char *step_screens[10] = {
-        "step1_loading", "step2_rotation", "step3_preatreatement", "step4_grid_detection",
-        "step5_word_detection", "step6_separation", "step7_character_recognition",
-        "step8_rebuilding", "step9_solving", "step10_final"
-    };
+    const char *step_screens[10] = {"step1_loading",
+                                    "step2_rotation",
+                                    "step3_preatreatement",
+                                    "step4_grid_detection",
+                                    "step5_word_detection",
+                                    "step6_separation",
+                                    "step7_character_recognition",
+                                    "step8_rebuilding",
+                                    "step9_solving",
+                                    "step10_final"};
 
     const char *step_next[10] = {
-        "step2_rotation", "step3_preatreatement", "step4_grid_detection", "step5_word_detection",
-        "step6_separation", "step7_character_recognition", "step8_rebuilding", "step9_solving",
-        "step10_final", "" // step10 has no Next
+        "step2_rotation",       "step3_preatreatement",
+        "step4_grid_detection", "step5_word_detection",
+        "step6_separation",     "step7_character_recognition",
+        "step8_rebuilding",     "step9_solving",
+        "step10_final",         "" // step10 has no Next
     };
 
-    const char *step_back[10] = {
-        "menu", "step1_loading", "step2_rotation", "step3_preatreatement",
-        "step4_grid_detection", "step5_word_detection", "step6_separation",
-        "step7_character_recognition", "step8_rebuilding", "step9_solving"
-    };
+    const char *step_back[10] = {"menu",
+                                 "step1_loading",
+                                 "step2_rotation",
+                                 "step3_preatreatement",
+                                 "step4_grid_detection",
+                                 "step5_word_detection",
+                                 "step6_separation",
+                                 "step7_character_recognition",
+                                 "step8_rebuilding",
+                                 "step9_solving"};
 
     GtkImage *step_images[10];
     GtkButton *step_load[10], *step_next_btn[10], *step_back_btn[10];
 
-    for (int i = 0; i < 10; i++) {
-        create_step_screen(stack, step_screens[i], step_screens[i], step_next[i],
-                           step_back[i], i==0,
-                           &step_images[i], &step_load[i], &step_next_btn[i], &step_back_btn[i]);
+    for (int i = 0; i < 10; i++)
+    {
+        create_step_screen(stack, step_screens[i], step_screens[i],
+                           step_next[i], step_back[i], i == 0, &step_images[i],
+                           &step_load[i], &step_next_btn[i], &step_back_btn[i]);
 
         // Step 10: add Save & Quit buttons
-        if (i == 9) {
+        if (i == 9)
+        {
             GtkWidget *save_btn = gtk_button_new_with_label("Save");
             GtkWidget *quit_btn = gtk_button_new_with_label("Quit");
             gtk_widget_set_size_request(save_btn, 120, 30);
             gtk_widget_set_size_request(quit_btn, 120, 30);
-            GtkWidget *parent_box = gtk_widget_get_parent(GTK_WIDGET(step_images[i]));
+            GtkWidget *parent_box =
+                gtk_widget_get_parent(GTK_WIDGET(step_images[i]));
             gtk_box_pack_start(GTK_BOX(parent_box), save_btn, FALSE, FALSE, 5);
             gtk_box_pack_start(GTK_BOX(parent_box), quit_btn, FALSE, FALSE, 5);
-            g_signal_connect(save_btn, "clicked", G_CALLBACK(save_image_action), step_images[i]);
+            g_signal_connect(save_btn, "clicked", G_CALLBACK(save_image_action),
+                             step_images[i]);
             g_signal_connect(quit_btn, "clicked", G_CALLBACK(exit_app), window);
         }
     }
@@ -292,22 +346,26 @@ int main(int argc, char *argv[]) {
     GtkButton *solve_load_btn[2], *solve_next_btn[2], *solve_back_btn[2];
 
     create_solve_screen(stack, "solve_load", "solve_save", "menu",
-                        &solve_image[0], &solve_load_btn[0], &solve_next_btn[0], &solve_back_btn[0]);
+                        &solve_image[0], &solve_load_btn[0], &solve_next_btn[0],
+                        &solve_back_btn[0]);
 
     // Solve save screen
     GtkWidget *solve_save_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);
     gtk_widget_set_halign(solve_save_box, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(solve_save_box, GTK_ALIGN_CENTER);
-    GtkWidget *solve_save_image = gtk_image_new_from_icon_name("image-x-generic", GTK_ICON_SIZE_DIALOG);
+    GtkWidget *solve_save_image =
+        gtk_image_new_from_icon_name("image-x-generic", GTK_ICON_SIZE_DIALOG);
     GtkWidget *save_btn = gtk_button_new_with_label("Save");
     GtkWidget *quit_btn = gtk_button_new_with_label("Quit");
     gtk_widget_set_size_request(save_btn, 120, 30);
     gtk_widget_set_size_request(quit_btn, 120, 30);
-    gtk_box_pack_start(GTK_BOX(solve_save_box), solve_save_image, FALSE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(solve_save_box), solve_save_image, FALSE, FALSE,
+                       5);
     gtk_box_pack_start(GTK_BOX(solve_save_box), save_btn, FALSE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(solve_save_box), quit_btn, FALSE, FALSE, 5);
     gtk_stack_add_named(stack, solve_save_box, "solve_save");
-    g_signal_connect(save_btn, "clicked", G_CALLBACK(save_image_action), solve_save_image);
+    g_signal_connect(save_btn, "clicked", G_CALLBACK(save_image_action),
+                     solve_save_image);
     g_signal_connect(quit_btn, "clicked", G_CALLBACK(exit_app), window);
 
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
@@ -317,4 +375,3 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-
