@@ -103,6 +103,17 @@ GtkWidget *create_menu_screen(GtkStack *stack, GtkWidget **steps_btn,
 
     GtkWidget *menu_label = gtk_label_new("Word Search Solver");
 
+    GtkCssProvider *provider = gtk_css_provider_new();
+    gtk_css_provider_load_from_data(
+        provider,
+
+        "label { background-color: #D3D3D3 ; color: black ; padding: 8px; "
+        "border-radius: 4px; }",
+        -1, NULL);
+    GtkStyleContext *context = gtk_widget_get_style_context(menu_label);
+    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider),
+                                   GTK_STYLE_PROVIDER_PRIORITY_USER);
+
     *solve_btn = gtk_button_new_with_label("Solve");
     *steps_btn = gtk_button_new_with_label("Steps");
     GtkWidget *exit_btn = gtk_button_new_with_label("Exit");
