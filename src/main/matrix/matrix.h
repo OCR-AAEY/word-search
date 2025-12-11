@@ -214,13 +214,13 @@ Matrix *mat_relu_derivative(Matrix *m);
 
 void mat_inplace_relu_derivative(Matrix *m);
 
-/// @brief Computes the element-wise sigmoid derivative of a matrix and returns
-/// a new matrix.
-/// @param[in] m Pointer to the input Matrix.
-/// @return Pointer to a newly allocated Matrix containing the sigmoid
-/// derivatives of each element.
-/// @throw Exits the program if memory allocation for the result fails.
-Matrix *mat_sigmoid_derivative(const Matrix *m);
+// /// @brief Computes the element-wise sigmoid derivative of a matrix and returns
+// /// a new matrix.
+// /// @param[in] m Pointer to the input Matrix.
+// /// @return Pointer to a newly allocated Matrix containing the sigmoid
+// /// derivatives of each element.
+// /// @throw Exits the program if memory allocation for the result fails.
+// Matrix *mat_sigmoid_derivative(const Matrix *m);
 
 // /// @brief Computes the element-wise sigmoid derivative of a matrix in-place.
 // /// @param[in, out] m Pointer to the Matrix to be modified.
@@ -234,6 +234,9 @@ void mat_inplace_softmax(Matrix *m);
 
 void mat_inplace_toggle(Matrix *m);
 
+/// @brief Strips zeros around the matrix.
+/// @param m The matrix to strip the zeros from.
+/// @return A new heap allocated matrix.
 Matrix *mat_strip_margins(const Matrix *m);
 
 Matrix *mat_scale_to_28(const Matrix *m, float fill_value);
