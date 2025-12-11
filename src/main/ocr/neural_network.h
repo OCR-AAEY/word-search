@@ -118,6 +118,17 @@ void net_update(Neural_Network *net, Matrix **nabla_w, Matrix **nabla_b,
 void net_train(Neural_Network *net, Dataset *dataset, size_t epochs,
                size_t batch_size, float learning_rate);
 
+/// @brief Returns the letter associated to the given image (represented as a
+/// matrix).
+/// @param net The OCR neural network.
+/// @param input The image to decode as a matrix. It has to be scaled
+/// (height=784 and width=1), stripped, and the letter must be written with ones
+/// on a background of zeros.
+/// @param out_chances If not null, contains the chances for each letter of the
+/// alphabet.
+/// @return The guessed letter.
+char net_decode_letter(Neural_Network *net, Matrix *input, float **out_chances);
+
 /// @brief Prints all weights and biases of the given neural network. Displays
 /// each weight and bias matrix in a readable format using `mat_print()`. The
 /// output is grouped and labeled for clarity.
