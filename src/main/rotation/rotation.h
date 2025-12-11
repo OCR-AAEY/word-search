@@ -4,17 +4,15 @@
 #include "image_loader/image_loading.h"
 #include "matrix/matrix.h"
 
-/**
- * @brief Rotates a grayscale matrix by a specified angle.
- *
- * This function rotates the given source matrix by the specified angle in
- * degrees. The resulting matrix represents the rotated image in grayscale.
- *
- * @param src Pointer to the source Matrix to rotate.
- * @param angle Rotation angle in degrees. Positive values rotate clockwise.
- * @return Pointer to a new Matrix containing the rotated data.
- *         Returns NULL on failure (e.g., memory allocation error).
- */
+/// @brief Rotates a grayscale matrix by a given angle.
+///
+/// Rotates the source matrix by the specified angle in degrees. Positive
+/// values rotate clockwise. The result is a new matrix containing the rotated
+/// grayscale image.
+///
+/// @param[in] src Pointer to the source matrix. Must not be NULL.
+/// @param[in] angle Rotation angle in degrees.
+/// @return Pointer to a new matrix with the rotated data, or NULL on failure.
 Matrix *rotate_matrix(const Matrix *src, float angle);
 
 /**
@@ -34,8 +32,8 @@ ImageData *rotate_image(ImageData *img, float angle);
 /// @brief Deskews automatically the image, using hough lines to detect the
 /// rotated angle of the grid.
 /// @param img Pointer to the matrix of the image to rotate automatically
-/// @return Returns a pointer to a newly allocated Matrix rerpesenting the
-/// deskewed image.
+/// @return Pointer to a newly allocated matrix with the deskewed image,
+/// or NULL on failure.
 Matrix *auto_deskew_matrix(Matrix *img);
 
 #endif
