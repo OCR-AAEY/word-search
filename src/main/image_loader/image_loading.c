@@ -54,7 +54,7 @@ GdkPixbuf *create_pixbuf_from_image_data(ImageData *img)
     guchar *pixels = malloc(height * rowstride);
     if (pixels == NULL)
     {
-        fprintf(stderr, "Failed to allocate the pxiel array");
+        fprintf(stderr, "Failed to allocate the pxiel array\n");
         return NULL;
     }
 
@@ -104,7 +104,7 @@ ImageData *load_image(const char *filename)
     if (channels < 3)
     {
         g_object_unref(pixbuf);
-        fprintf(stderr, "Unsupported channel number in the image loaded");
+        fprintf(stderr, "Unsupported channel number in the image loaded\n");
         return NULL;
     }
 
@@ -115,7 +115,7 @@ ImageData *load_image(const char *filename)
     if (pixels_copy == NULL)
     {
         g_object_unref(pixbuf);
-        fprintf(stderr, "Failed to allocate pixels copy");
+        fprintf(stderr, "Failed to allocate pixels copy\n");
         return NULL;
     }
 
@@ -137,7 +137,7 @@ ImageData *load_image(const char *filename)
     if (img == NULL)
     {
         free(pixels_copy);
-        fprintf(stderr, "Failed to allocate ImageData struct");
+        fprintf(stderr, "Failed to allocate ImageData struct\n");
         return NULL;
     }
 

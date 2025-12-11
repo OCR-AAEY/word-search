@@ -67,13 +67,13 @@ Matrix *convolve_horizontally(const Matrix *src, const float *kernel,
 {
     if (kernel_size % 2 == 0)
     {
-        fprintf(stderr, "The kernel size must be an odd number");
+        fprintf(stderr, "The kernel size must be an odd number\n");
         return NULL;
     }
 
     if (src == NULL)
     {
-        fprintf(stderr, "The source matrix is NULL");
+        fprintf(stderr, "The source matrix is NULL\n");
         return NULL;
     }
 
@@ -108,13 +108,13 @@ Matrix *convolve_vertically(const Matrix *src, const float *kernel,
 {
     if (kernel_size % 2 == 0)
     {
-        fprintf(stderr, "The kernel size must be an odd number");
+        fprintf(stderr, "The kernel size must be an odd number\n");
         return NULL;
     }
 
     if (src == NULL)
     {
-        fprintf(stderr, "The source matrix is NULL");
+        fprintf(stderr, "The source matrix is NULL\n");
         return NULL;
     }
 
@@ -148,13 +148,13 @@ Matrix *gaussian_blur(const Matrix *src, float sigma, size_t kernel_size)
 {
     if (kernel_size % 2 == 0)
     {
-        fprintf(stderr, "The kernel size must be an odd number");
+        fprintf(stderr, "The kernel size must be an odd number\n");
         return NULL;
     }
 
     if (src == NULL)
     {
-        fprintf(stderr, "The source matrix is NULL");
+        fprintf(stderr, "The source matrix is NULL\n");
         return NULL;
     }
 
@@ -174,28 +174,30 @@ Matrix *adaptative_gaussian_thresholding(const Matrix *src, float max_value,
 {
     if (max_value < 0)
     {
-        fprintf(stderr, "The max value must be a positive float");
+        fprintf(stderr, "The max value must be a positive float\n");
         return NULL;
     }
     if (sigma <= 0)
     {
-        fprintf(stderr, "Sigma must be positive");
+        fprintf(stderr, "Sigma must be positive\n");
         return NULL;
     }
     if (src == NULL)
     {
-        fprintf(stderr, "The source matrix is NULL");
+        fprintf(stderr, "The source matrix is NULL\n");
         return NULL;
     }
 
     Matrix *blurred = gaussian_blur(src, sigma, kernel_size);
     if (blurred == NULL)
     {
-        fprintf(stderr, "Failed to gaussian blur the matrix");
+        fprintf(stderr, "Failed to gaussian blur the matrix\n");
         return NULL;
     }
 
-    export_matrix(blurred, GAUSSIAN_BLURRED_FILENAME);
+    int status_export = export_matrix(blurred, GAUSSIAN_BLURRED_FILENAME);
+    if (status_export != 0)
+        fprintf(stderr, "step export : failed to export gaussian blur\n");
     size_t height = mat_height(src);
     size_t width = mat_width(src);
     Matrix *dest = mat_create_zero(height, width);
@@ -222,19 +224,19 @@ Matrix *morph_transformation_1d(const Matrix *src, size_t kernel_size,
 
     if (src == NULL)
     {
-        fprintf(stderr, "The source matrix is NULL");
+        fprintf(stderr, "The source matrix is NULL\n");
         return NULL;
     }
 
     if (transform != Erosion && transform != Dilation)
     {
-        fprintf(stderr, "Invalid MorphTransform type");
+        fprintf(stderr, "Invalid MorphTransform type\n");
         return NULL;
     }
 
     if (orientation != Vertical && orientation != Horizontal)
     {
-        fprintf(stderr, "Invalid Orientation");
+        fprintf(stderr, "Invalid Orientation\n");
         return NULL;
     }
 
@@ -280,7 +282,7 @@ Matrix *morph_transformation_1d(const Matrix *src, size_t kernel_size,
                         extreme_val = image_pixel;
                     break;
                 default:
-                    fprintf(stderr, "Invalid MorphTransform type");
+                    fprintf(stderr, "Invalid MorphTransform type\n");
                     return NULL;
                 }
             }
@@ -294,7 +296,7 @@ Matrix *erosion(const Matrix *src, size_t kernel_size)
 
     if (src == NULL)
     {
-        fprintf(stderr, "erosion: The source matrix is NULL");
+        fprintf(stderr, "erosion: The source matrix is NULL\n");
         return NULL;
     }
 
@@ -314,7 +316,7 @@ Matrix *dilation(const Matrix *src, size_t kernel_size)
 
     if (src == NULL)
     {
-        fprintf(stderr, "dilation: The source matrix is NULL");
+        fprintf(stderr, "dilation: The source matrix is NULL\n");
         return NULL;
     }
 
@@ -355,7 +357,7 @@ Matrix *morph_transform(Matrix *src, size_t kernel_size,
         return closed;
 
     default:
-        fprintf(stderr, "Invalid MorphTransform type");
+        fprintf(stderr, "Invalid MorphTransform type\n");
         return NULL;
     }
 }
