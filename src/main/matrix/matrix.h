@@ -214,7 +214,8 @@ Matrix *mat_relu_derivative(Matrix *m);
 
 void mat_inplace_relu_derivative(Matrix *m);
 
-// /// @brief Computes the element-wise sigmoid derivative of a matrix and returns
+// /// @brief Computes the element-wise sigmoid derivative of a matrix and
+// returns
 // /// a new matrix.
 // /// @param[in] m Pointer to the input Matrix.
 // /// @return Pointer to a newly allocated Matrix containing the sigmoid
