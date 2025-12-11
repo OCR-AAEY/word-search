@@ -43,8 +43,7 @@ void free_pixels(guchar *pixels, gpointer data)
 /// @brief Creates a GdkPixbuf from an ImageData struct.
 /// @param[in] img The ImageData to transform into a GdkPixbuf.
 /// @returns The GdkPixbuf containing the same pixel data as the ImageData
-/// passed as parameter.
-/// @throw Throws if it has not been able to allocate the pixels array.
+/// passed as parameter or NULL if the pixel allocation failed.
 GdkPixbuf *create_pixbuf_from_image_data(ImageData *img)
 {
     int width = img->width;
@@ -55,7 +54,8 @@ GdkPixbuf *create_pixbuf_from_image_data(ImageData *img)
     guchar *pixels = malloc(height * rowstride);
     if (pixels == NULL)
     {
-        errx(EXIT_FAILURE, "Failed to allocate the pxiel array");
+        fprintf(stderr, "Failed to allocate the pxiel array");
+        return NULL;
     }
 
     for (int i = 0; i < height * width; i++)
@@ -83,8 +83,8 @@ GdkPixbuf *create_pixbuf_from_image_data(ImageData *img)
 /// @attention This function keeps only the 3 first channels of the image
 /// (normally RGB).
 /// @param[in] filename The filename of the image to load.
-/// @returns An ImageData containing the data of the loaded image.
-/// @throw Throws if an error occured during the process.
+/// @returns An ImageData containing the data of the loaded image or NULL in
+/// case of error.
 ImageData *load_image(const char *filename)
 {
     GError *error = NULL;
@@ -94,7 +94,7 @@ ImageData *load_image(const char *filename)
     {
         fprintf(stderr, "Error loading image: %s\n", error->message);
         g_error_free(error);
-        exit(EXIT_FAILURE);
+        return NULL;
     }
 
     int width = gdk_pixbuf_get_width(pixbuf);
@@ -104,7 +104,8 @@ ImageData *load_image(const char *filename)
     if (channels < 3)
     {
         g_object_unref(pixbuf);
-        errx(EXIT_FAILURE, "Unsupported channel number in the image loaded");
+        fprintf(stderr, "Unsupported channel number in the image loaded");
+        return NULL;
     }
 
     guchar *pixels = gdk_pixbuf_get_pixels(pixbuf);
@@ -114,7 +115,8 @@ ImageData *load_image(const char *filename)
     if (pixels_copy == NULL)
     {
         g_object_unref(pixbuf);
-        errx(EXIT_FAILURE, "Failed to allocate pixels copy");
+        fprintf(stderr, "Failed to allocate pixels copy");
+        return NULL;
     }
 
     // Populates the Pixel data
@@ -135,7 +137,8 @@ ImageData *load_image(const char *filename)
     if (img == NULL)
     {
         free(pixels_copy);
-        errx(EXIT_FAILURE, "Failed to allocate ImageData struct");
+        fprintf(stderr, "Failed to allocate ImageData struct");
+        return NULL;
     }
 
     img->width = width;
