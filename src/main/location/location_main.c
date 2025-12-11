@@ -1,14 +1,8 @@
-#include "location/location.h"
-#include "location/location_grid.h"
-#include "location/location_word_letters.h"
-#include "location/split_letters.h"
-
-#include "pretreatment/pretreatment.h"
-#include "pretreatment/visualization.h"
-#include "rotation/rotation.h"
+#include "location/letters_extraction.h"
 #include "utils/utils.h"
 #include <err.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 int main(int argc, char **argv)
@@ -70,91 +64,16 @@ int main(int argc, char **argv)
         }
         else
         {
-            sprintf(image_path, LEVEL_2_IMG_2);
+            // sprintf(image_path, LEVEL_2_IMG_2);
+            sprintf(image_path, "aaaa");
         }
     }
 
-    cleanup_folders();
-    setup_folders();
-
-    ImageData *img = load_image(image_path);
-    Matrix *gray = image_to_grayscale(img);
-    export_matrix(gray, GRAYSCALED_FILENAME);
-    free_image(img);
-
-    Matrix *threshold = adaptative_gaussian_thresholding(gray, 255, 11, 7, 4);
-    export_matrix(threshold, THRESHOLDED_FILENAME);
-    mat_free(gray);
-
-    Matrix *rotated = auto_deskew_matrix(threshold);
-    export_matrix(rotated, ROTATED_FILENAME);
-    mat_free(threshold);
-
-    Matrix *closing = morph_transform(rotated, 1, Closing);
-    export_matrix(closing, CLOSING_FILENAME);
-
-    Matrix *opening = morph_transform(closing, 2, Opening);
-    export_matrix(opening, OPENING_FILENAME);
-    export_matrix(opening, POSTTREATMENT_FILENAME);
-    mat_free(closing);
-
-    size_t nb_lines;
-    Line **lines = hough_transform_lines(rotated, 90, 5, 1, &nb_lines);
-    mat_free(rotated);
-
-    draw_lines_on_img(lines, nb_lines, POSTTREATMENT_FILENAME,
-                      HOUGHLINES_VISUALIZATION_FILENAME);
-
-    size_t width_points, height_points;
-    Point **points = extract_intersection_points(lines, nb_lines,
-                                                 &height_points, &width_points);
-
-    draw_points_on_img(points, height_points, width_points,
-                       HOUGHLINES_VISUALIZATION_FILENAME,
-                       INTERSECTION_POINTS_FILENAME);
-
-    extract_grid_cells(opening, points, height_points, width_points);
-    BoundingBox *grid_box =
-        get_bounding_box_grid(points, height_points, width_points);
-    free_points(points, height_points);
-
-    draw_boundingbox_on_img(grid_box, POSTTREATMENT_FILENAME,
-                            GRID_BOUNDING_BOXES_FILENAME);
-    BoundingBox *remaining_box = find_biggest_remaining_area(
-        grid_box, mat_height(opening), mat_width(opening));
-
-    size_t nb_words;
-    BoundingBox **words_boxes =
-        get_bounding_box_words(opening, remaining_box, 5, 20, 4, &nb_words);
-
-    free(remaining_box);
-
-    draw_boundingboxes_on_img(words_boxes, nb_words, POSTTREATMENT_FILENAME,
-                              WORDS_BOUNDING_BOXES_FILENAME);
-    extract_words(opening, words_boxes, nb_words);
-
-    size_t *word_nb_letters;
-    BoundingBox ***letters_boxes = get_bounding_box_letters(
-        opening, words_boxes, nb_words, 2, &word_nb_letters);
-
-    letters_boxes =
-        detect_split_large_letters(letters_boxes, nb_words, word_nb_letters);
-
-    draw_2d_boundingboxes_on_img(letters_boxes, nb_words, word_nb_letters,
-                                 POSTTREATMENT_FILENAME,
-                                 LETTERS_BOUNDING_BOXES_FILENAME);
-    extract_letters(opening, letters_boxes, nb_words, word_nb_letters);
-
-    for (size_t i = 0; i < nb_words; i++)
+    int status = locate_and_extract_letters_png(image_path);
+    if (status != 0)
     {
-        free_bboxes(letters_boxes[i], word_nb_letters[i]);
+        fprintf(stderr, "Failed to locate and extract letters to png\n");
+        return EXIT_FAILURE;
     }
-    free(letters_boxes);
-    free(word_nb_letters);
-    free_bboxes(words_boxes, nb_words);
-    free(grid_box);
-
-    mat_free(opening);
-    free_lines(lines, nb_lines);
     return EXIT_SUCCESS;
 }
