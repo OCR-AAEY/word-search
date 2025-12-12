@@ -8,31 +8,55 @@
 
 int extract_grid_cells(Matrix *src, Point **points, size_t height, size_t width)
 {
+    const int PADDING = 5;
     int status;
+
     for (size_t h = 0; h < height - 1; h++)
     {
         for (size_t w = 0; w < width - 1; w++)
         {
+            // Coordonnées originales
+            int x1 = points[h][w].x;
+            int y1 = points[h][w].y;
+            int x2 = points[h + 1][w + 1].x;
+            int y2 = points[h + 1][w + 1].y;
+
+            // Application du padding
+            int px1 = x1 + PADDING;
+            int py1 = y1 + PADDING;
+            int px2 = x2 - PADDING;
+            int py2 = y2 - PADDING;
+
+            // Validation de la région après padding
+            if (px1 >= px2 || py1 >= py2)
+            {
+                fprintf(stderr,
+                        "extract_grid_cells: invalid region after padding "
+                        "(%zu, %zu): (%d, %d) -> (%d, %d)\n",
+                        h, w, px1, py1, px2, py2);
+                return EXIT_FAILURE;
+            }
+
+            // Construction du nom de fichier
             size_t filename_size =
                 snprintf(NULL, 0, "%s/(%zu_%zu).png", GRID_DIR, h, w);
             char filename[filename_size + 1];
             sprintf(filename, "%s/(%zu_%zu).png", GRID_DIR, h, w);
-            // printf("%s (%i, %i) to (%i, %i)\n", filename, points[h][w].x,
-            // points[h][w].y,
-            //                   points[h + 1][w + 1].x, points[h + 1][w +
-            //                   1].y);
-            status = save_image_region(src, filename, points[h][w].x,
-                                       points[h][w].y, points[h + 1][w + 1].x,
-                                       points[h + 1][w + 1].y);
+
+            // Sauvegarde de la région
+            status = save_image_region(src, filename, px1, py1, px2, py2);
+
             if (status != 0)
             {
                 fprintf(
                     stderr,
-                    "extract_grid_cells: Failed to save grid cell as png\n");
+                    "extract_grid_cells: Failed to save grid cell (%zu,%zu)\n",
+                    h, w);
                 return EXIT_FAILURE;
             }
         }
     }
+
     return EXIT_SUCCESS;
 }
 
