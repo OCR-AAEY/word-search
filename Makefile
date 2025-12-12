@@ -115,7 +115,7 @@ $(BIN_LOCATION): $(filter $(BUILD_MAIN_DIR)/location/%.o,$(OBJ_MAIN)) $(filter $
 	@echo "$(BIN_LOCATION): \033[32mCompilation succeeded\033[0m"
 
 # Main app target.
-$(BIN_APP): $(OBJ_MAIN) $(BUILD_MAIN_DIR)/app/app_main.o
+$(BIN_APP): $(OBJ_MAIN) 
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 	@echo "$(BIN_APP): \033[32mCompilation succeeded\033[0m"
 
