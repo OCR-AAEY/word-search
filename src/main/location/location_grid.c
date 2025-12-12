@@ -6,9 +6,9 @@
 #include <stdio.h>
 #include <string.h>
 
-void extract_grid_cells(Matrix *src, Point **points, size_t height,
-                        size_t width)
+int extract_grid_cells(Matrix *src, Point **points, size_t height, size_t width)
 {
+    int status;
     for (size_t h = 0; h < height - 1; h++)
     {
         for (size_t w = 0; w < width - 1; w++)
@@ -21,18 +21,35 @@ void extract_grid_cells(Matrix *src, Point **points, size_t height,
             // points[h][w].y,
             //                   points[h + 1][w + 1].x, points[h + 1][w +
             //                   1].y);
-            save_image_region(src, filename, points[h][w].x, points[h][w].y,
-                              points[h + 1][w + 1].x, points[h + 1][w + 1].y);
+            status = save_image_region(src, filename, points[h][w].x,
+                                       points[h][w].y, points[h + 1][w + 1].x,
+                                       points[h + 1][w + 1].y);
+            if (status != 0)
+            {
+                fprintf(
+                    stderr,
+                    "extract_grid_cells: Failed to save grid cell as png\n");
+                return EXIT_FAILURE;
+            }
         }
     }
+    return EXIT_SUCCESS;
 }
 
 BoundingBox *get_bounding_box_grid(Point **points, size_t height, size_t width)
 {
     if (height == 0 && width == 0)
-        errx(EXIT_FAILURE,
-             "Cannot find grid if there is no intersection points");
+    {
+        fprintf(stderr, "get_bounding_box_grid: Cannot find grid if there is "
+                        "no intersection points\n");
+        return NULL;
+    }
     BoundingBox *box = malloc(sizeof(BoundingBox));
+    if (box == NULL)
+    {
+        fprintf(stderr, "get_bounding_box_grid: Failed allocation box\n");
+        return NULL;
+    }
     // Point top_left = (Point) {.x = points[0][0].x, .y = points[0][0].y};
     // Point bottom_right = (Point) {.x = points[height-1][width-1].x, .y =
     // points[height-1][width-1].y};

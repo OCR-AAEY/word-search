@@ -9,8 +9,11 @@ BoundingBox *find_biggest_remaining_area(BoundingBox *grid_box,
                                          size_t src_height, size_t src_width)
 {
     if ((int)src_height < grid_box->br.y || (int)src_width < grid_box->br.x)
-        errx(EXIT_FAILURE,
-             "The given bounding box is outside of the bounds of the src");
+    {
+        fprintf(stderr, "find_biggest_remaining_area: The given bounding box "
+                        "is outside of the bounds of the src\n");
+        return NULL;
+    }
 
     size_t top_space = grid_box->tl.y;
     size_t bottom_space = src_height - grid_box->br.y;
@@ -18,6 +21,13 @@ BoundingBox *find_biggest_remaining_area(BoundingBox *grid_box,
     size_t left_space = grid_box->tl.x;
 
     BoundingBox *remaining_area = malloc(sizeof(BoundingBox));
+    if (remaining_area == NULL)
+    {
+        fprintf(
+            stderr,
+            "find_biggest_remaining_area: Failed allocation remaining area\n");
+        return NULL;
+    }
     Point tl = {};
     Point br = {};
     size_t maxi =
@@ -33,7 +43,10 @@ BoundingBox *find_biggest_remaining_area(BoundingBox *grid_box,
         if (br.x < 0)
         {
             free(remaining_area);
-            errx(EXIT_FAILURE, "There is no remaining space");
+            fprintf(
+                stderr,
+                "find_biggest_remaining_area: There is no remaining space\n");
+            return NULL;
         }
     }
     else if (maxi == right_space)
@@ -44,7 +57,10 @@ BoundingBox *find_biggest_remaining_area(BoundingBox *grid_box,
         if (tl.x >= (int)src_width)
         {
             free(remaining_area);
-            errx(EXIT_FAILURE, "There is no remaining space");
+            fprintf(
+                stderr,
+                "find_biggest_remaining_area: There is no remaining space\n");
+            return NULL;
         }
         br.x = src_width - 1;
         br.y = src_height - 1;
@@ -59,7 +75,10 @@ BoundingBox *find_biggest_remaining_area(BoundingBox *grid_box,
         if (tl.y < 0)
         {
             free(remaining_area);
-            errx(EXIT_FAILURE, "There is no remaining space");
+            fprintf(
+                stderr,
+                "find_biggest_remaining_area: There is no remaining space\n");
+            return NULL;
         }
     }
     else
@@ -70,7 +89,10 @@ BoundingBox *find_biggest_remaining_area(BoundingBox *grid_box,
         if (tl.y >= (int)src_height)
         {
             free(remaining_area);
-            errx(EXIT_FAILURE, "There is no remaining space");
+            fprintf(
+                stderr,
+                "find_biggest_remaining_area: There is no remaining space\n");
+            return NULL;
         }
         br.x = src_width - 1;
         br.y = src_height - 1;
@@ -116,21 +138,34 @@ size_t *histogram_horizontal(Matrix *src, BoundingBox *area, size_t *size_out)
     return histogram;
 }
 
-void pad_bounding_box(BoundingBox *box, size_t top, size_t bottom, size_t right,
-                      size_t left)
+int pad_bounding_box(BoundingBox *box, size_t top, size_t bottom, size_t right,
+                     size_t left)
 {
     box->tl.x += left;
     if (box->tl.x > box->br.x)
-        errx(EXIT_FAILURE, "The padding exceeds the bounding box size");
+    {
+        fprintf(stderr, "The padding exceeds the bounding box size");
+        return -1;
+    }
     box->tl.y += top;
     if (box->tl.y > box->br.y)
-        errx(EXIT_FAILURE, "The padding exceeds the bounding box size");
+    {
+        fprintf(stderr, "The padding exceeds the bounding box size");
+        return -2;
+    }
     box->br.x -= right;
     if (box->br.x < box->tl.x)
-        errx(EXIT_FAILURE, "The padding exceeds the bounding box size");
+    {
+        fprintf(stderr, "The padding exceeds the bounding box size");
+        return -3;
+    }
     box->br.y -= bottom;
     if (box->br.y < box->tl.y)
-        errx(EXIT_FAILURE, "The padding exceeds the bounding box size");
+    {
+        fprintf(stderr, "The padding exceeds the bounding box size");
+        return -4;
+    }
+    return EXIT_SUCCESS;
 }
 
 void margin_bounding_box(BoundingBox *box, size_t top, size_t bottom,
@@ -200,16 +235,40 @@ BoundingBox **get_bounding_box_words(Matrix *src, BoundingBox *area,
                                      size_t word_margin, size_t *size_out)
 {
     if (size_out == NULL)
-        errx(EXIT_FAILURE, "The size_out output parameter is NULL");
+    {
+        fprintf(
+            stderr,
+            "get_bounding_box_words: The size_out output parameter is NULL");
+        return NULL;
+    }
     if (src == NULL)
-        errx(EXIT_FAILURE, "The src matrix is NULL");
+    {
+        fprintf(stderr, "get_bounding_box_words: The src matrix is NULL");
+        return NULL;
+    }
     if (area == NULL)
-        errx(EXIT_FAILURE, "The area bbox is NULL");
+    {
+        fprintf(stderr, "get_bounding_box_words: The area bbox is NULL");
+        return NULL;
+    }
 
-    pad_bounding_box(area, area_padding, area_padding, area_padding,
-                     area_padding);
-    draw_boundingbox_on_img(area, POSTTREATMENT_FILENAME,
-                            REMAINING_SPACE_PADDING);
+    int status;
+
+    status = pad_bounding_box(area, area_padding, area_padding, area_padding,
+                              area_padding);
+    if (status != 0)
+    {
+        fprintf(stderr, "get_bounding_box_words: failed to pad box\n");
+        return NULL;
+    }
+
+    status = draw_boundingbox_on_img(area, POSTTREATMENT_FILENAME,
+                                     REMAINING_SPACE_PADDING);
+    if (status != 0)
+    {
+        fprintf(stderr, "step export : failed to export "
+                        "remaining space bounding box\n");
+    }
 
     size_t histo_size;
     size_t *histogram_horiz = histogram_horizontal(src, area, &histo_size);
@@ -311,37 +370,109 @@ BoundingBox ***get_bounding_box_letters(Matrix *src, BoundingBox **words_boxes,
                                         size_t **size_out)
 {
     if (size_out == NULL)
-        errx(EXIT_FAILURE, "The size_out output parameter is NULL");
+    {
+        fprintf(stderr, "get_bounding_box_letters: The size_out output "
+                        "parameter is NULL\n");
+        return NULL;
+    }
     if (src == NULL)
-        errx(EXIT_FAILURE, "The src matrix is NULL");
+    {
+        fprintf(stderr, "get_bounding_box_letters: The src matrix is NULL\n");
+        return NULL;
+    }
     if (words_boxes == NULL)
-        errx(EXIT_FAILURE, "The words_boxes is NULL");
+    {
+        fprintf(stderr, "get_bounding_box_letters: The words_boxes is NULL\n");
+        return NULL;
+    }
 
-    size_t histo_size;
     BoundingBox ***letters_boxes = malloc(nb_words * sizeof(BoundingBox **));
+    if (!letters_boxes)
+    {
+        fprintf(stderr,
+                "get_bounding_box_letters: Failed to allocate letters_boxes\n");
+        return NULL;
+    }
+
     *size_out = malloc(nb_words * sizeof(size_t));
+    if (!*size_out)
+    {
+        fprintf(
+            stderr,
+            "get_bounding_box_letters: Failed to allocate size_out array\n");
+        free(letters_boxes);
+        return NULL;
+    }
 
     for (size_t i = 0; i < nb_words; i++)
     {
         if (words_boxes[i] == NULL)
-            errx(EXIT_FAILURE, "The current word box is NULL");
+        {
+            fprintf(stderr,
+                    "get_bounding_box_letters: The current word box is NULL at "
+                    "index %zu\n",
+                    i);
 
+            // Free previously allocated letters_boxes
+            for (size_t j = 0; j < i; j++)
+                free_bboxes(letters_boxes[j], (*size_out)[j]);
+            free(letters_boxes);
+            free(*size_out);
+            *size_out = NULL;
+
+            return NULL;
+        }
+
+        size_t histo_size;
         size_t *histogram_vert =
             histogram_vertical(src, words_boxes[i], &histo_size);
+        if (!histogram_vert)
+        {
+            fprintf(stderr,
+                    "get_bounding_box_letters: Failed to allocate "
+                    "histogram_vert at index %zu\n",
+                    i);
+
+            for (size_t j = 0; j < i; j++)
+                free_bboxes(letters_boxes[j], (*size_out)[j]);
+            free(letters_boxes);
+            free(*size_out);
+            *size_out = NULL;
+
+            return NULL;
+        }
+
         letters_boxes[i] = find_letters_histogram_threshold(
             words_boxes[i], histogram_vert, histo_size, threshold,
             (*size_out) + i);
+
         free(histogram_vert);
+
+        if (!letters_boxes[i])
+        {
+            fprintf(stderr,
+                    "get_bounding_box_letters: Failed to find letters for word "
+                    "%zu\n",
+                    i);
+
+            for (size_t j = 0; j < i; j++)
+                free_bboxes(letters_boxes[j], (*size_out)[j]);
+            free(letters_boxes);
+            free(*size_out);
+            *size_out = NULL;
+
+            return NULL;
+        }
     }
 
     return letters_boxes;
 }
 
-void extract_boundingbox_to_png(Matrix *src, BoundingBox *box,
-                                const char *filename)
+int extract_boundingbox_to_png(Matrix *src, BoundingBox *box,
+                               const char *filename)
 {
-    save_image_region(src, filename, box->tl.x, box->tl.y, box->br.x,
-                      box->br.y);
+    return save_image_region(src, filename, box->tl.x, box->tl.y, box->br.x,
+                             box->br.y);
 }
 
 void extract_letters(Matrix *src, BoundingBox ***letter_boxes, size_t nb_words,
@@ -375,24 +506,40 @@ void extract_letters(Matrix *src, BoundingBox ***letter_boxes, size_t nb_words,
     }
 }
 
-void extract_words(Matrix *src, BoundingBox **words_boxes, size_t nb_words)
+int extract_words(Matrix *src, BoundingBox **words_boxes, size_t nb_words)
 {
     if (src == NULL)
-        errx(EXIT_FAILURE, "The src matrix is NULL");
+    {
+        fprintf(stderr, "extract_words: The src matrix is NULL\n");
+        return -1;
+    }
     if (words_boxes == NULL)
-        errx(EXIT_FAILURE, "The words_boxes is NULL");
+    {
+        fprintf(stderr, "extract_words: The words_boxes is NULL\n");
+        return -2;
+    }
 
     setup_words_folders(nb_words);
 
     for (size_t word_i = 0; word_i < nb_words; word_i++)
     {
         if (words_boxes[word_i] == NULL)
-            errx(EXIT_FAILURE, "The current word box is NULL");
+        {
+            fprintf(stderr, "extract_words: The current word box is NULL\n");
+            return -3;
+        }
         size_t filename_size =
             snprintf(NULL, 0, "%s%zu/full_word.png", WORD_BASE_DIR, word_i);
         char filename[filename_size + 1];
         sprintf(filename, "%s%zu/full_word.png", WORD_BASE_DIR, word_i);
 
-        extract_boundingbox_to_png(src, words_boxes[word_i], filename);
+        int status =
+            extract_boundingbox_to_png(src, words_boxes[word_i], filename);
+        if (status != 0)
+        {
+            fprintf(stderr, "extract_words: Failed to save word as png\n");
+            return -4;
+        }
     }
+    return EXIT_SUCCESS;
 }

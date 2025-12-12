@@ -419,10 +419,10 @@ int export_matrix(Matrix *src, const char *filename)
     if (pixbuf == NULL)
         return EXIT_FAILURE;
     GError *error;
-    save_pixbuf_to_png(pixbuf, (char *)filename, &error);
+    int success = save_pixbuf_to_png(pixbuf, (char *)filename, &error);
     if (error != NULL)
         g_error_free(error);
     g_object_unref(pixbuf);
     free_image(img);
-    return EXIT_SUCCESS;
+    return success ? EXIT_SUCCESS : EXIT_FAILURE;
 }
