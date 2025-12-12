@@ -6,25 +6,30 @@
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 /// @brief Finds the largest remaining area outside a given bounding box within
-/// source image dimensions.
-/// @param[in] grid_box Pointer to the BoundingBox structure representing the
-/// current area.
+/// the source image.
+/// @param[in] grid_box Pointer to the BoundingBox representing the current
+/// area. Must not be NULL.
 /// @param[in] src_height Height of the source image.
 /// @param[in] src_width Width of the source image.
 /// @return Pointer to a newly allocated BoundingBox representing the largest
-/// remaining area.
-/// @throw Exits the program if the given bounding box exceeds source boundaries
-/// or no remaining space exists.
+/// remaining area,
+///         or NULL if the bounding box exceeds source boundaries or no
+///         remaining space exists.
 BoundingBox *find_biggest_remaining_area(BoundingBox *grid_box,
                                          size_t src_height, size_t src_width);
 
 /// @brief Extracts word regions from a source matrix and saves each as a PNG.
-/// @param src Source matrix (must not be NULL).
-/// @param words_boxes Array of word bounding boxes (must not be NULL; each box
-/// must not be NULL).
-/// @param nb_words Number of words/bounding boxes.
-/// @note Saves each word as WORD_BASE_DIR/<index>/full_word.png.
-void extract_words(Matrix *src, BoundingBox **words_boxes, size_t nb_words);
+/// Each word is saved as WORD_BASE_DIR/<index>/full_word.png.
+/// @param[in] src Pointer to the source matrix. Must not be NULL.
+/// @param[in] words_boxes Array of pointers to word bounding boxes. Must not be
+/// NULL; each box must not be NULL.
+/// @param[in] nb_words Number of words/bounding boxes in the array.
+/// @return 0 on success, or a negative error code on failure:
+///         -1 if src is NULL,
+///         -2 if words_boxes is NULL,
+///         -3 if any word box is NULL,
+///         -4 if saving any word fails.
+int extract_words(Matrix *src, BoundingBox **words_boxes, size_t nb_words);
 
 /// @brief Extracts letter regions from a source matrix and saves each as a PNG.
 /// @param src Source matrix (must not be NULL).
@@ -40,21 +45,25 @@ void extract_letters(Matrix *src, BoundingBox ***letter_boxes, size_t nb_words,
 
 /// @brief Saves the region defined by a bounding box from a source matrix as a
 /// PNG.
-/// @param src Source matrix (must not be NULL).
-/// @param box Bounding box defining the region to extract (must not be NULL).
-/// @param filename Output PNG file path.
-void extract_boundingbox_to_png(Matrix *src, BoundingBox *box,
-                                const char *filename);
+/// @param[in] src Pointer to the source matrix. Must not be NULL.
+/// @param[in] box Pointer to the bounding box defining the region to extract.
+/// Must not be NULL.
+/// @param[in] filename Path to the output PNG file.
+/// @return 0 on success, or EXIT_FAILURE if the extraction or saving fails.
+int extract_boundingbox_to_png(Matrix *src, BoundingBox *box,
+                               const char *filename);
 
 /// @brief Computes bounding boxes of letters inside each word region.
-/// @param src Source matrix (must not be NULL).
-/// @param words_boxes Array of word bounding boxes (must not be NULL).
-/// @param nb_words Number of words.
-/// @param threshold Threshold used for letter segmentation.
-/// @param size_out Output array giving the number of letters found per word
-///        (must not be NULL; memory is allocated inside the function).
-/// @return A 2D array of pointers to letter bounding boxes for each word (heap
-/// allocated).
+/// @param[in] src Pointer to the source matrix. Must not be NULL.
+/// @param[in] words_boxes Array of word bounding boxes. Must not be NULL.
+/// @param[in] nb_words Number of words in the array.
+/// @param[in] threshold Threshold used for letter segmentation.
+/// @param[out] size_out Pointer to an array that will store the number of
+/// letters found per word. Must not be NULL; memory is allocated inside the
+/// function.
+/// @return A 2D array of allocated BoundingBox pointers for each word,
+///         or NULL on error (e.g., invalid parameters or memory allocation
+///         failure).
 BoundingBox ***get_bounding_box_letters(Matrix *src, BoundingBox **words_boxes,
                                         size_t nb_words, size_t threshold,
                                         size_t **size_out);
@@ -84,15 +93,17 @@ BoundingBox **find_letters_histogram_threshold(BoundingBox *area,
 size_t *histogram_vertical(Matrix *src, BoundingBox *area, size_t *size_out);
 
 /// @brief Detects and returns bounding boxes of words within a specified area.
-/// @param src Source matrix (must not be NULL).
-/// @param area Bounding box defining the region to analyze (must not be NULL).
-/// @param threshold Threshold used for word segmentation.
-/// @param area_padding Padding applied to the input area before processing.
-/// @param word_margin Extra margin added to each detected word box.
-/// @param size_out Output parameter storing the number of detected words (must
-/// not be NULL).
-/// @return An array of allocated BoundingBox pointers representing detected
-/// words.
+/// @param[in] src Pointer to the source matrix. Must not be NULL.
+/// @param[in] area Pointer to the bounding box defining the region to analyze.
+/// Must not be NULL.
+/// @param[in] threshold Threshold used for word segmentation.
+/// @param[in] area_padding Padding applied to the input area before processing.
+/// @param[in] word_margin Extra margin added to each detected word box.
+/// @param[out] size_out Pointer to store the number of detected words. Must not
+/// be NULL.
+/// @return Array of allocated BoundingBox pointers representing detected words,
+///         or NULL on error (e.g., invalid parameters or memory allocation
+///         failure).
 BoundingBox **get_bounding_box_words(Matrix *src, BoundingBox *area,
                                      size_t threshold, size_t area_padding,
                                      size_t word_margin, size_t *size_out);
@@ -122,15 +133,14 @@ void margin_bounding_box(BoundingBox *box, size_t top, size_t bottom,
                          size_t right, size_t left);
 
 /// @brief Shrinks a bounding box by applying padding from each side.
-/// @param box Bounding box to modify (must not be NULL).
-/// @param top Padding to remove from the top.
-/// @param bottom Padding to remove from the bottom.
-/// @param right Padding to remove from the right.
-/// @param left Padding to remove from the left.
-/// @throw The function will EXIT_FAILURE with an error if padding exceeds the
-/// box size.
-void pad_bounding_box(BoundingBox *box, size_t top, size_t bottom, size_t right,
-                      size_t left);
+/// @param[in,out] box Pointer to the BoundingBox to modify. Must not be NULL.
+/// @param[in] top Padding to remove from the top.
+/// @param[in] bottom Padding to remove from the bottom.
+/// @param[in] right Padding to remove from the right.
+/// @param[in] left Padding to remove from the left.
+/// @return 0 on success, or -1 if the padding exceeds the box size.
+int pad_bounding_box(BoundingBox *box, size_t top, size_t bottom, size_t right,
+                     size_t left);
 
 /// @brief Computes a horizontal histogram of black pixels within a given area.
 /// @param src Source matrix (must not be NULL).

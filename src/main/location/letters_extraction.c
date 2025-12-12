@@ -103,12 +103,23 @@ int locate_and_extract_letters_png(const char *input_image)
         return EXIT_FAILURE;
     }
 
-    draw_lines_on_img(lines, nb_lines, POSTTREATMENT_FILENAME,
-                      HOUGHLINES_VISUALIZATION_FILENAME);
+    status_export = draw_lines_on_img(lines, nb_lines, POSTTREATMENT_FILENAME,
+                                      HOUGHLINES_VISUALIZATION_FILENAME);
+    if (status_export != 0)
+    {
+        fprintf(stderr, "step export : failed to export hough lines\n");
+    }
 
     size_t width_points, height_points;
     Point **points = extract_intersection_points(lines, nb_lines,
                                                  &height_points, &width_points);
+    if (points == NULL)
+    {
+        fprintf(stderr, "Failed to find intersection points\n");
+        mat_free(opening);
+        free_lines(lines, nb_lines);
+        return EXIT_FAILURE;
+    }
 
     status_export = draw_points_on_img(points, height_points, width_points,
                                        HOUGHLINES_VISUALIZATION_FILENAME,
@@ -118,10 +129,28 @@ int locate_and_extract_letters_png(const char *input_image)
         fprintf(stderr, "step export : failed to export intersection points\n");
     }
 
-    extract_grid_cells(opening, points, height_points, width_points);
+    int grid_cells_status =
+        extract_grid_cells(opening, points, height_points, width_points);
+    if (grid_cells_status != 0)
+    {
+        fprintf(stderr, "Failed to export grid cells\n");
+        mat_free(opening);
+        free_lines(lines, nb_lines);
+        free_points(points, height_points);
+        return EXIT_FAILURE;
+    }
+
     BoundingBox *grid_box =
         get_bounding_box_grid(points, height_points, width_points);
     free_points(points, height_points);
+
+    if (grid_box == NULL)
+    {
+        fprintf(stderr, "Failed to get grid bounding box\n");
+        mat_free(opening);
+        free_lines(lines, nb_lines);
+        return EXIT_FAILURE;
+    }
 
     status_export = draw_boundingbox_on_img(grid_box, POSTTREATMENT_FILENAME,
                                             GRID_BOUNDING_BOXES_FILENAME);
@@ -133,11 +162,28 @@ int locate_and_extract_letters_png(const char *input_image)
     BoundingBox *remaining_box = find_biggest_remaining_area(
         grid_box, mat_height(opening), mat_width(opening));
 
+    if (remaining_box == NULL)
+    {
+        fprintf(stderr, "Failed to get remaining area for word list\n");
+        mat_free(opening);
+        free(grid_box);
+        free_lines(lines, nb_lines);
+        return EXIT_FAILURE;
+    }
+
     size_t nb_words;
     BoundingBox **words_boxes =
         get_bounding_box_words(opening, remaining_box, 5, 20, 4, &nb_words);
-
     free(remaining_box);
+
+    if (words_boxes == NULL)
+    {
+        fprintf(stderr, "Failed to get word bounding boxes\n");
+        mat_free(opening);
+        free(grid_box);
+        free_lines(lines, nb_lines);
+        return EXIT_FAILURE;
+    }
 
     status_export =
         draw_boundingboxes_on_img(words_boxes, nb_words, POSTTREATMENT_FILENAME,
@@ -147,8 +193,13 @@ int locate_and_extract_letters_png(const char *input_image)
         fprintf(stderr,
                 "step export : failed to export words bounding boxes\n");
     }
-    extract_words(opening, words_boxes, nb_words);
+    status_export = extract_words(opening, words_boxes, nb_words);
+    if (status_export != 0)
+    {
+        fprintf(stderr, "step export : failed to export full words as png\n");
+    }
 
+    // TODO : continue remove errx
     size_t *word_nb_letters;
     BoundingBox ***letters_boxes = get_bounding_box_letters(
         opening, words_boxes, nb_words, 2, &word_nb_letters);

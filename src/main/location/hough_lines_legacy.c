@@ -10,7 +10,11 @@ Matrix *create_hough_accumulator(size_t height, size_t width,
                                  float theta_precision)
 {
     if (theta_precision <= 0)
-        errx(EXIT_FAILURE, "Theta precision must be strictly positive");
+    {
+        fprintf(stderr, "create_hough_accumulator: Theta precision must be "
+                        "strictly positive\n");
+        return NULL;
+    }
 
     // Maximum possible distance from the origin of the image (image diagonal)
     float diag = sqrtf((float)height * height + (float)width * width);
@@ -29,17 +33,30 @@ Matrix *create_hough_accumulator(size_t height, size_t width,
     return accumulator;
 }
 
-void populate_hough_lines(Matrix *src, Matrix *accumulator,
-                          float theta_precision, size_t *max_count)
+int populate_hough_lines(Matrix *src, Matrix *accumulator,
+                         float theta_precision, size_t *max_count)
 {
+    // TODO : update all calls
     if (src == NULL)
-        errx(EXIT_FAILURE, "The source matrix is NULL");
+    {
+        fprintf(stderr, "The source matrix is NULL\n");
+        return -1;
+    }
 
     if (accumulator == NULL)
-        errx(EXIT_FAILURE, "The accumulator matrix is NULL");
+    {
+        fprintf(stderr, "The accumulator matrix is NULL\n");
+        return -2;
+    }
 
     if (max_count == NULL)
-        errx(EXIT_FAILURE, "The max_count output parameter is NULL");
+    {
+        fprintf(stderr, "The max_count output parameter is NULL\n");
+        return -3;
+    }
+
+    if (theta_precision <= 0.0f)
+        return -4;
 
     size_t height = mat_height(src);
     size_t width = mat_width(src);
@@ -51,6 +68,13 @@ void populate_hough_lines(Matrix *src, Matrix *accumulator,
     // pre compute cos and sin values, like a cache
     float *cosd_table = malloc(theta_index_max * sizeof(float));
     float *sind_table = malloc(theta_index_max * sizeof(float));
+
+    if (!cosd_table || !sind_table)
+    {
+        free(cosd_table);
+        free(sind_table);
+        return -5;
+    }
 
     for (size_t theta_index = 0; theta_index < theta_index_max; theta_index++)
     {
@@ -97,6 +121,7 @@ void populate_hough_lines(Matrix *src, Matrix *accumulator,
 
     free(cosd_table);
     free(sind_table);
+    return 0;
 }
 
 void statistics_on_accumulator(Matrix *accumulator, float *stddev_out,
@@ -134,12 +159,24 @@ Line **extract_hough_lines(Matrix *accumulator, size_t threshold,
                            float theta_precision, size_t *line_count)
 {
     if (accumulator == NULL)
-        errx(EXIT_FAILURE, "The accumulator matrix is NULL");
+    {
+        fprintf(stderr,
+                "extract_hough_lines : The accumulator matrix is NULL\n");
+        return NULL;
+    }
     if (line_count == NULL)
-        errx(EXIT_FAILURE, "The line_count output parameter is NULL");
+    {
+        fprintf(
+            stderr,
+            "extract_hough_lines : The line_count output parameter is NULL\n");
+        return NULL;
+    }
     if (threshold == 0)
-        errx(EXIT_FAILURE, "Threshold should not be 0 because it would "
-                           "generate to much noise");
+    {
+        fprintf(stderr, "extract_hough_lines : Threshold should not be 0 "
+                        "because it would generate to much noise\n");
+        return NULL;
+    }
 
     size_t theta_max = mat_width(accumulator);
     size_t r_max = (mat_height(accumulator) - 1) / 2;
@@ -156,8 +193,8 @@ Line **extract_hough_lines(Matrix *accumulator, size_t threshold,
             // ignore values that are below the threshold
             if (count < threshold)
                 continue;
-            // increase the size of the array if the max number of lines is
-            // reached
+            // increase the size of the array if the max
+            // number of lines is reached
             if (*line_count == max_lines)
             {
                 max_lines += 10;
@@ -165,7 +202,10 @@ Line **extract_hough_lines(Matrix *accumulator, size_t threshold,
                 if (tmp == NULL)
                 {
                     free_lines(lines, *line_count);
-                    errx(EXIT_FAILURE, "Reallocation of lines array failed");
+                    fprintf(stderr, "extract_hough_lines : "
+                                    "Reallocation of lines "
+                                    "array failed\n");
+                    return NULL;
                 }
                 lines = tmp;
             }
@@ -174,7 +214,11 @@ Line **extract_hough_lines(Matrix *accumulator, size_t threshold,
             if (line == NULL)
             {
                 free_lines(lines, *line_count);
-                errx(EXIT_FAILURE, "Line allocation failed");
+                {
+                    fprintf(stderr, "extract_hough_lines : Line "
+                                    "allocation failed\n");
+                    return NULL;
+                }
             }
             lines[(*line_count)++] = line;
             line->r = (float)r - (float)r_max;
@@ -188,11 +232,22 @@ Line **hough_lines_NMS(Line **lines, size_t *line_count, float delta_r,
                        float delta_theta)
 {
     if (lines == NULL)
-        errx(EXIT_FAILURE, "The Lines array is NULL");
+    {
+        fprintf(stderr, "hough_lines_NMS: The Lines array is NULL\n");
+        return NULL;
+    }
     if (line_count == NULL || *line_count == 0)
-        errx(EXIT_FAILURE, "The line count is NULL or 0");
+    {
+        fprintf(stderr, "hough_lines_NMS: The line count is NULL or 0\n");
+        return NULL;
+    }
     if (delta_r < 0 || delta_theta < 0)
-        errx(EXIT_FAILURE, "delta_r and delta_theta must not be negative");
+    {
+        fprintf(
+            stderr,
+            "hough_lines_NMS: delta_r and delta_theta must not be negative\n");
+        return NULL;
+    }
 
     int *suppressed = calloc(*line_count, sizeof(int));
 
@@ -242,16 +297,34 @@ Line **hough_lines_NMS(Line **lines, size_t *line_count, float delta_r,
 Line **hough_transform_lines(Matrix *src, float theta_precision, float delta_r,
                              float delta_theta, size_t *size_out)
 {
+    // TODO : update all calls
     if (src == NULL)
-        errx(EXIT_FAILURE, "The source matrix is NULL");
+    {
+        fprintf(stderr, "hough_transform_lines: The source matrix is NULL\n");
+        return NULL;
+    }
     if (size_out == NULL)
-        errx(EXIT_FAILURE, "The size output parameter is NULL");
+    {
+        fprintf(stderr,
+                "hough_transform_lines: The size output parameter is NULL\n");
+        return NULL;
+    }
 
     Matrix *accumulator = create_hough_accumulator(
         mat_height(src), mat_width(src), theta_precision);
 
+    if (accumulator == NULL)
+        return NULL;
+
     size_t max_acc;
-    populate_hough_lines(src, accumulator, theta_precision, &max_acc);
+    int status =
+        populate_hough_lines(src, accumulator, theta_precision, &max_acc);
+    if (status != 0)
+    {
+        fprintf(stderr, "hough_transform_lines: Failed to populate the hough "
+                        "line accumulator to detect lines\n");
+        return NULL;
+    }
 
     // float stddev, mean;
     // statistics_on_accumulator(accumulator, &stddev, &mean);
@@ -262,9 +335,20 @@ Line **hough_transform_lines(Matrix *src, float theta_precision, float delta_r,
     Line **lines =
         extract_hough_lines(accumulator, threshold, theta_precision, size_out);
 
+    if (lines == NULL)
+    {
+        fprintf(stderr, "hough_transform_lines: Failed to extract hough lines "
+                        "from accumulator\n");
+        return NULL;
+    }
     // filter lines that are too similar
     lines = hough_lines_NMS(lines, size_out, delta_r, delta_theta);
-
+    if (lines == NULL)
+    {
+        fprintf(stderr,
+                "hough_transform_lines: Failed to apply NMS on hough lines\n");
+        return NULL;
+    }
     mat_free(accumulator);
 
     return lines;
@@ -290,34 +374,60 @@ void free_lines(Line **lines, size_t size)
     free(lines);
 }
 
-void insert_line_in_group(Line *line, Line ***lines_group, size_t *lines_count,
-                          size_t *max_group)
+// TODO : remove errx and add error handling through return value
+
+int insert_line_in_group(Line *line, Line ***lines_group, size_t *lines_count,
+                         size_t *max_group)
 {
     if (*lines_count == *max_group)
     {
         *max_group += 10;
         *lines_group = realloc(*lines_group, *max_group * sizeof(Line *));
         if (*lines_group == NULL)
-            errx(EXIT_FAILURE, "Failed to reallocate lines group");
+        {
+            fprintf(stderr, "Failed to reallocate lines group");
+            return EXIT_FAILURE;
+        }
     }
     (*lines_group)[(*lines_count)++] = line;
+    return EXIT_SUCCESS;
 }
 
-void split_lines(Line **lines, size_t line_count, Line ***lines_1,
-                 size_t *lines_1_count, Line ***lines_2, size_t *lines_2_count)
+int split_lines(Line **lines, size_t line_count, Line ***lines_1,
+                size_t *lines_1_count, Line ***lines_2, size_t *lines_2_count)
 {
     if (lines == NULL)
-        errx(EXIT_FAILURE, "The lines array is NULL");
+    {
+        fprintf(stderr, "split_lines: The lines array is NULL\n");
+        return -1;
+    }
     if (lines_1 == NULL)
-        errx(EXIT_FAILURE, "The lines_1 output parameter is NULL");
+    {
+        fprintf(stderr, "split_lines: The lines_1 output parameter is NULL\n");
+        return -2;
+    }
     if (lines_2 == NULL)
-        errx(EXIT_FAILURE, "The lines_2 output parameter is NULL");
+    {
+        fprintf(stderr, "split_lines: The lines_2 output parameter is NULL\n");
+        return -3;
+    }
     if (line_count == 0)
-        errx(EXIT_FAILURE, "There is no lines to sort");
+    {
+        fprintf(stderr, "split_lines: There is no lines to sort\n");
+        return -4;
+    }
     if (lines_1_count == NULL)
-        errx(EXIT_FAILURE, "The lines_1_count output parameter is NULL");
+    {
+        fprintf(stderr,
+                "split_lines: The lines_1_count output parameter is NULL\n");
+        return -5;
+    }
     if (lines_2_count == NULL)
-        errx(EXIT_FAILURE, "The lines_2_count output parameter is NULL");
+    {
+        fprintf(stderr,
+                "split_lines: The lines_2_count output parameter is NULL\n");
+        return -6;
+    }
 
     size_t max_1 = line_count / 2;
     size_t max_2 = line_count / 2;
@@ -326,57 +436,126 @@ void split_lines(Line **lines, size_t line_count, Line ***lines_1,
     *lines_1 = malloc(max_1 * sizeof(Line *));
     *lines_2 = malloc(max_2 * sizeof(Line *));
 
+    if (*lines_1 == NULL)
+    {
+        fprintf(stderr,
+                "split_lines: Failed to allocate first group of lines\n");
+        return -7;
+    }
+    if (*lines_2 == NULL)
+    {
+        fprintf(stderr,
+                "split_lines: Failed to allocate second group of lines\n");
+        return -8;
+    }
+
+    int status;
     for (size_t i = 0; i < line_count; i++)
     {
         Line *li = lines[i];
         if (*lines_1_count == 0 || li->theta == (*lines_1)[0]->theta)
         {
-            insert_line_in_group(li, lines_1, lines_1_count, &max_1);
+            status = insert_line_in_group(li, lines_1, lines_1_count, &max_1);
+            if (status != 0)
+            {
+                fprintf(stderr, "split_lines: Failed to add line in group 1\n");
+                free(lines_1);
+                free(lines_2);
+                return -9;
+            }
         }
         else if (*lines_2_count == 0 || li->theta == (*lines_2)[0]->theta)
         {
-            insert_line_in_group(li, lines_2, lines_2_count, &max_2);
+            status = insert_line_in_group(li, lines_2, lines_2_count, &max_2);
+            if (status != 0)
+            {
+                fprintf(stderr, "split_lines: Failed to add line in group 2\n");
+                free(lines_1);
+                free(lines_2);
+                return -10;
+            }
         }
         else
         {
             if (li->theta == (*lines_1)[0]->theta)
             {
-                insert_line_in_group(li, lines_1, lines_1_count, &max_1);
+                status =
+                    insert_line_in_group(li, lines_1, lines_1_count, &max_1);
+                if (status != 0)
+                {
+                    fprintf(stderr,
+                            "split_lines: Failed to add line in group 1\n");
+                    free(lines_1);
+                    free(lines_2);
+                    return -11;
+                }
             }
             else if (li->theta == (*lines_2)[0]->theta)
             {
-                insert_line_in_group(li, lines_2, lines_2_count, &max_2);
+                status =
+                    insert_line_in_group(li, lines_2, lines_2_count, &max_2);
+                if (status != 0)
+                {
+                    fprintf(stderr,
+                            "split_lines: Failed to add line in group 2\n");
+                    free(lines_1);
+                    free(lines_2);
+                    return -12;
+                }
             }
             else
             {
-                printf("theta1 = %f, theta2 = %f, got %f\n",
-                       (*lines_1)[0]->theta, (*lines_2)[0]->theta, li->theta);
-                errx(EXIT_FAILURE,
-                     "There are 3 lines angles : impossible to split in 2");
+                // printf("theta1 = %f, theta2 = %f, got %f\n",
+                //        (*lines_1)[0]->theta, (*lines_2)[0]->theta,
+                //        li->theta);
+                fprintf(stderr, "split_lines: There are 3 lines angles, "
+                                "impossible to split in 2\n");
+                free(lines_1);
+                free(lines_2);
+                return -13;
             }
         }
     }
     // printf("theta1 = %f, theta2 = %f\n",
     //                    (*lines_1)[0]->theta, (*lines_2)[0]->theta);
+    return EXIT_SUCCESS;
 }
 
 Point **extract_intersection_points(Line **lines, size_t line_count,
                                     size_t *height_out, size_t *width_out)
 {
     if (lines == NULL)
-        errx(EXIT_FAILURE, "The lines array is NULL");
+    {
+        fprintf(stderr,
+                "extract_intersection_points: The lines array is NULL\n");
+        return NULL;
+    }
     if (height_out == NULL)
-        errx(EXIT_FAILURE, "The height output parameter is NULL");
+    {
+        fprintf(stderr, "extract_intersection_points: The height output "
+                        "parameter is NULL\n");
+        return NULL;
+    }
     if (width_out == NULL)
-        errx(EXIT_FAILURE, "The width output parameter is NULL");
+    {
+        fprintf(stderr, "extract_intersection_points: The width output "
+                        "parameter is NULL\n");
+        return NULL;
+    }
 
     Line **lines_1;
     Line **lines_2;
     size_t lines_1_count;
     size_t lines_2_count;
 
-    split_lines(lines, line_count, &lines_1, &lines_1_count, &lines_2,
-                &lines_2_count);
+    int status = split_lines(lines, line_count, &lines_1, &lines_1_count,
+                             &lines_2, &lines_2_count);
+    if (status != 0)
+    {
+        fprintf(stderr, "extract_intersection_points: The splitting of lines "
+                        "into 2 groups failed\n");
+        return NULL;
+    }
 
     *height_out = lines_1_count;
     *width_out = lines_2_count;
@@ -384,13 +563,26 @@ Point **extract_intersection_points(Line **lines, size_t line_count,
     Point **points = malloc(lines_1_count * sizeof(Point *));
 
     if (points == NULL)
-        errx(EXIT_FAILURE, "Memory allocation failed for points");
+    {
+        fprintf(stderr, "extract_intersection_points: Memory allocation failed "
+                        "for points\n");
+        free(lines_1);
+        free(lines_2);
+        return NULL;
+    }
 
     for (size_t i = 0; i < lines_1_count; i++)
     {
         points[i] = malloc(lines_2_count * sizeof(Point));
         if (points[i] == NULL)
-            errx(EXIT_FAILURE, "Memory allocation failed for points row");
+        {
+            fprintf(stderr,
+                    "extract_intersection_points: row allocation failed\n");
+            free_points(points, i);
+            free(lines_1);
+            free(lines_2);
+            return NULL;
+        }
     }
 
     for (size_t i_1 = 0; i_1 < lines_1_count; i_1++)
@@ -400,8 +592,15 @@ Point **extract_intersection_points(Line **lines, size_t line_count,
         {
             Line *l2 = lines_2[i_2];
             if (l1->theta == l2->theta)
-                errx(EXIT_FAILURE, "Both group of lines have the same angle, "
-                                   "there is no intersection");
+            {
+                fprintf(stderr, "extract_intersection_points: Both group of "
+                                "lines have the same angle, "
+                                "there is no intersection\n");
+                free_points(points, lines_1_count);
+                free(lines_1);
+                free(lines_2);
+                return NULL;
+            }
 
             Point intersection;
             intersection.x =
