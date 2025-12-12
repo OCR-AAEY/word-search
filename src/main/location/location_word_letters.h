@@ -33,15 +33,17 @@ int extract_words(Matrix *src, BoundingBox **words_boxes, size_t nb_words);
 
 /// @brief Extracts letter regions from a source matrix and saves each as a PNG.
 /// @param src Source matrix (must not be NULL).
-/// @param letter_boxes 2D array of pointer to letter bounding boxes per word
-/// (must not be NULL).
+/// @param letter_boxes 2D array of pointers to letter bounding boxes per word
+///        (must not be NULL; each inner array must not be NULL).
 /// @param nb_words Number of words.
 /// @param words_nb_letters Array giving the number of letters for each word
-/// (must not be NULL).
+///        (must not be NULL).
+/// @return 0 on success, or a negative status code on error (invalid input,
+///         missing letter boxes, or failure to save a letter PNG).
 /// @note Saves each letter as
-/// WORD_BASE_DIR/<word_index>/LETTERS_DIR/<letter_index>.png.
-void extract_letters(Matrix *src, BoundingBox ***letter_boxes, size_t nb_words,
-                     size_t *words_nb_letters);
+///       WORD_BASE_DIR/<word_index>/LETTERS_DIR/<letter_index>.png.
+int extract_letters(Matrix *src, BoundingBox ***letter_boxes, size_t nb_words,
+                    size_t *words_nb_letters);
 
 /// @brief Saves the region defined by a bounding box from a source matrix as a
 /// PNG.
@@ -77,7 +79,7 @@ BoundingBox ***get_bounding_box_letters(Matrix *src, BoundingBox **words_boxes,
 /// @param size_out Output parameter storing the number of detected letters
 ///        (must not be NULL).
 /// @return An array of allocated BoundingBox pointers representing detected
-/// letters.
+/// letters or NULL on error.
 BoundingBox **find_letters_histogram_threshold(BoundingBox *area,
                                                size_t *histogram, size_t size,
                                                size_t threshold,
@@ -89,7 +91,7 @@ BoundingBox **find_letters_histogram_threshold(BoundingBox *area,
 /// @param size_out Output parameter storing the histogram width (must not be
 /// NULL).
 /// @return A newly allocated array where each element counts black pixels in a
-/// column.
+/// column or NULL in case of error.
 size_t *histogram_vertical(Matrix *src, BoundingBox *area, size_t *size_out);
 
 /// @brief Detects and returns bounding boxes of words within a specified area.

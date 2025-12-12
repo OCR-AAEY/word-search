@@ -199,13 +199,39 @@ int locate_and_extract_letters_png(const char *input_image)
         fprintf(stderr, "step export : failed to export full words as png\n");
     }
 
-    // TODO : continue remove errx
     size_t *word_nb_letters;
     BoundingBox ***letters_boxes = get_bounding_box_letters(
         opening, words_boxes, nb_words, 2, &word_nb_letters);
 
+    if (letters_boxes == NULL)
+    {
+        fprintf(stderr, "Failed to get letters bounding boxes\n");
+        mat_free(opening);
+        free(grid_box);
+        free_lines(lines, nb_lines);
+        free_bboxes(words_boxes, nb_words);
+        return EXIT_FAILURE;
+    }
+
     letters_boxes =
         detect_split_large_letters(letters_boxes, nb_words, word_nb_letters);
+
+    if (letters_boxes == NULL)
+    {
+        fprintf(stderr, "Failed to split merged letters bounding boxes\n");
+        mat_free(opening);
+        free(grid_box);
+        free_lines(lines, nb_lines);
+
+        for (size_t i = 0; i < nb_words; i++)
+        {
+            free_bboxes(letters_boxes[i], word_nb_letters[i]);
+        }
+        free(letters_boxes);
+        free(word_nb_letters);
+        free_bboxes(words_boxes, nb_words);
+        return EXIT_FAILURE;
+    }
 
     status_export = draw_2d_boundingboxes_on_img(
         letters_boxes, nb_words, word_nb_letters, POSTTREATMENT_FILENAME,
@@ -214,7 +240,8 @@ int locate_and_extract_letters_png(const char *input_image)
     {
         fprintf(stderr, "step export : failed to export letters boxes\n");
     }
-    extract_letters(opening, letters_boxes, nb_words, word_nb_letters);
+    int status_extract_letters =
+        extract_letters(opening, letters_boxes, nb_words, word_nb_letters);
 
     for (size_t i = 0; i < nb_words; i++)
     {
@@ -227,6 +254,12 @@ int locate_and_extract_letters_png(const char *input_image)
 
     mat_free(opening);
     free_lines(lines, nb_lines);
+
+    if (status_extract_letters)
+    {
+        fprintf(stderr, "Failed to export words letters as png\n");
+        return EXIT_FAILURE;
+    }
 
     return EXIT_SUCCESS;
 }

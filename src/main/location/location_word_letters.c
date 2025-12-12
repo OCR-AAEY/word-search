@@ -285,22 +285,39 @@ BoundingBox **get_bounding_box_words(Matrix *src, BoundingBox *area,
 size_t *histogram_vertical(Matrix *src, BoundingBox *area, size_t *size_out)
 {
     if (area == NULL)
-        errx(EXIT_FAILURE, "Sigma must be positive");
+    {
+        fprintf(stderr, "histogram_vertical: Sigma must be positive\n");
+        return NULL;
+    }
     if (src == NULL)
-        errx(EXIT_FAILURE, "The source matrix is NULL");
+    {
+        fprintf(stderr, "histogram_vertical: The source matrix is NULL\n");
+        return NULL;
+    }
     if (size_out == NULL)
-        errx(EXIT_FAILURE, "The size_out output parameter is NULL");
+    {
+        fprintf(stderr,
+                "histogram_vertical: The size_out output parameter is NULL\n");
+        return NULL;
+    }
 
     size_t height = mat_height(src);
     size_t width = mat_width(src);
     if (area->br.y >= (int)height || area->br.y >= (int)width)
-        errx(EXIT_FAILURE,
-             "The area concerned is outside of the bounds of the src matrix");
+    {
+        fprintf(stderr, "histogram_vertical: The area concerned is outside of "
+                        "the bounds of the src matrix\n");
+        return NULL;
+    }
 
     size_t horiz_size = area->br.y - area->tl.y + 1;
     *size_out = area->br.x - area->tl.x + 1;
     size_t *histogram = calloc(*size_out, sizeof(size_t));
-
+    if (histogram == NULL)
+    {
+        fprintf(stderr, "histogram_vertical: Histogram allocation failed\n");
+        return NULL;
+    }
     for (size_t h = 0; h < horiz_size; h++)
     {
         for (size_t w = 0; w < *size_out; w++)
@@ -321,12 +338,26 @@ BoundingBox **find_letters_histogram_threshold(BoundingBox *area,
                                                size_t *size_out)
 {
     if (histogram == NULL)
-        errx(EXIT_FAILURE, "The histogram is NULL");
+    {
+        fprintf(stderr,
+                "find_letters_histogram_threshold: The histogram is NULL\n");
+        return NULL;
+    }
     if (size_out == NULL)
-        errx(EXIT_FAILURE, "The size_out output parameter is NULL");
+    {
+        fprintf(stderr, "find_letters_histogram_threshold: The size_out output "
+                        "parameter is NULL\n");
+        return NULL;
+    }
     size_t max_boxes = 10;
     size_t boxes_index = 0;
     BoundingBox **letters_boxes = malloc(max_boxes * sizeof(BoundingBox *));
+    if (letters_boxes == NULL)
+    {
+        fprintf(stderr, "find_letters_histogram_threshold: Failed letters "
+                        "boxes allocation\n");
+        return NULL;
+    }
     BoundingBox *current_box = NULL;
 
     for (size_t i = 0; i < size; i++)
@@ -349,12 +380,23 @@ BoundingBox **find_letters_histogram_threshold(BoundingBox *area,
                 if (tmp == NULL)
                 {
                     free(letters_boxes);
-                    errx(EXIT_FAILURE,
-                         "Failed to reallocate the words bounding boxes array");
+                    fprintf(stderr,
+                            "find_letters_histogram_threshold: Failed to "
+                            "reallocate the words bounding boxes array");
+                    return NULL;
                 }
                 letters_boxes = tmp;
             }
             current_box = malloc(sizeof(BoundingBox));
+            if (current_box == NULL)
+            {
+                free(letters_boxes);
+                fprintf(
+                    stderr,
+                    "find_letters_histogram_threshold: Failed single letter "
+                    "box allocation\n");
+                return NULL;
+            }
             current_box->tl.y = area->tl.y;
             current_box->tl.x = area->tl.x + i;
             current_box->br.y = area->br.y;
@@ -426,11 +468,11 @@ BoundingBox ***get_bounding_box_letters(Matrix *src, BoundingBox **words_boxes,
         size_t histo_size;
         size_t *histogram_vert =
             histogram_vertical(src, words_boxes[i], &histo_size);
-        if (!histogram_vert)
+        if (histogram_vert == NULL)
         {
             fprintf(stderr,
-                    "get_bounding_box_letters: Failed to allocate "
-                    "histogram_vert at index %zu\n",
+                    "get_bounding_box_letters: Failed to get vertical "
+                    "histogram at index %zu\n",
                     i);
 
             for (size_t j = 0; j < i; j++)
@@ -448,7 +490,7 @@ BoundingBox ***get_bounding_box_letters(Matrix *src, BoundingBox **words_boxes,
 
         free(histogram_vert);
 
-        if (!letters_boxes[i])
+        if (letters_boxes[i] == NULL)
         {
             fprintf(stderr,
                     "get_bounding_box_letters: Failed to find letters for word "
@@ -475,21 +517,33 @@ int extract_boundingbox_to_png(Matrix *src, BoundingBox *box,
                              box->br.y);
 }
 
-void extract_letters(Matrix *src, BoundingBox ***letter_boxes, size_t nb_words,
-                     size_t *words_nb_letters)
+int extract_letters(Matrix *src, BoundingBox ***letter_boxes, size_t nb_words,
+                    size_t *words_nb_letters)
 {
     if (words_nb_letters == NULL)
-        errx(EXIT_FAILURE, "The words_nb_letters is NULL");
+    {
+        fprintf(stderr, "extract_letters: The words_nb_letters is NULL\n");
+        return -1;
+    }
     if (src == NULL)
-        errx(EXIT_FAILURE, "The src matrix is NULL");
+    {
+        fprintf(stderr, "extract_letters: The src matrix is NULL\n");
+        return -2;
+    }
     if (letter_boxes == NULL)
-        errx(EXIT_FAILURE, "The letter_boxes is NULL");
+    {
+        fprintf(stderr, "extract_letters: The letter_boxes is NULL\n");
+        return -3;
+    }
 
     for (size_t word_i = 0; word_i < nb_words; word_i++)
     {
         if (letter_boxes[word_i] == NULL)
-            errx(EXIT_FAILURE,
-                 "The current word array of letter boxes is NULL");
+        {
+            fprintf(stderr, "extract_letters: The current word array of letter "
+                            "boxes is NULL\n");
+            return -4;
+        }
         for (size_t letter_index = 0; letter_index < words_nb_letters[word_i];
              letter_index++)
         {
@@ -500,10 +554,16 @@ void extract_letters(Matrix *src, BoundingBox ***letter_boxes, size_t nb_words,
             sprintf(filename, "%s%zu/%s/%zu.png", WORD_BASE_DIR, word_i,
                     LETTERS_DIR, letter_index);
 
-            extract_boundingbox_to_png(src, letter_boxes[word_i][letter_index],
-                                       filename);
+            int status = extract_boundingbox_to_png(
+                src, letter_boxes[word_i][letter_index], filename);
+            if (status != 0)
+            {
+                fprintf(stderr, "extract_words: Failed to save word as png\n");
+                return -5;
+            }
         }
     }
+    return EXIT_SUCCESS;
 }
 
 int extract_words(Matrix *src, BoundingBox **words_boxes, size_t nb_words)
