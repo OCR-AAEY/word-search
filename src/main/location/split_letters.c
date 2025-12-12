@@ -1,5 +1,5 @@
 #include "location/split_letters.h"
-#include <err.h>
+#include <stdio.h>
 
 unsigned int get_average_letter_width(BoundingBox ***letters_boxes,
                                       size_t nb_words, size_t *word_nb_letters)
@@ -21,7 +21,11 @@ unsigned int get_average_letter_width(BoundingBox ***letters_boxes,
 BoundingBox **split_large_letter(BoundingBox *letter_box, size_t nb_parts)
 {
     if (nb_parts <= 1)
-        errx(EXIT_FAILURE, "Unable to split the letter in 1 or less parts");
+    {
+        fprintf(stderr, "split_large_letter: Unable to split the letter in 1 "
+                        "or less parts\n");
+        return NULL;
+    }
     unsigned int letter_width = letter_box->br.x - letter_box->tl.x;
     int split_letter_width = (int)letter_width / (int)nb_parts;
 
@@ -31,7 +35,12 @@ BoundingBox **split_large_letter(BoundingBox *letter_box, size_t nb_parts)
     {
         BoundingBox *new_letter_box = malloc(sizeof(BoundingBox));
         if (new_letter_box == NULL)
-            errx(EXIT_FAILURE, "Failed to allocate new_letter_box");
+        {
+            fprintf(stderr,
+                    "split_large_letter: Failed to allocate new_letter_box\n");
+            free(new_letter_boxes);
+            return NULL;
+        }
 
         new_letter_box->tl.y = letter_box->tl.y;
         new_letter_box->br.y = letter_box->br.y;
