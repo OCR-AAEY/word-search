@@ -2,12 +2,14 @@
 #include "rotation/hough_lines.h"
 #include "utils/math/trigo.h"
 #include <err.h>
+#include <stdio.h>
 
 Matrix *rotate_matrix(const Matrix *src, float angle)
 {
     if (src == NULL)
     {
-        errx(EXIT_FAILURE, "rotate_matrix: src matrix is NULL");
+        fprintf(stderr, "rotate_matrix: src matrix is NULL\n");
+        return NULL;
     }
 
     size_t w = mat_width(src);
@@ -67,7 +69,8 @@ ImageData *rotate_image(ImageData *img, float angle)
     Pixel *np = calloc(nw * nh, sizeof(Pixel));
     if (np == NULL)
     {
-        errx(EXIT_FAILURE, "rotate_image malloc fail");
+        fprintf(stderr, "rotate_image malloc fail\n");
+        return NULL;
     }
 
     for (int i = 0; i < nw * nh; i++)
@@ -103,7 +106,8 @@ ImageData *rotate_image(ImageData *img, float angle)
     ImageData *out = malloc(sizeof(ImageData));
     if (!out)
     {
-        errx(EXIT_FAILURE, "rotate_image malloc fail out");
+        fprintf(stderr, "rotate_image malloc fail out\n");
+        return NULL;
     }
 
     out->width = nw;
@@ -115,7 +119,14 @@ ImageData *rotate_image(ImageData *img, float angle)
 
 Matrix *auto_deskew_matrix(Matrix *img)
 {
-    float theta_angle = hough_transform_find_peak_angle(img, 1.0f);
+    float theta_angle;
+    int status = hough_transform_find_peak_angle(img, 1.0f, &theta_angle);
+    if (status != 0)
+    {
+        fprintf(stderr,
+                "Failed to get rotation angle from hough line transform\n");
+        return NULL;
+    }
 
     float rotation_angle = fmodf(theta_angle, 90.0f);
     if (rotation_angle > 45)
@@ -125,5 +136,10 @@ Matrix *auto_deskew_matrix(Matrix *img)
     // printf("Rotation applied :%f\n", rotation_angle);
 
     Matrix *rotated = rotate_matrix(img, rotation_angle);
+    if (rotated == NULL)
+    {
+        fprintf(stderr, "auto_deskew_matrix: rotate_matrix failed\n");
+        return NULL;
+    }
     return rotated;
 }

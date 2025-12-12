@@ -3,12 +3,16 @@
 #include <err.h>
 #include <math.h>
 #include <stddef.h>
+#include <stdio.h>
 
 Matrix *create_hough_accumulator_rotation(size_t height, size_t width,
                                           float theta_precision)
 {
     if (theta_precision <= 0.0f)
-        errx(EXIT_FAILURE, "Theta precision must be strictly positive");
+    {
+        fprintf(stderr, "Theta precision must be strictly positive\n");
+        return NULL;
+    }
 
     // Maximum possible distance from the origin of the image (image diagonal)
     float diag = sqrt((float)height * height + (float)width * width);
@@ -27,11 +31,20 @@ Matrix *create_hough_accumulator_rotation(size_t height, size_t width,
     return accumulator;
 }
 
-float populate_acc_find_peak_theta(Matrix *src, Matrix *accumulator,
-                                   float theta_precision)
+int populate_acc_find_peak_theta(Matrix *src, Matrix *accumulator,
+                                 float theta_precision, float *out_theta)
 {
+    if (src == NULL)
+        return -1;
+
     if (accumulator == NULL)
-        errx(EXIT_FAILURE, "The accumulator matrix is NULL");
+        return -2;
+
+    if (out_theta == NULL)
+        return -3;
+
+    if (theta_precision <= 0.0f)
+        return -4;
 
     size_t height = mat_height(src);
     size_t width = mat_width(src);
@@ -42,6 +55,13 @@ float populate_acc_find_peak_theta(Matrix *src, Matrix *accumulator,
     // pre compute cos and sin values, like a cache
     float *cosd_table = malloc(theta_index_max * sizeof(float));
     float *sind_table = malloc(theta_index_max * sizeof(float));
+
+    if (!cosd_table || !sind_table)
+    {
+        free(cosd_table);
+        free(sind_table);
+        return -5;
+    }
 
     for (size_t theta_index = 0; theta_index < theta_index_max; theta_index++)
     {
@@ -94,21 +114,36 @@ float populate_acc_find_peak_theta(Matrix *src, Matrix *accumulator,
 
     free(cosd_table);
     free(sind_table);
-    return max_voted_theta;
+
+    *out_theta = max_voted_theta;
+    return 0;
 }
 
-float hough_transform_find_peak_angle(Matrix *src, float theta_precision)
+int hough_transform_find_peak_angle(Matrix *src, float theta_precision,
+                                    float *out_angle)
 {
     if (src == NULL)
-        errx(EXIT_FAILURE, "The source matrix is NULL");
+        return -1;
+
+    if (out_angle == NULL)
+        return -2;
 
     Matrix *accumulator = create_hough_accumulator_rotation(
         mat_height(src), mat_width(src), theta_precision);
 
-    float max_theta =
-        populate_acc_find_peak_theta(src, accumulator, theta_precision);
+    if (accumulator == NULL)
+        return -3;
+
+    float max_theta;
+
+    int status = populate_acc_find_peak_theta(src, accumulator, theta_precision,
+                                              &max_theta);
+    if (status != 0)
+        return -4;
 
     mat_free(accumulator);
 
-    return max_theta;
+    *out_angle = max_theta;
+
+    return 0;
 }
