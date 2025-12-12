@@ -3,19 +3,19 @@
 #include <gtk/gtk.h>
 
 /* ----------GLOBALS------------ */
-const char *step_image_paths[10] = {"assets/steps/1.png",
-                                    "assets/" ROTATED_FILENAME,
-                                    "assets/" POSTTREATMENT_FILENAME,
-                                    "assets/" HOUGHLINES_VISUALIZATION_FILENAME,
-                                    "assets/" WORDS_BOUNDING_BOXES_FILENAME,
-                                    "assets/" LETTERS_BOUNDING_BOXES_FILENAME,
+const char *step_image_paths[10] = {"assets/logo/image.png",
+                                    ROTATED_FILENAME,
+                                    POSTTREATMENT_FILENAME,
+                                    HOUGHLINES_VISUALIZATION_FILENAME,
+                                    WORDS_BOUNDING_BOXES_FILENAME,
+                                    LETTERS_BOUNDING_BOXES_FILENAME,
                                     "assets/steps/7.png",
                                     "assets/steps/8.png",
                                     "assets/steps/9.png",
                                     "assets/solved.png"};
 GtkImage *step_images[10];
 GtkButton *step_load[10], *step_next_btn[10], *step_back_btn[10];
-
+GtkButton *solve_load_btn[2], *solve_next_btn[2], *solve_back_btn[2];
 /* ---------- STRUCTS ---------- */
 typedef struct
 {
@@ -71,6 +71,7 @@ static void load_action(GtkButton *button, gpointer user_data)
         if (data->next_btn)
             gtk_widget_set_sensitive(GTK_WIDGET(data->next_btn), TRUE);*/
         gtk_image_set_from_file(data->current_image, filename);
+        gtk_widget_set_sensitive(GTK_WIDGET(solve_next_btn[0]),TRUE);
         gtk_widget_set_sensitive(GTK_WIDGET(step_next_btn[0]), TRUE);
         /* Reload all step images from disk */
         for (int i = 1; i < 10; i++)
@@ -400,7 +401,7 @@ int main(int argc, char *argv[])
 
     /* ---------- SOLVE ---------- */
     GtkImage *solve_images[2];
-    GtkButton *solve_load_btn[2], *solve_next_btn[2], *solve_back_btn[2];
+
     create_solve_screen(stack, "solve_load", "solve_save", "menu",
                         "assets/solved.png", &solve_images[0],
                         &solve_load_btn[0], &solve_next_btn[0],
