@@ -113,13 +113,19 @@ Matrix *load_and_preprocess_image(const char *input_image, Matrix **rotated_out)
 static Point **detect_grid_points(Matrix *rotated, size_t *width_out,
                                   size_t *height_out)
 {
+    int status_export;
+
     size_t nb_lines = 0;
     Line **lines = hough_transform_lines(rotated, 90, 5, 1, &nb_lines);
     if (!lines)
         return NULL;
 
-    draw_lines_on_img(lines, nb_lines, ROTATED_FILENAME,
-                      HOUGHLINES_VISUALIZATION_FILENAME);
+    status_export = draw_lines_on_img(lines, nb_lines, ROTATED_FILENAME,
+                                      HOUGHLINES_VISUALIZATION_FILENAME);
+    if (status_export != 0)
+    {
+        fprintf(stderr, "step export : failed to export hough lines\n");
+    }
 
     Point **points =
         extract_intersection_points(lines, nb_lines, height_out, width_out);
@@ -130,9 +136,13 @@ static Point **detect_grid_points(Matrix *rotated, size_t *width_out,
         return NULL;
     }
 
-    draw_points_on_img(points, *height_out, *width_out,
-                       HOUGHLINES_VISUALIZATION_FILENAME,
-                       INTERSECTION_POINTS_FILENAME);
+    status_export = draw_points_on_img(points, *height_out, *width_out,
+                                       HOUGHLINES_VISUALIZATION_FILENAME,
+                                       INTERSECTION_POINTS_FILENAME);
+    if (status_export != 0)
+    {
+        fprintf(stderr, "step export : failed to export intersection points\n");
+    }
 
     free_lines(lines, nb_lines);
     return points;
@@ -270,6 +280,16 @@ int locate_and_extract_letters_png(const char *input_image)
     if (points == NULL)
     {
         mat_free(processed_img);
+        return EXIT_FAILURE;
+    }
+
+    int grid_cells_status =
+        extract_grid_cells(processed_img, points, h_points, w_points);
+    if (grid_cells_status != 0)
+    {
+        fprintf(stderr, "Failed to export grid cells\n");
+        mat_free(processed_img);
+        free_points(points, h_points);
         return EXIT_FAILURE;
     }
 
