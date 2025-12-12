@@ -60,6 +60,12 @@ static void load_action(GtkButton *button, gpointer user_data)
     {
         char *filename =
             gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+	
+	int e = locate_and_extract_letters_png((const char*)filename);
+	if(e)
+	{
+		g_print("invalid file");
+	}
         /*gtk_image_set_from_file(data->current_image, filename);
         if (data->next_btn)
             gtk_widget_set_sensitive(GTK_WIDGET(data->next_btn), TRUE);*/
