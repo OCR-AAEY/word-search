@@ -61,7 +61,7 @@ static void load_action(GtkButton *button, gpointer user_data)
         int e = locate_and_extract_letters_png((const char *)filename);
         if (e)
         {
-            g_print("invalid file");
+            g_print("invalid file\n");
         }
         /*gtk_image_set_from_file(data->current_image, filename);
         if (data->next_btn)
@@ -79,10 +79,8 @@ static void load_action(GtkButton *button, gpointer user_data)
         }
 
         g_free(filename);
-        
     }
     gtk_widget_destroy(dialog);
-    
 }
 
 static void next_action(GtkButton *button, gpointer user_data)
@@ -122,7 +120,6 @@ static void save_image_action(GtkButton *button, gpointer user_data)
         g_free(filename);
     }
     gtk_widget_destroy(dialog);
-    
 }
 
 /* ---------- MENU SCREEN ---------- */
@@ -177,7 +174,7 @@ GtkWidget *create_menu_screen(GtkStack *stack, GtkWidget **steps_btn,
                      (gpointer) "step1_loading");
     g_signal_connect(exit_btn, "clicked", G_CALLBACK(exit_app),
                      gtk_widget_get_toplevel(GTK_WIDGET(overlay)));
-    
+
     return overlay;
 }
 
@@ -343,11 +340,11 @@ int main(int argc, char *argv[])
                                     "step9_solving",
                                     "step10_final"};
     const char *step_next[10] = {
-        "step2_rotation",       "step3_preatreatement",
-        "step4_grid_detection", "step5_word_detection",
-        "step6_letter_detection",     "step7_character_recognition",
-        "step8_rebuilding",     "step9_solving",
-        "step10_final",         ""};
+        "step2_rotation",         "step3_preatreatement",
+        "step4_grid_detection",   "step5_word_detection",
+        "step6_letter_detection", "step7_character_recognition",
+        "step8_rebuilding",       "step9_solving",
+        "step10_final",           ""};
     const char *step_back[10] = {"menu",
                                  "step1_loading",
                                  "step2_rotation",
