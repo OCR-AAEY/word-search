@@ -106,6 +106,7 @@ Grid *grid_load_from_file(char *file_name)
             }
             else if (row_length != width)
             {
+                free(array);
                 errx(EXIT_FAILURE,
                      "Line %i is not of same length as the first line. "
                      "Expected %i and got %i",
@@ -137,6 +138,7 @@ Grid *grid_load_from_file(char *file_name)
         }
         else
         {
+            free(array);
             errx(EXIT_FAILURE, "Invalid character found at line %i: '%c'.",
                  height + 1, c);
         }
@@ -144,6 +146,7 @@ Grid *grid_load_from_file(char *file_name)
 
     if (width < 5)
     {
+        free(array);
         errx(EXIT_FAILURE,
              "Given grid is too small: its width should be greater or equal to "
              "5 but got: %i.",
@@ -152,8 +155,9 @@ Grid *grid_load_from_file(char *file_name)
 
     if (height < 5)
     {
+        free(array);
         errx(
-            1,
+            EXIT_FAILURE,
             "Given grid is too small: its height should be greater or equal to "
             "5 but got: %i.",
             height);
