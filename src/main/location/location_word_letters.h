@@ -119,7 +119,7 @@ BoundingBox **get_bounding_box_words(Matrix *src, BoundingBox *area,
 /// @param size_out Output parameter storing the number of detected words
 ///        (must not be NULL).
 /// @return An array of allocated BoundingBox pointers representing detected
-/// words.
+/// words or NULL on error.
 BoundingBox **find_words_histogram_threshold(BoundingBox *area,
                                              size_t *histogram, size_t size,
                                              size_t threshold,
@@ -150,7 +150,7 @@ int pad_bounding_box(BoundingBox *box, size_t top, size_t bottom, size_t right,
 /// @param size_out Output parameter storing the histogram height (must not be
 /// NULL).
 /// @return A newly allocated array where each element counts black pixels in a
-/// row.
+/// row or NULL on error.
 size_t *histogram_horizontal(Matrix *src, BoundingBox *area, size_t *size_out);
 
 #endif

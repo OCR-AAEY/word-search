@@ -1,11 +1,12 @@
+# Raw datasets
+/assets/ocr/other
+
 # Tests
 venv/
 extracted/
 
 # Build
 /build
-xnor.net
-/solver
 
 # Executables
 /image_loader
@@ -15,6 +16,7 @@ xnor.net
 /rotation
 /app
 /run_tests
+
 # IDEs
 .idea/
 .vscode/

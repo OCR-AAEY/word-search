@@ -64,8 +64,8 @@ int main(int argc, char **argv)
         }
         else
         {
-            // sprintf(image_path, LEVEL_2_IMG_2);
-            sprintf(image_path, "aaaa");
+            sprintf(image_path, LEVEL_2_IMG_2);
+            // sprintf(image_path, "aaaa");
         }
     }
 
