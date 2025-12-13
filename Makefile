@@ -36,6 +36,12 @@
 # Whether gcc commands should be displayed during compilation or not.
 VERBOSE ?= 0
 
+# The number of iteration for the random tests.
+TEST_ITERATION ?= 100
+ifeq ($(TEST_ITERATION),0)
+$(error Macro TEST_ITERATION has been set 0)
+endif
+
 # Source directory.
 SRC_DIR   = src
 # Main directory.
@@ -59,11 +65,22 @@ CFLAGS         = -Wall -Wextra -fsanitize=address,undefined -I$(MAIN_DIR)
 # Additional C flags.
 XCFLAGS        =
 # C flags for unit testing.
-TEST_FLAGS     = -DUNIT_TEST -I$(TEST_DIR)
+TEST_FLAGS     = -DUNIT_TEST -D TEST_ITERATION=$(TEST_ITERATION) -I$(TEST_DIR)
 # C flags for unit test libraries import.
 TEST_LIB_FLAGS = $(shell pkg-config --cflags --libs criterion)
 # C flags for libraries import.
 LIB_FLAGS      = -lm $(shell pkg-config --cflags --libs gtk+-3.0)
+
+# SIMD (AVX) flags.
+AVX ?= 0
+ifeq ($(AVX),2)
+CFLAGS := $(CFLAGS) -mavx2 -mfma -DUSE_AVX -DUSE_AVX_2
+else ifeq ($(AVX),512)
+$(error AVX 512 is not supported yet)
+CFLAGS := $(CFLAGS) -mavx512 -mfma -DUSE_AVX -DUSE_AVX_512
+else ifneq ($(AVX), 0)
+$(error AVX macro has been set to an unrecognized value. Expected '2' or '512' and got $(AVX))
+endif
 
 # Source files located in the main directory.
 SRC_MAIN = $(shell find $(MAIN_DIR) -name '*.c' -and -not -name '*_main.c')
@@ -78,36 +95,67 @@ OBJ_MAIN_FOR_TEST = $(SRC_MAIN:$(MAIN_DIR)/%.c=$(BUILD_DIR)/main_for_test/%.o)
 OBJ_TEST_FOR_TEST = $(SRC_TEST:$(TEST_DIR)/%.c=$(BUILD_DIR)/test/%.o)
 
 # Solver executable.
-BIN_SOLVER = solver
+BIN_SOLVER       = solver
+# A executable file that displays a matrix from a matrix file.
+BIN_MAT_DISPLAY  = mat_display
 # OCR neural network training executable.
-BIN_OCR    = ocr
+BIN_OCR          = ocr_train
+# OCR dataset generation script.
+BIN_OCR_DATASET  = ocr_dataset
+# Program used to apply OCR on a single image.
+BIN_DECODE_IMAGE = decode_image
 # Rotate test executable.
 BIN_AUTO_ROTATE = rotate
 # Locates the elements in the image
 BIN_LOCATION= location
 # Main application executable.
-BIN_APP    = app
+BIN_APP          = app
 # Unit tests executable.
-BIN_TEST   = run_tests
+BIN_TEST         = run_tests
+
+# Use to add a dependency to a main function in a make rule. The parameter is the source file containing the main function. You must not provide the extension '.c'.
+define main
+$(BUILD_MAIN_DIR)/$(1).o
+endef
+
+# Use to add a dependency to a directory in a make rule. The parameter is a space separated list of directories to be included. Their path must be given from the 'src/main' directory.
+define import
+$(foreach dir,$(1),$(filter $(BUILD_MAIN_DIR)/$(dir)/%.o,$(OBJ_MAIN)))
+endef
 
 ##############################
 #          TARGETS           #
 ##############################
 
 # Solver target.
-$(BIN_SOLVER): $(filter $(BUILD_MAIN_DIR)/solver/%.o,$(OBJ_MAIN)) $(BUILD_MAIN_DIR)/solver/solver_main.o
+$(BIN_SOLVER): $(call import,solver) $(call main,solver/solver_main)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-	@echo "$(BIN_SOLVER): \033[32mCompilation succeeded\033[0m"
+	@echo "$@: \033[32mCompilation succeeded\033[0m"
+
+# Matrix display target.
+$(BIN_MAT_DISPLAY): $(call import,matrix utils/random) $(call main,matrix/mat_display_main)
+	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
 # OCR neural network training target.
-$(BIN_OCR): $(filter $(BUILD_MAIN_DIR)/neural_network/%.o,$(OBJ_MAIN)) $(BUILD_MAIN_DIR)/neural_network/ocr_main.o
+$(BIN_OCR): $(call import,ocr matrix utils) $(call main,ocr/ocr_train_main)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-	@echo "$(BIN_OCR): \033[32mCompilation succeeded\033[0m"
+	@echo "$@: \033[32mCompilation succeeded\033[0m"
+
+# OCR dataset generation target.
+$(BIN_OCR_DATASET): $(call import,matrix image_loader utils pretreatment ocr) $(call main,ocr/ocr_dataset_main)
+	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+	@echo "$@: \033[32mCompilation succeeded\033[0m"
+
+# Decode image target.
+$(BIN_DECODE_IMAGE): $(call import,matrix image_loader utils pretreatment ocr) $(call main,ocr/decode_letter_main)
+	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
 # Auto rotation target.
-# $(BIN_AUTO_ROTATE): $(filter $(BUILD_MAIN_DIR)/rotation/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/pretreatment/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/image_loader/%.o,$(OBJ_MAIN))  $(filter $(BUILD_MAIN_DIR)/utils/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/matrix/%.o,$(OBJ_MAIN)) $(BUILD_MAIN_DIR)/rotation/rotate_main.o
-# 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-# 	@echo "$(BIN_AUTO_ROTATE): \033[32mCompilation succeeded\033[0m"
+$(BIN_AUTO_ROTATE): $(call import,rotation pretreatment image_loader utils matrix) $(call main,rotation/rotate_main)
+	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
 # Location target.
 $(BIN_LOCATION): $(filter $(BUILD_MAIN_DIR)/location/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/rotation/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/pretreatment/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/image_loader/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/extract_char/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/utils/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/matrix/%.o,$(OBJ_MAIN)) $(BUILD_MAIN_DIR)/location/location_main.o
@@ -115,14 +163,14 @@ $(BIN_LOCATION): $(filter $(BUILD_MAIN_DIR)/location/%.o,$(OBJ_MAIN)) $(filter $
 	@echo "$(BIN_LOCATION): \033[32mCompilation succeeded\033[0m"
 
 # Main app target.
-$(BIN_APP): $(OBJ_MAIN) $(BUILD_MAIN_DIR)/app/app_main.o
+$(BIN_APP): $(call import,extract_char location ocr rotation utils image_loader matrix pretreatment solver) $(call main,...)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-	@echo "$(BIN_APP): \033[32mCompilation succeeded\033[0m"
+	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
 # Unit tests target.
 $(BIN_TEST): $(OBJ_MAIN_FOR_TEST) $(OBJ_TEST_FOR_TEST)
 	$(CC) $(CFLAGS) $(XCFLAGS) $(TEST_FLAGS) $^ -o $@ $(LIB_FLAGS) $(TEST_LIB_FLAGS)
-	@echo "$(BIN_TEST): \033[32mCompilation succeeded\033[0m"
+	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
 ##############################
 #        PATTERN RULES       #
@@ -164,8 +212,17 @@ clean:
 	@rm -rf $(BUILD_DIR)
 	@echo "Cleaning executables..."
 	@rm -rf $(BIN_SOLVER)
+	@rm -rf $(BIN_MAT_DISPLAY)
 	@rm -rf $(BIN_OCR)
+	@rm -rf $(BIN_OCR_DATASET)
+	@rm -rf $(BIN_DECODE_IMAGE)
+	@rm -rf $(BIN_AUTO_ROTATE)
+	@rm -rf $(BIN_APP)
 	@rm -rf $(BIN_TEST)
+	@echo "Cleaning test files..."
+	@rm -rf save_and_load_random_test.matrix
+	@rm -rf save_and_load_test.matrix
+	@rm -rf save_and_load_random_test.dataset
 	@echo "Cleaning misc files..."
 	@rm -rf extracted/
 	@echo "\033[32mClean succeeded\033[0m"
