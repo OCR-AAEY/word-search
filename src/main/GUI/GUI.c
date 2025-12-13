@@ -57,7 +57,7 @@ static void load_action(GtkButton *button, gpointer user_data)
     {
         char *filename =
             gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-
+        // solver launch
         int e = locate_and_extract_letters_png((const char *)filename);
         if (e)
         {
@@ -79,9 +79,10 @@ static void load_action(GtkButton *button, gpointer user_data)
         }
 
         g_free(filename);
+        
     }
     gtk_widget_destroy(dialog);
-    // solver launch
+    
 }
 
 static void next_action(GtkButton *button, gpointer user_data)
@@ -121,6 +122,7 @@ static void save_image_action(GtkButton *button, gpointer user_data)
         g_free(filename);
     }
     gtk_widget_destroy(dialog);
+    
 }
 
 /* ---------- MENU SCREEN ---------- */
@@ -175,7 +177,7 @@ GtkWidget *create_menu_screen(GtkStack *stack, GtkWidget **steps_btn,
                      (gpointer) "step1_loading");
     g_signal_connect(exit_btn, "clicked", G_CALLBACK(exit_app),
                      gtk_widget_get_toplevel(GTK_WIDGET(overlay)));
-
+    
     return overlay;
 }
 
@@ -335,7 +337,7 @@ int main(int argc, char *argv[])
                                     "step3_preatreatement",
                                     "step4_grid_detection",
                                     "step5_word_detection",
-                                    "step6_separation",
+                                    "step6_letter_detection",
                                     "step7_character_recognition",
                                     "step8_rebuilding",
                                     "step9_solving",
@@ -343,7 +345,7 @@ int main(int argc, char *argv[])
     const char *step_next[10] = {
         "step2_rotation",       "step3_preatreatement",
         "step4_grid_detection", "step5_word_detection",
-        "step6_separation",     "step7_character_recognition",
+        "step6_letter_detection",     "step7_character_recognition",
         "step8_rebuilding",     "step9_solving",
         "step10_final",         ""};
     const char *step_back[10] = {"menu",
@@ -352,7 +354,7 @@ int main(int argc, char *argv[])
                                  "step3_preatreatement",
                                  "step4_grid_detection",
                                  "step5_word_detection",
-                                 "step6_separation",
+                                 "step6_letter_detection",
                                  "step7_character_recognition",
                                  "step8_rebuilding",
                                  "step9_solving"};
