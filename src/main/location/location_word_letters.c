@@ -343,11 +343,25 @@ size_t *histogram_vertical(Matrix *src, BoundingBox *area, size_t *size_out)
 
     size_t height = mat_height(src);
     size_t width = mat_width(src);
-    if (area->br.y >= (int)height || area->br.x >= (int)width ||
-        area->tl.y >= (int)height || area->tl.x >= (int)width)
+
+    // Reject negative coordinates
+    if (area->tl.x < 0 || area->tl.y < 0 || area->br.x < 0 || area->br.y < 0)
     {
-        fprintf(stderr, "histogram_vertical: The area concerned is outside of "
-                        "the bounds of the src matrix\n");
+        fprintf(stderr, "histogram_vertical: negative coordinates\n");
+        return NULL;
+    }
+
+    // Reject inverted boxes
+    if (area->tl.x > area->br.x || area->tl.y > area->br.y)
+    {
+        fprintf(stderr, "histogram_vertical: invalid bounding box order\n");
+        return NULL;
+    }
+
+    // Reject out-of-bounds
+    if ((size_t)area->br.x >= width || (size_t)area->br.y >= height)
+    {
+        fprintf(stderr, "histogram_vertical: area outside matrix bounds\n");
         return NULL;
     }
 
