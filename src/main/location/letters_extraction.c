@@ -173,7 +173,6 @@ static int extract_words_and_letters(Matrix *processed_img,
     if (words_boxes == NULL)
     {
         fprintf(stderr, "Failed to get word bounding boxes\n");
-        mat_free(processed_img);
         return -2;
     }
 
@@ -200,7 +199,6 @@ static int extract_words_and_letters(Matrix *processed_img,
     if (letters_boxes == NULL)
     {
         fprintf(stderr, "Failed to get letters bounding boxes\n");
-        mat_free(processed_img);
         free_bboxes(words_boxes, nb_words);
         return -3;
     }
@@ -213,7 +211,6 @@ static int extract_words_and_letters(Matrix *processed_img,
     if (letters_boxes == NULL)
     {
         fprintf(stderr, "Failed to split merged letters bounding boxes\n");
-        mat_free(processed_img);
 
         for (size_t i = 0; i < nb_words; i++)
         {
