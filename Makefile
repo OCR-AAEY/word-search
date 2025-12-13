@@ -217,6 +217,7 @@ clean:
 	@rm -rf $(BIN_OCR_DATASET)
 	@rm -rf $(BIN_DECODE_IMAGE)
 	@rm -rf $(BIN_AUTO_ROTATE)
+	@rm -rf $(BIN_LOCATION)
 	@rm -rf $(BIN_APP)
 	@rm -rf $(BIN_TEST)
 	@echo "Cleaning test files..."
