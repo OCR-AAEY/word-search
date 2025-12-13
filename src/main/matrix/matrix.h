@@ -16,15 +16,7 @@ size_t mat_height(const Matrix *m);
 /// @return The number of columns in the matrix.
 size_t mat_width(const Matrix *m);
 
-/// @brief Creates a  matrix initialized with teh given value on the heap.
-/// @param[in] height Number of rows in the new matrix (must be non-zero).
-/// @param[in] width Number of columns in the new matrix (must be non-zero).
-/// @param[in] value The value to which the coefficients of the matrix will be
-/// initialized. If value is 0, `mat_create_zero` should be used instead.
-/// @return A pointer to a newly allocated matrix.
-/// @throw Terminates the program if height or width is zero, or if memory
-/// allocation fails.
-Matrix *mat_create(size_t height, size_t width, float value);
+Matrix *mat_create(size_t height, size_t width);
 
 /// @brief Creates an empty matrix (initialized with zeros) on the heap.
 /// @param[in] height Number of rows in the new matrix (must be non-zero).
@@ -33,6 +25,16 @@ Matrix *mat_create(size_t height, size_t width, float value);
 /// @throw Terminates the program if height or width is zero, or if memory
 /// allocation fails.
 Matrix *mat_create_zero(size_t height, size_t width);
+
+/// @brief Creates a  matrix initialized with teh given value on the heap.
+/// @param[in] height Number of rows in the new matrix (must be non-zero).
+/// @param[in] width Number of columns in the new matrix (must be non-zero).
+/// @param[in] value The value to which the coefficients of the matrix will be
+/// initialized. If value is 0, `mat_create_zero` should be used instead.
+/// @return A pointer to a newly allocated matrix.
+/// @throw Terminates the program if height or width is zero, or if memory
+/// allocation fails.
+Matrix *mat_create_filled(size_t height, size_t width, float value);
 
 /// @brief Creates a new matrix using an existing array as its content.
 /// @param[in] height Number of rows in the matrix (must be non-zero).
@@ -58,7 +60,7 @@ Matrix *mat_create_from_arr(size_t height, size_t width, const float *content);
 /// is zero or memory allocation fails for the matrix or its contents.
 /// @note The caller is responsible for freeing the returned matrix using
 /// `mat_free()` when it is no longer needed.
-Matrix *mat_create_uniform_random(size_t height, size_t width, float min,
+Matrix *mat_create_random_uniform(size_t height, size_t width, float min,
                                   float max);
 
 /// @brief Creates a new matrix with random Gaussian-distributed elements.
@@ -66,7 +68,7 @@ Matrix *mat_create_uniform_random(size_t height, size_t width, float min,
 /// @param[in] width Number of columns in the matrix (must be non-zero).
 /// @return A pointer to a new matrix initialized with Gaussian random values.
 /// @throw Terminates the program if allocation fails or dimensions are invalid.
-Matrix *mat_create_gaussian_random(size_t height, size_t width);
+Matrix *mat_create_random_gaussian(size_t height, size_t width);
 
 /// @brief Creates a new matrix filled with normally distributed random values.
 /// This function allocates and initializes a new matrix of size `height ×
@@ -84,7 +86,7 @@ Matrix *mat_create_gaussian_random(size_t height, size_t width);
 /// == 0` or memory allocation for the matrix or its content fails.
 /// @note The caller is responsible for freeing the returned matrix using
 /// `mat_free()`.
-Matrix *mat_create_normal_random(size_t height, size_t width, float mean,
+Matrix *mat_create_random_normal(size_t height, size_t width, float mean,
                                  float stddev);
 
 /// @brief Frees a matrix and its associated memory.
@@ -106,14 +108,14 @@ void mat_free_matrix_array(Matrix **array, size_t lentgh);
 /// The function checks whether two matrices have the same dimensions
 /// and identical element values. If both pointers refer to the same
 /// Matrix instance, the function immediately returns 1.
-int mat_eq(Matrix *a, Matrix *b);
+int mat_eq(Matrix *a, Matrix *b, float epsilon);
 
 /// @brief Creates a deep copy of a matrix (allocates a new matrix with the same
 /// contents).
-/// @param[in] m Pointer to the matrix to copy.
+/// @param[in] src Pointer to the matrix to copy.
 /// @return A pointer to a new matrix identical to the original.
 /// @throw Terminates the program if memory allocation fails.
-Matrix *mat_deepcopy(const Matrix *m);
+Matrix *mat_deepcopy(const Matrix *src);
 
 /// @brief For internal use. More efficient because it does not check for valid
 /// parameters.
@@ -204,37 +206,51 @@ Matrix *mat_hadamard(const Matrix *a, const Matrix *b);
 /// dimensions.
 void mat_inplace_hadamard(Matrix *a, const Matrix *b);
 
-/// @brief Applies the sigmoid function element-wise to the given matrix.
-/// Sigmoid(x) = 1 / (1 + exp(-x))
-/// @param[in] m Pointer to the input matrix.
-/// @return A new matrix containing the sigmoid of each element of m.
-/// @throw Terminates the program if memory allocation fails.
-Matrix *mat_sigmoid(const Matrix *m);
+Matrix *mat_relu(Matrix *m);
 
-/// @brief Applies the sigmoid function element-wise to the given matrix
-/// (in-place). Sigmoid(x) = 1 / (1 + exp(-x))
-/// @param[in,out] m Pointer to the matrix to modify.
-void mat_inplace_sigmoid(Matrix *m);
+void mat_inplace_relu(Matrix *m);
 
-/// @brief Computes the element-wise sigmoid derivative of a matrix and returns
-/// a new matrix.
-/// @param[in] m Pointer to the input Matrix.
-/// @return Pointer to a newly allocated Matrix containing the sigmoid
-/// derivatives of each element.
-/// @throw Exits the program if memory allocation for the result fails.
-Matrix *mat_sigmoid_derivative(const Matrix *m);
+Matrix *mat_relu_derivative(Matrix *m);
 
-/// @brief Computes the element-wise sigmoid derivative of a matrix in-place.
-/// @param[in, out] m Pointer to the Matrix to be modified.
-void mat_inplace_sigmoid_derivative(Matrix *m);
+void mat_inplace_relu_derivative(Matrix *m);
 
-/// @brief Computes the mean squared error (MSE) between two matrices.
-/// @param[in] actual Pointer to the matrix containing actual values.
-/// @param[in] expected Pointer to the matrix containing expected values.
-/// @return The mean squared error between the two matrices as a float.
-/// @throw Exits the program with an error if the matrices have mismatched
-/// dimensions.
-float mat_mean_squared_error(Matrix *actual, Matrix *expected);
+// /// @brief Computes the element-wise sigmoid derivative of a matrix and
+// returns
+// /// a new matrix.
+// /// @param[in] m Pointer to the input Matrix.
+// /// @return Pointer to a newly allocated Matrix containing the sigmoid
+// /// derivatives of each element.
+// /// @throw Exits the program if memory allocation for the result fails.
+// Matrix *mat_sigmoid_derivative(const Matrix *m);
+
+// /// @brief Computes the element-wise sigmoid derivative of a matrix in-place.
+// /// @param[in, out] m Pointer to the Matrix to be modified.
+// void mat_inplace_sigmoid_derivative(Matrix *m);
+
+// void mat_inplace_relu(Matrix *m);
+
+Matrix *mat_relu_derivative(Matrix *m);
+
+void mat_inplace_softmax(Matrix *m);
+
+void mat_inplace_toggle(Matrix *m);
+
+/// @brief Strips zeros around the matrix.
+/// @param m The matrix to strip the zeros from.
+/// @return A new heap allocated matrix.
+Matrix *mat_strip_margins(const Matrix *m);
+
+Matrix *mat_scale_to_28(const Matrix *m, float fill_value);
+
+void mat_inplace_to_one_hot(Matrix *m);
+
+// /// @brief Computes the mean squared error (MSE) between two matrices.
+// /// @param[in] actual Pointer to the matrix containing actual values.
+// /// @param[in] expected Pointer to the matrix containing expected values.
+// /// @return The mean squared error between the two matrices as a float.
+// /// @throw Exits the program with an error if the matrices have mismatched
+// /// dimensions.
+// float mat_mean_squared_error(Matrix *actual, Matrix *expected);
 
 /// @brief Returns the transpose of a matrix as a new matrix.
 /// @param[in] m Pointer to the input Matrix.
@@ -242,31 +258,33 @@ float mat_mean_squared_error(Matrix *actual, Matrix *expected);
 /// @throw Exits the program if memory allocation for the result fails.
 Matrix *mat_transpose(const Matrix *m);
 
-/// @brief Transposes a matrix in-place. Supports both square and non-square
-/// matrices.
-/// @param[in, out] m Pointer to the Matrix to be transposed in-place.
-/// @throw None. The function assumes the matrix pointer is valid and memory is
-/// properly allocated.
-void mat_inplace_transpose(Matrix *m);
+// /// @brief Transposes a matrix in-place. Supports both square and non-square
+// /// matrices.
+// /// @param[in, out] m Pointer to the Matrix to be transposed in-place.
+// /// @throw None. The function assumes the matrix pointer is valid and memory
+// is
+// /// properly allocated.
+// void mat_inplace_transpose(Matrix *m);
 
-/// @brief Creates a flattened (1×N) copy of the given matrix (row vector).
-/// @param[in] m Pointer to the input matrix.
-/// @return A new 1-row matrix containing the flattened elements of the input.
-Matrix *mat_vertical_flatten(const Matrix *m);
+// /// @brief Creates a flattened (1×N) copy of the given matrix (row vector).
+// /// @param[in] m Pointer to the input matrix.
+// /// @return A new 1-row matrix containing the flattened elements of the
+// input. Matrix *mat_vertical_flatten(const Matrix *m);
 
 /// @brief Flattens a matrix into a single column in-place (vertical flatten).
 /// @param[in, out] m Pointer to the Matrix to be flattened.
 void mat_inplace_vertical_flatten(Matrix *m);
 
-/// @brief Creates a flattened (N×1) copy of the given matrix (column vector).
-/// @param[in] m Pointer to the input matrix.
-/// @return A new 1-column matrix containing the flattened elements of the
-/// input.
-Matrix *mat_horizontal_flatten(const Matrix *m);
+// /// @brief Creates a flattened (N×1) copy of the given matrix (column
+// vector).
+// /// @param[in] m Pointer to the input matrix.
+// /// @return A new 1-column matrix containing the flattened elements of the
+// /// input.
+// Matrix *mat_horizontal_flatten(const Matrix *m);
 
-/// @brief Flattens a matrix into a single row in-place (horizontal flatten).
-/// @param[in, out] m Pointer to the Matrix to be flattened.
-void mat_inplace_horizontal_flatten(Matrix *m);
+// /// @brief Flattens a matrix into a single row in-place (horizontal flatten).
+// /// @param[in, out] m Pointer to the Matrix to be flattened.
+// void mat_inplace_horizontal_flatten(Matrix *m);
 
 /// @brief Normalizes a matrix so that the sum of all its elements equals 1.
 /// @param[in] m Pointer to the input Matrix to be normalized.
@@ -326,5 +344,19 @@ void mat_inplace_map_with_indexes(Matrix *m, float (*f)(float, size_t, size_t));
 /// @param[in] precision Number of decimal places to display for each element.
 /// @throw Terminates the program if the matrix pointer is NULL.
 void mat_print(const Matrix *m, unsigned int precision);
+
+void mat_print_n_first(const Matrix *m, size_t n, unsigned int precision);
+
+void mat_display(const Matrix *m);
+
+Matrix *mat_load_from_fd(int fd);
+
+Matrix *mat_load_from_file(const char *filename);
+
+void mat_save_to_fd(const Matrix *m, int fd);
+
+void mat_save_to_file(const Matrix *m, const char *filename);
+
+size_t mat_max_h(const Matrix *m);
 
 #endif
