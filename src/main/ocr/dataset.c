@@ -345,7 +345,7 @@ void ds_save_to_compressed_file(Dataset *ds, const char *filename)
                 buff <<= 1;
                 buff |= (c[j + b] > 0.5f);
             }
-            write(fd, &buff, 1);
+            w = write(fd, &buff, 1);
             if (w != sizeof(buff))
                 errx(EXIT_FAILURE, "Failed to write compressed pixel block");
         }
