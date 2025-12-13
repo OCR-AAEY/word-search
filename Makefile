@@ -61,7 +61,7 @@ CC = gcc
 endif
 
 # C flags.
-CFLAGS         = -Wall -Wextra -fsanitize=address,undefined -I$(MAIN_DIR)
+CFLAGS         = -Wall -Wextra -fsanitize=address,undefined -I$(MAIN_DIR) -O1
 # Additional C flags.
 XCFLAGS        =
 # C flags for unit testing.
