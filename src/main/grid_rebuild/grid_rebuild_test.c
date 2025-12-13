@@ -1,139 +1,108 @@
-// src/main/grid_rebuild/grid_rebuild_test.c
-// Full extraction -> cell export -> NN inference -> Grid rebuild -> print
-// Uses LEVEL_1_IMG_1 and a 17x17 grid as requested.
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <err.h>
 
-#include "utils/utils.h"
+#include "grid_rebuild.h"
+
+#include "ocr/neural_network.h"
+/* Image & preprocessing */
 #include "image_loader/image_loading.h"
+#include "matrix/matrix.h"
 #include "pretreatment/pretreatment.h"
-#include "rotation/rotation.h"
+
+/* Grid detection */
 #include "location/location.h"
 #include "location/hough_lines_legacy.h"
-#include "matrix/matrix.h"
-#include "ocr/neural_network.h"
-#include "grid_rebuild.h"
+
+#include "rotation/rotation.h"
+
+/* Utils */
+#include "utils/utils.h"
+
+/* Solver (for Grid printing) */
 #include "solver/grid.h"
 
-/* Default values - you can override the model path by passing it as argv[1] */
-#define DEFAULT_MODEL_PATH "assets/model.bin"
-#define DEFAULT_IMAGE_PATH LEVEL_2_IMG_2
-#define DEFAULT_ROWS 17
-#define DEFAULT_COLS 17
+/* Sample image */
+#define TEST_IMAGE LEVEL_1_IMG_1
+#define GRID_ROWS 17
+#define GRID_COLS 17
+#define MODEL_PATH "assets/model.bin"
+#define GRID_FOLDER GRID_DIR
 
-/* Run the project extraction pipeline (similar to the project's main pipeline)
- * The goal is to produce extracted/grid/(r_c).png using existing project
- * functions. This follows the sequence already used in your project:
- *
- *  - cleanup_folders() / setup_folders()
- *  - load_image -> image_to_grayscale
- *  - adaptative thresholding
- *  - auto deskew (rotation)
- *  - morphological transforms (closing/opening)
- *  - Hough transform lines
- *  - extract_intersection_points
- *  - extract_grid_cells -> writes to GRID_DIR/(r_c).png
- *
- * Note: we intentionally reuse the project's functions so behaviour matches.
- */
-static void run_full_extraction_pipeline(const char *input_image_path)
+static void run_full_extraction_pipeline(void)
 {
-    printf("[+] Running full extraction pipeline on: %s\n", input_image_path);
-
+    /* Cleanup and prepare folders */
     cleanup_folders();
     setup_folders();
 
-    // 1) Load image
-    ImageData *img = load_image(input_image_path);
+    /* Load image */
+    ImageData *img = load_image(TEST_IMAGE);
     if (!img)
-        errx(EXIT_FAILURE, "Failed to load input image: %s", input_image_path);
+        errx(EXIT_FAILURE, "Failed to load test image");
 
-    // 2) Convert to grayscale matrix
-    Matrix *gray = image_to_grayscale(img);
+    Matrix *m = image_to_grayscale(img);
     free_image(img);
-    if (!gray)
-        errx(EXIT_FAILURE, "image_to_grayscale failed");
 
-    // 3) Deskew (auto rotation) step expects threshold first in your pipeline,
-    //    but we follow a robust sequence: threshold -> deskew -> transforms.
-    Matrix *threshold = adaptative_gaussian_thresholding(gray, 255, 7, 3, 2);
-    mat_free(gray);
-    if (!threshold)
-        errx(EXIT_FAILURE, "Thresholding failed");
+    /* Pretreatment pipeline */
+    Matrix *tmp;
 
-    Matrix *rotated = auto_deskew_matrix(threshold);
-    mat_free(threshold);
-    if (!rotated)
-        errx(EXIT_FAILURE, "auto_deskew_matrix failed");
+    tmp = auto_deskew_matrix(m);
+    mat_free(m);
+    m = tmp;
 
-    // 4) Morphological filtering: closing then opening (same sequence used in project)
-    Matrix *closing = morph_transform(rotated, 1, Closing);
-    if (!closing) { mat_free(rotated); errx(EXIT_FAILURE, "morph_transform(Closing) failed"); }
+    tmp = adaptative_gaussian_thresholding(m, 255, 11, 10, 5);
+    mat_free(m);
+    m = tmp;
 
-    Matrix *opening = morph_transform(closing, 2, Opening);
-    mat_free(closing);
-    if (!opening) { mat_free(rotated); errx(EXIT_FAILURE, "morph_transform(Opening) failed"); }
+    tmp = morph_transform(m, 2, Closing);
+    mat_free(m);
+    m = tmp;
 
-    // 5) Hough transform to get lines
-    size_t nb_lines = 0;
-    Line **lines = hough_transform_lines(opening, 90, 5, 1, &nb_lines);
-    if (!lines || nb_lines == 0) {
-        mat_free(opening);
-        errx(EXIT_FAILURE, "hough_transform_lines returned no lines");
-    }
+    tmp = morph_transform(m, 2, Opening);
+    mat_free(m);
+    m = tmp;
 
-    // 6) Extract intersection points from Hough lines
-    size_t height_points = 0, width_points = 0;
-    Point **points = extract_intersection_points(lines, nb_lines, &height_points, &width_points);
-    if (!points || height_points == 0 || width_points == 0) {
-        free_lines(lines, nb_lines);
-        mat_free(opening);
-        errx(EXIT_FAILURE, "extract_intersection_points failed to detect grid intersections");
-    }
-    printf("[+] Found %zu x %zu intersection points\n", height_points, width_points);
+    /* Hough lines */
+    size_t nb_lines;
+    Line **lines = hough_transform_lines(m, 90, 5, 1, &nb_lines);
 
-    // 7) Extract grid cells -> this writes files to GRID_DIR (EXTRACT_DIR "/grid")
-    extract_grid_cells(opening, points, height_points, width_points);
+    if (!lines)
+        errx(EXIT_FAILURE, "Hough transform failed");
 
-    // cleanup temporary structures
-    for (size_t i = 0; i < height_points; ++i) free(points[i]);
-    free(points);
+    /* Intersection points */
+    size_t h_points, w_points;
+    Point **points = extract_intersection_points(
+        lines, nb_lines, &h_points, &w_points);
+
+    if (!points)
+        errx(EXIT_FAILURE, "Intersection extraction failed");
+
+    /* Extract grid cells */
+    extract_grid_cells(m, points, h_points, w_points);
+
+    /* Cleanup */
+    free_points(points, h_points);
     free_lines(lines, nb_lines);
-    mat_free(opening);
-
-    printf("[+] Extraction pipeline finished. Cells written to: %s\n", GRID_DIR);
+    mat_free(m);
 }
 
-/* main: optionally accept model path as argv[1]; otherwise use DEFAULT_MODEL_PATH */
-int main(int argc, char **argv)
+int main(void)
 {
-    const char *model_path = (argc >= 2) ? argv[1] : DEFAULT_MODEL_PATH;
-    const char *image_path = DEFAULT_IMAGE_PATH;
-    const size_t rows = DEFAULT_ROWS;
-    const size_t cols = DEFAULT_COLS;
+    printf("=== GRID REBUILD TEST ===\n");
 
-    printf("=== GRID REBUILD TEST (Level1 Image1 -> %zux%zu grid) ===\n", rows, cols);
-    printf("[i] model: %s\n", model_path);
-    printf("[i] image: %s\n", image_path);
+    run_full_extraction_pipeline();
 
-    // 1) Run full extraction pipeline (produces extracted/grid/(r_c).png)
-    run_full_extraction_pipeline(image_path);
+    printf("\n--- Rebuilding grid with OCR ---\n\n");
 
-    // 2) Rebuild grid from extracted cells using the given model
-    Grid *g = grid_rebuild_from_folder_with_model(GRID_DIR, rows, cols, model_path);
-    if (!g) {
-        fprintf(stderr, "grid_rebuild_from_folder_with_model failed\n");
-        return EXIT_FAILURE;
-    }
+    Grid *g = grid_rebuild_from_folder_with_model(
+        GRID_FOLDER, GRID_ROWS, GRID_COLS, MODEL_PATH);
 
-    // 3) Print result and free
-    printf("\n=== REBUILT GRID ===\n");
+    if (!g)
+        errx(EXIT_FAILURE, "Grid rebuild failed");
+
     grid_print(g);
-
     grid_free(g);
 
-    printf("\n[OK] grid_rebuild_test finished.\n");
+    printf("\n=== DONE ===\n");
     return EXIT_SUCCESS;
 }
