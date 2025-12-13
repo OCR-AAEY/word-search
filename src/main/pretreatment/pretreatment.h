@@ -92,8 +92,8 @@ Matrix *adaptative_gaussian_thresholding(const Matrix *src, float max_value,
 /// (horizontal then vertical).
 /// @param[in] src Pointer to the source matrix. Must not be NULL.
 /// @param[in] kernel_size Size of the kernel. Even kernel sizes are supported.
-/// @return Pointer to a newly allocated matrix containing the eroded image.
-/// @throw Throws if src is NULL.
+/// @return Pointer to a newly allocated matrix containing the eroded image,
+///         or NULL on failure.
 /// @note Caller is responsible for freeing the returned matrix using
 /// mat_free().
 Matrix *erosion(const Matrix *src, size_t kernel_size);
@@ -102,8 +102,8 @@ Matrix *erosion(const Matrix *src, size_t kernel_size);
 /// (horizontal then vertical).
 /// @param[in] src Pointer to the source matrix. Must not be NULL.
 /// @param[in] kernel_size Size of the kernel. Even kernel sizes are supported.
-/// @return Pointer to a newly allocated matrix containing the dilated image.
-/// @throw Throws if src is NULL.
+/// @return Pointer to a newly allocated matrix containing the dilated image,
+///         or NULL on failure.
 /// @note Caller is responsible for freeing the returned matrix using
 /// mat_free().
 Matrix *dilation(const Matrix *src, size_t kernel_size);
@@ -115,8 +115,7 @@ Matrix *dilation(const Matrix *src, size_t kernel_size);
 /// @param[in] transform Type of morphological transformation (Erosion,
 /// Dilation, Opening, Closing).
 /// @return Pointer to a newly allocated matrix containing the transformed
-/// image.
-/// @throw Throws if src is NULL or transform type is invalid.
+/// image, or NULL on failure.
 /// @note Caller is responsible for freeing the returned matrix using
 /// mat_free().
 Matrix *morph_transform(Matrix *src, size_t kernel_size,
@@ -163,51 +162,40 @@ float *gaussian_kernel_1d(float sigma, size_t kernel_size);
 int clamp(int value, int min, int max);
 
 /// @brief Performs a 1D horizontal convolution on an image.
-///
-/// Each pixel in the output image is computed as a weighted sum of its
-/// horizontal neighbors in the input image, using the specified 1D convolution
-/// kernel. Out-of-bounds pixels are handled by clamping to the nearest valid
-/// pixel (edge repetition).
-///
-/// @param[in] src Pointer to the source image matrix.
+/// Each output pixel is computed as a weighted sum of its horizontal neighbors,
+/// using the specified 1D kernel. Out-of-bounds pixels are clamped to the
+/// nearest valid pixel.
+/// @param[in] src Pointer to the source image matrix. Must not be NULL.
 /// @param[in] kernel Pointer to a 1D array of convolution weights.
 /// @param[in] kernel_size Length of the 1D kernel (must be odd).
-/// @return Pointer to the matrix containing the horizontally
-///         convolved image.
-/// @throw Throws if the @p src is NULL or kernel_size is even.
+/// @return Pointer to the matrix containing the horizontally convolved image,
+/// or NULL on error.
 Matrix *convolve_horizontally(const Matrix *src, const float *kernel,
                               size_t kernel_size);
 
 /// @brief Performs a 1D vertical convolution on an image.
-///
-/// Each pixel in the output image is computed as a weighted sum of its
-/// vertical neighbors in the input image, using the specified 1D convolution
-/// kernel. Out-of-bounds pixels are handled by clamping to the nearest valid
-/// pixel (edge repetition).
-///
-/// @param[in] src Pointer to the source image matrix.
+/// Each output pixel is computed as a weighted sum of its vertical neighbors,
+/// using the specified 1D kernel. Out-of-bounds pixels are clamped to the
+/// nearest valid pixel.
+/// @param[in] src Pointer to the source image matrix. Must not be NULL.
 /// @param[in] kernel Pointer to a 1D array of convolution weights.
 /// @param[in] kernel_size Length of the 1D kernel (must be odd).
-/// @return Pointer to the matrix containing the vertically
-///         convolved image.
-/// @throw Throws if the @p src is NULL or kernel_size is even.
+/// @return Pointer to the matrix containing the vertically convolved image, or
+/// NULL on error.
 Matrix *convolve_vertically(const Matrix *src, const float *kernel,
                             size_t kernel_size);
 
 /// @brief Performs a 1D morphological transformation (erosion or dilation)
-/// along a specified orientation.
+/// along the specified orientation.
 /// @param[in] src Pointer to the source matrix. Must not be NULL.
-/// @param[in] kernel_size Size of the kernel. OpenCV-style anchor is used; even
-/// sizes are supported.
+/// @param[in] kernel_size Size of the kernel. Even sizes are supported;
+/// OpenCV-style anchor is used.
 /// @param[in] transform Type of morphological transformation (Erosion or
 /// Dilation).
 /// @param[in] orientation Orientation of the 1D pass (Horizontal or Vertical).
 /// @return Pointer to a newly allocated matrix containing the transformed
-/// image.
-/// @throw Throws if src is NULL, transform is invalid, or orientation is
-/// invalid.
-/// @note Caller is responsible for freeing the returned matrix using
-/// mat_free().
+/// image, or NULL on error.
+/// @note Caller must free the returned matrix using mat_free().
 Matrix *morph_transformation_1d(const Matrix *src, size_t kernel_size,
                                 enum MorphTransform transform,
                                 enum Orientation orientation);

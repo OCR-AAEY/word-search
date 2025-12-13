@@ -1,14 +1,23 @@
 #include "extract_char.h"
 
-void save_image_region(const Matrix *matrix, const char *name, size_t x0,
-                       size_t y0, size_t x1, size_t y1)
+int save_image_region(const Matrix *matrix, const char *name, size_t x0,
+                      size_t y0, size_t x1, size_t y1)
 {
-
     // Matrix check
     if (matrix == NULL)
     {
-        errx(EXIT_FAILURE, "The matrix is NULL");
+        fprintf(stderr, "save_image_region: The matrix is NULL\n");
+        return -1;
     }
+
+    size_t mat_h = mat_height(matrix);
+    size_t mat_w = mat_width(matrix);
+    if (x1 >= mat_w || y1 >= mat_h)
+    {
+        fprintf(stderr, "save_image_region: The region to save is invalid\n");
+        return -2;
+    }
+
     size_t tmp;
     if (x1 < x0)
     {
@@ -39,7 +48,8 @@ void save_image_region(const Matrix *matrix, const char *name, size_t x0,
 
             if (val > 255 || val < 0)
             {
-                errx(EXIT_FAILURE, "value out of bound");
+                fprintf(stderr, "save_image_region: value out of bound\n");
+                return -3;
             }
 
             guchar value = (guchar)roundf(val);
@@ -48,11 +58,16 @@ void save_image_region(const Matrix *matrix, const char *name, size_t x0,
             p[3 * i + 2] = value;
         }
     }
-    GError *error;
-    save_pixbuf_to_png(pixbuf, (char *)name, &error);
+    int save_success = save_pixbuf_to_png(pixbuf, (char *)name);
 
-    if (error)
-        g_error_free(error);
+    if (!save_success)
+    {
+        fprintf(stderr,
+                "save_image_region: Failed to save the region as png\n");
+        g_object_unref(pixbuf);
+        return -4;
+    }
 
     g_object_unref(pixbuf);
+    return EXIT_SUCCESS;
 }
