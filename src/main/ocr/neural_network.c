@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "dataset.h"
@@ -529,6 +530,20 @@ void net_train(Neural_Network *net, Dataset *dataset, size_t epochs,
             mat_free_matrix_array(nabla_b, net->layer_number);
         }
     }
+}
+
+char net_decode_letter(Neural_Network *net, Matrix *input, float **out_chances)
+{
+    Matrix *res = net_feed_forward(net, input, NULL, NULL);
+
+    char letter = 'a' + mat_max_h(res);
+
+    if (out_chances != NULL)
+        memcpy(*out_chances, mat_coef_ptr(res, 0, 0), 26 * sizeof(float));
+
+    mat_free(res);
+
+    return letter;
 }
 
 void net_print(Neural_Network *net, unsigned int precision)

@@ -24,9 +24,9 @@
 
 /* Sample image */
 #define TEST_IMAGE LEVEL_1_IMG_1
-#define GRID_ROWS 17
-#define GRID_COLS 17
-#define MODEL_PATH "assets/model.bin"
+#define GRID_ROWS 13
+#define GRID_COLS 3
+#define MODEL_PATH "assets/ocr/model/real.nn"
 #define GRID_FOLDER GRID_DIR
 
 static void run_full_extraction_pipeline(void)

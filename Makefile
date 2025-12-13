@@ -95,21 +95,23 @@ OBJ_MAIN_FOR_TEST = $(SRC_MAIN:$(MAIN_DIR)/%.c=$(BUILD_DIR)/main_for_test/%.o)
 OBJ_TEST_FOR_TEST = $(SRC_TEST:$(TEST_DIR)/%.c=$(BUILD_DIR)/test/%.o)
 
 # Solver executable.
-BIN_SOLVER      = solver
+BIN_SOLVER       = solver
 # A executable file that displays a matrix from a matrix file.
-BIN_MAT_DISPLAY = mat_display
+BIN_MAT_DISPLAY  = mat_display
 # OCR neural network training executable.
-BIN_OCR         = ocr_train
+BIN_OCR          = ocr_train
 # OCR dataset generation script.
-BIN_OCR_DATASET = ocr_dataset
+BIN_OCR_DATASET  = ocr_dataset
+# Program used to apply OCR on a single image.
+BIN_DECODE_IMAGE = decode_image
 # Rotate test executable.
 BIN_AUTO_ROTATE = rotate
 #Grid rebuild test executable
 BIN_GRID_REBUILD = grid_rebuild
 # Main application executable.
-BIN_APP         = app
+BIN_APP          = app
 # Unit tests executable.
-BIN_TEST        = run_tests
+BIN_TEST         = run_tests
 
 # Use to add a dependency to a main function in a make rule. The parameter is the source file containing the main function. You must not provide the extension '.c'.
 define main
@@ -145,6 +147,11 @@ $(BIN_OCR_DATASET): $(call import,matrix image_loader utils pretreatment ocr) $(
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
+# Decode image target.
+$(BIN_DECODE_IMAGE): $(call import,matrix image_loader utils pretreatment ocr) $(call main,ocr/decode_letter_main)
+	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+	@echo "$@: \033[32mCompilation succeeded\033[0m"
+
 # Auto rotation target.
 $(BIN_AUTO_ROTATE): $(call import,rotation pretreatment image_loader utils matrix) $(call main,rotation/rotate_main)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
@@ -158,7 +165,7 @@ $(BIN_GRID_REBUILD): $(call import,grid_rebuild image_loader matrix ocr pretreat
 
 
 # Main app target.
-$(BIN_APP): $(call import,...) $(call main,...)
+$(BIN_APP): $(call import,extract_char location ocr rotation utils image_loader matrix pretreatment solver) $(call main,...)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
@@ -210,6 +217,7 @@ clean:
 	@rm -rf $(BIN_MAT_DISPLAY)
 	@rm -rf $(BIN_OCR)
 	@rm -rf $(BIN_OCR_DATASET)
+	@rm -rf $(BIN_DECODE_IMAGE)
 	@rm -rf $(BIN_AUTO_ROTATE)
 	@rm -rf $(BIN_GRID_REBUILD)
 	@rm -rf $(BIN_APP)
