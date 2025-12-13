@@ -61,7 +61,7 @@ CC = gcc
 endif
 
 # C flags.
-CFLAGS         = -Wall -Wextra -fsanitize=address -fsanitize=undefined -I$(MAIN_DIR)
+CFLAGS         = -Wall -Wextra -fsanitize=address,undefined -I$(MAIN_DIR)
 # Additional C flags.
 XCFLAGS        =
 # C flags for unit testing.
@@ -108,10 +108,12 @@ BIN_DECODE_IMAGE = decode_image
 BIN_AUTO_ROTATE = rotate
 #Grid rebuild test executable
 BIN_GRID_REBUILD = grid_rebuild
+# Locates the elements in the image
+BIN_LOCATION = location
 # Main application executable.
-BIN_APP          = app
+BIN_APP = app
 # Unit tests executable.
-BIN_TEST         = run_tests
+BIN_TEST = run_tests
 
 # Use to add a dependency to a main function in a make rule. The parameter is the source file containing the main function. You must not provide the extension '.c'.
 define main
@@ -163,6 +165,10 @@ $(BIN_GRID_REBUILD): $(call import,grid_rebuild image_loader matrix ocr pretreat
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
+# Location target.
+$(BIN_LOCATION): $(filter $(BUILD_MAIN_DIR)/location/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/rotation/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/pretreatment/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/image_loader/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/extract_char/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/utils/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/matrix/%.o,$(OBJ_MAIN)) $(BUILD_MAIN_DIR)/location/location_main.o
+	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+	@echo "$(BIN_LOCATION): \033[32mCompilation succeeded\033[0m"
 
 # Main app target.
 $(BIN_APP): $(call import,extract_char location ocr rotation utils image_loader matrix pretreatment solver) $(call main,...)

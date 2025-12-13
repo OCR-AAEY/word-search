@@ -25,11 +25,7 @@ typedef struct Grid Grid;
  *   A newly allocated Grid* (must be freed with grid_free),
  *   or NULL on error.
  */
-Grid *grid_rebuild_from_folder_with_model(
-    const char *folder,
-    size_t rows,
-    size_t cols,
-    const char *model_path
-);
+Grid *grid_rebuild_from_folder_with_model(const char *folder, size_t rows,
+                                          size_t cols, const char *model_path);
 
 #endif /* GRID_REBUILD_H */
