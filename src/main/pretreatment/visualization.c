@@ -418,10 +418,7 @@ int export_matrix(Matrix *src, const char *filename)
     GdkPixbuf *pixbuf = create_pixbuf_from_image_data(img);
     if (pixbuf == NULL)
         return EXIT_FAILURE;
-    GError *error;
-    int success = save_pixbuf_to_png(pixbuf, (char *)filename, &error);
-    if (error != NULL)
-        g_error_free(error);
+    int success = save_pixbuf_to_png(pixbuf, (char *)filename);
     g_object_unref(pixbuf);
     free_image(img);
     return success ? EXIT_SUCCESS : EXIT_FAILURE;
