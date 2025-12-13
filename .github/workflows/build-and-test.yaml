@@ -13,11 +13,39 @@ jobs:
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GHCR_PAT }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build project
+      - name: Check AVX runner compatibility
+        id: avx-compatibility
         shell: bash
         run: |
+          if lscpu | grep -iqo avx2 && lscpu | grep -iqo fma; then
+            echo "avx2=1" >> $GITHUB_OUTPUT
+          fi
+
+          if lscpu | grep -iqo avx512 && lscpu | grep -iqo fma; then
+            echo "avx512=1" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and test project
+        shell: bash
+        run: |
+          make clean
           make VERBOSE=1 XCFLAGS=-Werror test
+
+      - name: Build and test project (with AVX2)
+        if: ${{ steps.avx-compatibility.outputs.avx2 }} == '1'
+        shell: bash
+        run: |
+          make clean
+          make VERBOSE=1 XCFLAGS=-Werror AVX=2 test
+
+      # - name: Build and test project (with AVX512)
+      #   if: ${{ steps.avx-compatibility.outputs.avx512 }} == '1'
+      #   shell: bash
+      #   run: |
+      #     make clean
+      #     make VERBOSE=1 XCFLAGS=-Werror AVX=512 test

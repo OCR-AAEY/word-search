@@ -108,22 +108,40 @@ BoundingBox *find_biggest_remaining_area(BoundingBox *grid_box,
 size_t *histogram_horizontal(Matrix *src, BoundingBox *area, size_t *size_out)
 {
     if (area == NULL)
-        errx(EXIT_FAILURE, "Sigma must be positive");
+    {
+        fprintf(stderr, "histogram_horizontal: Sigma must be positive\n");
+        return NULL;
+    }
     if (src == NULL)
-        errx(EXIT_FAILURE, "The source matrix is NULL");
+    {
+        fprintf(stderr, "histogram_horizontal: The source matrix is NULL\n");
+        return NULL;
+    }
     if (size_out == NULL)
-        errx(EXIT_FAILURE, "The size_out output parameter is NULL");
+    {
+        fprintf(
+            stderr,
+            "histogram_horizontal: The size_out output parameter is NULL\n");
+        return NULL;
+    }
 
     size_t height = mat_height(src);
     size_t width = mat_width(src);
     if (area->br.y >= (int)height || area->br.y >= (int)width)
-        errx(EXIT_FAILURE,
-             "The area concerned is outside of the bounds of the src matrix");
+    {
+        fprintf(stderr, "histogram_horizontal: The area concerned is outside "
+                        "of the bounds of the src matrix\n");
+        return NULL;
+    }
 
     *size_out = area->br.y - area->tl.y + 1;
     size_t vert_size = area->br.x - area->tl.x + 1;
     size_t *histogram = calloc(*size_out, sizeof(size_t));
-
+    if (histogram == NULL)
+    {
+        fprintf(stderr, "histogram_horizontal: Histogram allocation failed\n");
+        return NULL;
+    }
     for (size_t h = 0; h < *size_out; h++)
     {
         for (size_t w = 0; w < vert_size; w++)
@@ -186,9 +204,17 @@ BoundingBox **find_words_histogram_threshold(BoundingBox *area,
                                              size_t threshold, size_t *size_out)
 {
     if (histogram == NULL)
-        errx(EXIT_FAILURE, "The histogram is NULL");
+    {
+        fprintf(stderr,
+                "find_words_histogram_threshold: The histogram is NULL\n");
+        return NULL;
+    }
     if (size_out == NULL)
-        errx(EXIT_FAILURE, "The size_out output parameter is NULL");
+    {
+        fprintf(stderr, "find_words_histogram_threshold: The size_out output "
+                        "parameter is NULL\n");
+        return NULL;
+    }
     size_t max_boxes = 10;
     size_t boxes_index = 0;
     BoundingBox **words_boxes = malloc(max_boxes * sizeof(BoundingBox *));
@@ -200,7 +226,7 @@ BoundingBox **find_words_histogram_threshold(BoundingBox *area,
         {
             if (current_box != NULL)
             {
-                current_box->br.y = area->tl.y + i - 1;
+                current_box->br.y = area->tl.y + i;
                 current_box = NULL;
             }
         }
@@ -214,8 +240,9 @@ BoundingBox **find_words_histogram_threshold(BoundingBox *area,
                 if (tmp == NULL)
                 {
                     free(words_boxes);
-                    errx(EXIT_FAILURE,
-                         "Failed to reallocate the words bounding boxes array");
+                    fprintf(stderr,
+                            "find_words_histogram_threshold: Failed to "
+                            "reallocate the words bounding boxes array\n");
                 }
                 words_boxes = tmp;
             }
@@ -272,8 +299,21 @@ BoundingBox **get_bounding_box_words(Matrix *src, BoundingBox *area,
 
     size_t histo_size;
     size_t *histogram_horiz = histogram_horizontal(src, area, &histo_size);
+    if (histogram_horiz == NULL)
+    {
+        fprintf(stderr, "get_bounding_box_words: failed to get histogram\n");
+        return NULL;
+    }
     BoundingBox **words_boxes = find_words_histogram_threshold(
         area, histogram_horiz, histo_size, threshold, size_out);
+    if (words_boxes == NULL)
+    {
+        fprintf(
+            stderr,
+            "get_bounding_box_words: failed to find words from histogram\n");
+        free(histogram_horiz);
+        return NULL;
+    }
     for (size_t i = 0; i < *size_out; i++)
     {
         margin_bounding_box(words_boxes[i], word_margin, word_margin, 0, 0);
@@ -303,10 +343,25 @@ size_t *histogram_vertical(Matrix *src, BoundingBox *area, size_t *size_out)
 
     size_t height = mat_height(src);
     size_t width = mat_width(src);
-    if (area->br.y >= (int)height || area->br.y >= (int)width)
+
+    // Reject negative coordinates
+    if (area->tl.x < 0 || area->tl.y < 0 || area->br.x < 0 || area->br.y < 0)
     {
-        fprintf(stderr, "histogram_vertical: The area concerned is outside of "
-                        "the bounds of the src matrix\n");
+        fprintf(stderr, "histogram_vertical: negative coordinates\n");
+        return NULL;
+    }
+
+    // Reject inverted boxes
+    if (area->tl.x > area->br.x || area->tl.y > area->br.y)
+    {
+        fprintf(stderr, "histogram_vertical: invalid bounding box order\n");
+        return NULL;
+    }
+
+    // Reject out-of-bounds
+    if ((size_t)area->br.x >= width || (size_t)area->br.y >= height)
+    {
+        fprintf(stderr, "histogram_vertical: area outside matrix bounds\n");
         return NULL;
     }
 
