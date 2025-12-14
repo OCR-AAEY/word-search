@@ -1,6 +1,8 @@
 #include "wordlist_rebuild.h"
 #include <stdio.h>
 
+#ifndef UNIT_TEST
+
 int main(void)
 {
     const char *folder = "extracted/words";
@@ -21,3 +23,4 @@ int main(void)
     wordlist_free(wl);
     return 0;
 }
+#endif
