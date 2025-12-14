@@ -1,10 +1,16 @@
+#include "grid_rebuild/grid_rebuild.h"
 #include "image_loader/image_loading.h"
 #include "location/letters_extraction.h"
 #include "ocr/neural_network.h"
 #include "pretreatment/pretreatment.h"
-#include "pretreatment/vizualization.h"
+#include "pretreatment/visualization.h"
+#include "solver/grid.h"
 #include "utils/utils.h"
+#include "wordlist_rebuild/wordlist_rebuild.h"
 #include <gtk/gtk.h>
+#include <string.h>
+
+#define MODEL "real"
 
 /* ----------GLOBALS------------ */
 const char *step_image_paths[8] = {
@@ -23,6 +29,22 @@ typedef struct
 } LoadNextData;
 
 /* ---------- CALLBACKS ---------- */
+char **wordlist_to_wordarray(Wordlist *wordlist)
+{
+    char **words = malloc((wordlist->count + 1) * sizeof(char *));
+    words[wordlist->count] = NULL;
+    for (size_t i = 0; i < (size_t)(wordlist->count); i++)
+    {
+        words[i] = malloc((wordlist->lengths[i] + 1) * sizeof(char));
+        memcpy(words[i], wordlist->words[i], wordlist->lengths[i]);
+        words[wordlist->lengths[i]] = '\0';
+    }
+
+    wordlist_free(wordlist);
+
+    return words;
+}
+
 static void exit_app(GtkButton *b, gpointer win)
 {
     gtk_widget_destroy(GTK_WIDGET(win));
@@ -61,15 +83,18 @@ static void load_action(GtkButton *button, gpointer user_data)
         char *filename =
             gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
         // solver launch
-        Point *** points;
+        Point **points;
 
-        size_t out_h_points;
-        size_t out_w_points;
-        Grid grid;
-        char ** words;
-        size_t nb_words;
-        int e = locate_and_extract_letters_png((const char *)filename,points
-                                               &out_h_points, &out_w_points);
+        size_t h_points;
+        size_t w_points;
+        Grid *grid = grid_rebuild_from_folder_with_model(
+            "./extracted", "./asset/ocr/model/" MODEL ".nn");
+        Wordlist *wordlist = wordlist_rebuild_from_folder(
+            "./extracted", "./asset/ocr/model/" MODEL ".nn");
+        size_t nb_words = wordlist->count;
+        char **words = wordlist_to_wordarray(wordlist);
+        int e = locate_and_extract_letters_png((const char *)filename, &points,
+                                               &h_points, &w_points);
         if (e)
         {
             g_print("invalid file");
@@ -108,15 +133,14 @@ static void load_action(GtkButton *button, gpointer user_data)
 
         mat_inplace_vertical_flatten(m);
 
-        Neural_Network *net = net_load_from_file(
-            "assets/ocr/model/grid.nn");
+        Neural_Network *net = net_load_from_file("assets/ocr/model/grid.nn");
         char res = net_decode_letter(net, m, NULL);
 
         mat_free(m);
         net_free(net);
         g_print("The character is : %c\n", res);
-        int ** structure = grid_solve(grid, words,nb_words);
-        highlight_words((const char *)filename, points,structure  ,out_h_points,out_w_points,nb_words);
+        int **structure = grid_solve(grid, words, nb_words);
+        highlight_words((const char *)filename, structure, points, nb_words);
         free_points(points, h_points);
         gtk_widget_set_sensitive(GTK_WIDGET(solve_next_btn[0]), TRUE);
         gtk_widget_set_sensitive(GTK_WIDGET(step_next_btn[0]), TRUE);

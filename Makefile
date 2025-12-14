@@ -178,7 +178,7 @@ $(BIN_LOCATION): $(filter $(BUILD_MAIN_DIR)/location/%.o,$(OBJ_MAIN)) $(filter $
 	@echo "$(BIN_LOCATION): \033[32mCompilation succeeded\033[0m"
 
 # Main app target.
-$(BIN_APP): $(call import,extract_char location ocr rotation utils image_loader matrix pretreatment solver) $(call main,GUI/GUI)
+$(BIN_APP): $(call import,extract_char location ocr rotation utils image_loader matrix pretreatment solver grid_rebuild wordlist_rebuild) $(call main,GUI/GUI)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 	@echo "$@: \033[32mCompilation succeeded\033[0m"
 

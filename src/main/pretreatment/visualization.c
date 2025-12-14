@@ -446,7 +446,7 @@ int draw_highlighting_line(cairo_t *cr, int xs, int xf, int ys, int yf,
 }
 
 int highlight_words(const char *input_filename,int ** coord ,Point** intersections,
-     size_t h_points, size_t w_points,size_t len)
+     size_t len)
 {
     cairo_t *cr;
     cairo_surface_t *surface;
