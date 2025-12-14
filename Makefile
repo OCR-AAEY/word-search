@@ -106,12 +106,16 @@ BIN_OCR_DATASET  = ocr_dataset
 BIN_DECODE_IMAGE = decode_image
 # Rotate test executable.
 BIN_AUTO_ROTATE = rotate
+#Grid rebuild test executable
+BIN_GRID_REBUILD = grid_rebuild
+#Wordlist rebuild test executable
+BIN_WORDLIST_REBUILD = wordlist_rebuild
 # Locates the elements in the image
-BIN_LOCATION= location
+BIN_LOCATION = location
 # Main application executable.
-BIN_APP          = app
+BIN_APP = app
 # Unit tests executable.
-BIN_TEST         = run_tests
+BIN_TEST = run_tests
 
 # Use to add a dependency to a main function in a make rule. The parameter is the source file containing the main function. You must not provide the extension '.c'.
 define main
@@ -156,6 +160,17 @@ $(BIN_DECODE_IMAGE): $(call import,matrix image_loader utils pretreatment ocr) $
 $(BIN_AUTO_ROTATE): $(call import,rotation pretreatment image_loader utils matrix) $(call main,rotation/rotate_main)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 	@echo "$@: \033[32mCompilation succeeded\033[0m"
+
+#Grid rebuild Target.
+$(BIN_GRID_REBUILD): $(call import,grid_rebuild image_loader matrix ocr pretreatment utils solver location rotation extract_char) $(call main,grid_rebuild/grid_rebuild_test)
+	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+	@echo "$@: \033[32mCompilation succeeded\033[0m"
+
+# Wordlist rebuild target
+$(BIN_WORDLIST_REBUILD): $(call import,wordlist_rebuild image_loader matrix ocr pretreatment utils solver location rotation extract_char) $(call main,wordlist_rebuild/wordlist_rebuild_test)
+	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+	@echo "$@: \033[32mCompilation succeeded\033[0m"
+
 
 # Location target.
 $(BIN_LOCATION): $(filter $(BUILD_MAIN_DIR)/location/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/rotation/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/pretreatment/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/image_loader/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/extract_char/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/utils/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/matrix/%.o,$(OBJ_MAIN)) $(BUILD_MAIN_DIR)/location/location_main.o
@@ -217,6 +232,8 @@ clean:
 	@rm -rf $(BIN_OCR_DATASET)
 	@rm -rf $(BIN_DECODE_IMAGE)
 	@rm -rf $(BIN_AUTO_ROTATE)
+	@rm -rf $(BIN_GRID_REBUILD)
+	@rm -rf $(BIN_WORDLIST_REBUILD)
 	@rm -rf $(BIN_APP)
 	@rm -rf $(BIN_TEST)
 	@echo "Cleaning test files..."
