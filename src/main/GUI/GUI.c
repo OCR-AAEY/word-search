@@ -31,7 +31,6 @@ typedef struct
 
 /* ---------- CALLBACKS ---------- */
 
-
 GtkWidget *create_resized_image(const char *filename, int width, int height)
 {
     GdkPixbuf *pixbuf;
@@ -42,12 +41,8 @@ GtkWidget *create_resized_image(const char *filename, int width, int height)
     if (!pixbuf)
         return NULL;
 
-    scaled = gdk_pixbuf_scale_simple(
-        pixbuf,
-        width,
-        height,
-        GDK_INTERP_BILINEAR
-    );
+    scaled =
+        gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
 
     image = gtk_image_new_from_pixbuf(scaled);
 
@@ -56,8 +51,6 @@ GtkWidget *create_resized_image(const char *filename, int width, int height)
 
     return image;
 }
-
-
 
 char **wordlist_to_wordarray(Wordlist *wordlist)
 {
@@ -234,8 +227,9 @@ GtkWidget *create_menu_screen(GtkStack *stack, GtkWidget **steps_btn,
 {
     GtkWidget *overlay = gtk_overlay_new();
 
-    GtkWidget *bg_image = create_resized_image("assets/logo/image.png",400,300);
-    
+    GtkWidget *bg_image =
+        create_resized_image("assets/logo/image.png", 400, 300);
+
     gtk_widget_set_hexpand(bg_image, TRUE);
     gtk_widget_set_vexpand(bg_image, TRUE);
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), bg_image);
@@ -300,7 +294,8 @@ GtkWidget *create_step_screen(GtkStack *stack, const char *label_text,
     gtk_widget_set_halign(box, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(box, GTK_ALIGN_CENTER);
 
-    GtkWidget *image = create_resized_image(image_path,400,300); // unique image
+    GtkWidget *image =
+        create_resized_image(image_path, 400, 300); // unique image
 
     GtkWidget *label = gtk_label_new(label_text);
 
@@ -514,7 +509,8 @@ int main(int argc, char *argv[])
     gtk_widget_set_valign(solve_save_box, GTK_ALIGN_CENTER);
     // GtkWidget *solve_save_image =
     // gtk_image_new_from_file("./assets/logo/image.png");
-    GtkWidget *image = create_resized_image("./assets/logo/image.png",400,300);
+    GtkWidget *image =
+        create_resized_image("./assets/logo/image.png", 400, 300);
     solve_images[1] = GTK_IMAGE(image);
     GtkWidget *save_btn = gtk_button_new_with_label("Save");
     GtkWidget *quit_btn = gtk_button_new_with_label("Quit");
