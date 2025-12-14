@@ -461,16 +461,24 @@ int highlight_words(const char *input_filename, int **coord,
     {
         if (coord[i] != NULL)
         {
-            int ys = intersections[coord[i][0]][coord[i][1]].y;
-            int xs = intersections[coord[i][0]][coord[i][1]]
-                         .x; // Start x from the first intersection
-            int yf = intersections[coord[i][2]][coord[i][3]].y;
-            int xf = intersections[coord[i][2]][coord[i][3]]
-                         .x; // End x at the last intersection
+            int ys = (intersections[coord[i][1]][coord[i][0]].y +
+                      intersections[coord[i][1] + 1][coord[i][0] + 1].y) /
+                     2;
+            int xs = (intersections[coord[i][1]][coord[i][0]].x +
+                      intersections[coord[i][1] + 1][coord[i][0] + 1].x) /
+                     2;
+            // Start x from the first intersection
+            int yf = (intersections[coord[i][3]][coord[i][2]].y +
+                      intersections[coord[i][3] + 1][coord[i][2] + 1].y) /
+                     2;
+            int xf = (intersections[coord[i][3]][coord[i][2]].x +
+                      intersections[coord[i][3] + 1][coord[i][2] + 1].x) /
+                     2;
+            // End x at the last intersection
             draw_highlighting_line(cr, xs, xf, ys, yf, 1.0, 1.0, 0.0); // color
         }
     }
-    cairo_surface_write_to_png(surface, "extracted/solved.png");   
+    cairo_surface_write_to_png(surface, "extracted/solved.png");
 
     return EXIT_SUCCESS;
 }

@@ -21,6 +21,7 @@ const char *step_image_paths[8] = {
 GtkImage *step_images[8];
 GtkButton *step_load[8], *step_next_btn[8], *step_back_btn[8];
 GtkButton *solve_load_btn[2], *solve_next_btn[2], *solve_back_btn[2];
+GtkImage *solve_images[2];
 /* ---------- STRUCTS ---------- */
 typedef struct
 {
@@ -37,7 +38,7 @@ char **wordlist_to_wordarray(Wordlist *wordlist)
     {
         words[i] = malloc((wordlist->lengths[i] + 1) * sizeof(char));
         memcpy(words[i], wordlist->words[i], wordlist->lengths[i]);
-        words[wordlist->lengths[i]] = '\0';
+        words[i][wordlist->lengths[i]] = '\0';
     }
 
     wordlist_free(wordlist);
@@ -78,7 +79,7 @@ static void load_action(GtkButton *button, gpointer user_data)
     gtk_file_filter_add_mime_type(filter, "image/jpg");
     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
     // file explorer
-    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)/*  */
+    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
     {
         char *filename =
             gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
@@ -132,14 +133,15 @@ static void load_action(GtkButton *button, gpointer user_data)
 
         mat_inplace_vertical_flatten(m);
 
-        Neural_Network *net = net_load_from_file("assets/ocr/model/grid.nn");
+        Neural_Network *net =
+            net_load_from_file("assets/ocr/model/" MODEL ".nn");
         char res = net_decode_letter(net, m, NULL);
 
         mat_free(m);
         net_free(net);
         g_print("The character is : %c\n", res);
         int **word_pos = grid_solve(grid, words, nb_words);
-        highlight_words((const char *)filename, word_pos, points, nb_words);
+        highlight_words(POSTTREATMENT_FILENAME, word_pos, points, nb_words);
         free_points(points, h_points);
         gtk_widget_set_sensitive(GTK_WIDGET(solve_next_btn[0]), TRUE);
         gtk_widget_set_sensitive(GTK_WIDGET(step_next_btn[0]), TRUE);
@@ -151,6 +153,7 @@ static void load_action(GtkButton *button, gpointer user_data)
                 gtk_widget_set_sensitive(GTK_WIDGET(step_next_btn[i]), TRUE);
         }
 
+        reload_image(solve_images[1], "./extracted/solved.png");
         g_free(filename);
     }
     gtk_widget_destroy(dialog);
@@ -470,17 +473,16 @@ int main(int argc, char *argv[])
     }
 
     /* ---------- SOLVE ---------- */
-    GtkImage *solve_images[2];
-
     create_solve_screen(stack, "solve_load", "solve_save", "menu",
-                        "assets/solved.png", &solve_images[0],
+                        "./assets/logo/image.png", &solve_images[0],
                         &solve_load_btn[0], &solve_next_btn[0],
                         &solve_back_btn[0]);
 
     GtkWidget *solve_save_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);
     gtk_widget_set_halign(solve_save_box, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(solve_save_box, GTK_ALIGN_CENTER);
-    GtkWidget *solve_save_image = gtk_image_new_from_file("assets/solved.png");
+    GtkWidget *solve_save_image =
+        gtk_image_new_from_file("./assets/logo/image.png");
     GtkWidget *save_btn = gtk_button_new_with_label("Save");
     GtkWidget *quit_btn = gtk_button_new_with_label("Quit");
     gtk_widget_set_size_request(save_btn, 120, 30);
