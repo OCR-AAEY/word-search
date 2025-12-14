@@ -395,8 +395,9 @@ int **grid_solve(Grid *grid, char **words, size_t word_len)
         res[i] = malloc(4 * sizeof(int));
         if (res[i] == NULL)
             errx(EXIT_FAILURE, "malloc failed");
-        
-        int e = grid_solve_word(grid, words[i], &res[i][0], &res[i][1], &res[i][2], &res[i][3]);
+
+        int e = grid_solve_word(grid, words[i], &res[i][0], &res[i][1],
+                                &res[i][2], &res[i][3]);
         if (e == 0)
         {
             free(res[i]);
