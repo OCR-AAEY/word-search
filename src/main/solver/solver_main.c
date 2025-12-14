@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 
     int start_h, start_w, end_h, end_w;
 
-    grid_solve(grid, word, &start_h, &start_w, &end_h, &end_w);
+    grid_solve_word(grid, word, &start_h, &start_w, &end_h, &end_w);
 
     grid_free(grid);
 
