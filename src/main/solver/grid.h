@@ -76,7 +76,23 @@ void grid_print(Grid *grid);
 /// @param[out] end_width The width of the end point of the word if it is found.
 /// Otherwise set to -1.
 /// @return Returns 1 if the sought word has been found, 0 otherwise.
-int grid_solve(Grid *grid, char *word, int *start_height, int *start_width,
-               int *end_height, int *end_width);
+int grid_solve_word(Grid *grid, char *word, int *start_height, int *start_width,
+                    int *end_height, int *end_width);
+
+/// @brief Solves a word grid for a list of words and returns their coordinates.
+/// @param[in] grid Pointer to the Grid structure to search in (must not be
+/// NULL).
+/// @param[in] words Array of C strings representing the words to solve
+/// (must not be NULL).
+/// @param[in] word_len Number of words in the @p words array.
+/// @return A dynamically allocated array of int pointers of length
+/// @p word_len. Each entry is either:
+///
+/// - a pointer to an array of 4 integers describing the word position (start
+/// height, start width, end height, end width), or
+///
+/// - NULL if the corresponding word was not found.
+/// @throw Terminates the program if a memory allocation fails.
+int **grid_solve(Grid *grid, char **words, size_t word_len);
 
 #endif
