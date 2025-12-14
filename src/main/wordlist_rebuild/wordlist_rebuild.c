@@ -111,7 +111,7 @@ Wordlist *wordlist_rebuild_from_folder(const char *folder,
             continue;
 
         int letter_count = 0;
-        for (;;)
+        while(1)
         {
             char letter_file[MAX_PATH];
             int m = snprintf(letter_file, sizeof letter_file, "%s/%d.png",
