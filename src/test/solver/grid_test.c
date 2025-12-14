@@ -34,7 +34,7 @@ Test(solver, grid_solve_test_1)
 {
     Grid *grid = grid_load_from_file("./src/test/solver/grid_1.txt");
     int s_h, s_w, e_h, e_w;
-    grid_solve(grid, "HORIZONTAL", &s_h, &s_w, &e_h, &e_w);
+    grid_solve_word(grid, "HORIZONTAL", &s_h, &s_w, &e_h, &e_w);
     grid_free(grid);
 
     cr_expect_eq(s_h, 0);
@@ -47,7 +47,7 @@ Test(solver, grid_solve_test_2)
 {
     Grid *grid = grid_load_from_file("./src/test/solver/grid_1.txt");
     int s_h, s_w, e_h, e_w;
-    grid_solve(grid, "VERTICAL", &s_h, &s_w, &e_h, &e_w);
+    grid_solve_word(grid, "VERTICAL", &s_h, &s_w, &e_h, &e_w);
     grid_free(grid);
 
     cr_expect_eq(s_h, 7);
@@ -60,7 +60,7 @@ Test(solver, grid_solve_test_3)
 {
     Grid *grid = grid_load_from_file("./src/test/solver/grid_1.txt");
     int s_h, s_w, e_h, e_w;
-    grid_solve(grid, "DIAGONAL", &s_h, &s_w, &e_h, &e_w);
+    grid_solve_word(grid, "DIAGONAL", &s_h, &s_w, &e_h, &e_w);
     grid_free(grid);
 
     cr_expect_eq(s_h, 1);
@@ -73,7 +73,7 @@ Test(solver, grid_solve_test_4)
 {
     Grid *grid = grid_load_from_file("./src/test/solver/grid_1.txt");
     int s_h, s_w, e_h, e_w;
-    grid_solve(grid, "FIND", &s_h, &s_w, &e_h, &e_w);
+    grid_solve_word(grid, "FIND", &s_h, &s_w, &e_h, &e_w);
     grid_free(grid);
 
     cr_expect_eq(s_h, 8);
@@ -86,7 +86,7 @@ Test(solver, grid_solve_test_5)
 {
     Grid *grid = grid_load_from_file("./src/test/solver/grid_1.txt");
     int s_h, s_w, e_h, e_w;
-    grid_solve(grid, "HELLO", &s_h, &s_w, &e_h, &e_w);
+    grid_solve_word(grid, "HELLO", &s_h, &s_w, &e_h, &e_w);
     grid_free(grid);
 
     cr_expect_eq(s_h, 8);
@@ -99,7 +99,7 @@ Test(solver, grid_solve_test_6)
 {
     Grid *grid = grid_load_from_file("./src/test/solver/grid_1.txt");
     int s_h, s_w, e_h, e_w;
-    grid_solve(grid, "WORLD", &s_h, &s_w, &e_h, &e_w);
+    grid_solve_word(grid, "WORLD", &s_h, &s_w, &e_h, &e_w);
     grid_free(grid);
 
     cr_expect_eq(s_h, 5);
@@ -112,7 +112,7 @@ Test(solver, grid_solve_test_7)
 {
     Grid *grid = grid_load_from_file("./src/test/solver/grid_1.txt");
     int s_h, s_w, e_h, e_w;
-    grid_solve(grid, "GOLDORAK", &s_h, &s_w, &e_h, &e_w);
+    grid_solve_word(grid, "GOLDORAK", &s_h, &s_w, &e_h, &e_w);
     grid_free(grid);
 
     cr_expect_eq(s_h, 1);
@@ -125,7 +125,7 @@ Test(solver, grid_solve_test_8)
 {
     Grid *grid = grid_load_from_file("./src/test/solver/grid_1.txt");
     int s_h, s_w, e_h, e_w;
-    grid_solve(grid, "EPITA", &s_h, &s_w, &e_h, &e_w);
+    grid_solve_word(grid, "EPITA", &s_h, &s_w, &e_h, &e_w);
     grid_free(grid);
 
     cr_expect_eq(s_h, -1);

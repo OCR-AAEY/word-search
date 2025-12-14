@@ -95,23 +95,27 @@ OBJ_MAIN_FOR_TEST = $(SRC_MAIN:$(MAIN_DIR)/%.c=$(BUILD_DIR)/main_for_test/%.o)
 OBJ_TEST_FOR_TEST = $(SRC_TEST:$(TEST_DIR)/%.c=$(BUILD_DIR)/test/%.o)
 
 # Solver executable.
-BIN_SOLVER       = solver
+BIN_SOLVER           = solver
 # A executable file that displays a matrix from a matrix file.
-BIN_MAT_DISPLAY  = mat_display
+BIN_MAT_DISPLAY      = mat_display
 # OCR neural network training executable.
-BIN_OCR          = ocr_train
+BIN_OCR              = ocr_train
 # OCR dataset generation script.
-BIN_OCR_DATASET  = ocr_dataset
+BIN_OCR_DATASET      = ocr_dataset
 # Program used to apply OCR on a single image.
-BIN_DECODE_IMAGE = decode_image
+BIN_DECODE_IMAGE     = decode_image
 # Rotate test executable.
-BIN_AUTO_ROTATE = rotate
+BIN_AUTO_ROTATE      = rotate
+#Grid rebuild test executable
+BIN_GRID_REBUILD     = grid_rebuild
+#Wordlist rebuild test executable
+BIN_WORDLIST_REBUILD = wordlist_rebuild
 # Locates the elements in the image
-BIN_LOCATION= location
+BIN_LOCATION         = location
 # Main application executable.
-BIN_APP          = app
+BIN_APP              = app
 # Unit tests executable.
-BIN_TEST         = run_tests
+BIN_TEST             = run_tests
 
 # Use to add a dependency to a main function in a make rule. The parameter is the source file containing the main function. You must not provide the extension '.c'.
 define main
@@ -142,10 +146,10 @@ $(BIN_OCR): $(call import,ocr matrix utils) $(call main,ocr/ocr_train_main)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
-# OCR dataset generation target.
-$(BIN_OCR_DATASET): $(call import,matrix image_loader utils pretreatment ocr) $(call main,ocr/ocr_dataset_main)
-	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-	@echo "$@: \033[32mCompilation succeeded\033[0m"
+# # OCR dataset generation target.
+# $(BIN_OCR_DATASET): $(call import,matrix image_loader utils pretreatment ocr) $(call main,ocr/ocr_dataset_main)
+# 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+# 	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
 # Decode image target.
 $(BIN_DECODE_IMAGE): $(call import,matrix image_loader utils pretreatment ocr) $(call main,ocr/decode_letter_main)
@@ -157,13 +161,24 @@ $(BIN_AUTO_ROTATE): $(call import,rotation pretreatment image_loader utils matri
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
+# # Grid rebuild Target.
+# $(BIN_GRID_REBUILD): $(call import,grid_rebuild image_loader matrix ocr pretreatment utils solver location rotation extract_char) $(call main,grid_rebuild/grid_rebuild_main)
+# 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+# 	@echo "$@: \033[32mCompilation succeeded\033[0m"
+
+# # Wordlist rebuild target
+# $(BIN_WORDLIST_REBUILD): $(call import,wordlist_rebuild image_loader matrix ocr pretreatment utils solver location rotation extract_char) $(call main,wordlist_rebuild/wordlist_rebuild_main)
+# 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
+# 	@echo "$@: \033[32mCompilation succeeded\033[0m"
+
+
 # Location target.
 $(BIN_LOCATION): $(filter $(BUILD_MAIN_DIR)/location/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/rotation/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/pretreatment/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/image_loader/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/extract_char/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/utils/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/matrix/%.o,$(OBJ_MAIN)) $(BUILD_MAIN_DIR)/location/location_main.o
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 	@echo "$(BIN_LOCATION): \033[32mCompilation succeeded\033[0m"
 
 # Main app target.
-$(BIN_APP): $(call import,extract_char location ocr rotation utils image_loader matrix pretreatment solver) $(call main,...)
+$(BIN_APP): $(call import,extract_char location ocr rotation utils image_loader matrix pretreatment solver grid_rebuild wordlist_rebuild) $(call main,gui/gui_main)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
 	@echo "$@: \033[32mCompilation succeeded\033[0m"
 
@@ -197,7 +212,7 @@ $(BUILD_DIR)/test/%.o: $(TEST_DIR)/%.c
 
 .PHONY: all run test clean format
 
-all: $(BIN_SOLVER) $(BIN_OCR) $(BIN_APP)
+all: $(BIN_SOLVER) $(BIN_MAT_DISPLAY) $(BIN_OCR) $(BIN_DECODE_IMAGE) $(BIN_AUTO_ROTATE) $(BIN_LOCATION) $(BIN_APP)
 
 run: $(BIN_APP)
 	@echo "Running app..."
@@ -217,6 +232,8 @@ clean:
 	@rm -rf $(BIN_OCR_DATASET)
 	@rm -rf $(BIN_DECODE_IMAGE)
 	@rm -rf $(BIN_AUTO_ROTATE)
+	@rm -rf $(BIN_GRID_REBUILD)
+	@rm -rf $(BIN_WORDLIST_REBUILD)
 	@rm -rf $(BIN_LOCATION)
 	@rm -rf $(BIN_APP)
 	@rm -rf $(BIN_TEST)

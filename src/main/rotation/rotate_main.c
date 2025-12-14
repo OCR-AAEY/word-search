@@ -15,6 +15,8 @@ int main()
     Matrix *threshold = adaptative_gaussian_thresholding(gray, 255, 11, 10, 5);
     Matrix *rotated = auto_deskew_matrix(threshold);
     int status_export = export_matrix(rotated, ROTATED_FILENAME);
+    if (status_export != 0)
+        return EXIT_FAILURE;
     free_image(img);
     mat_free(threshold);
     mat_free(gray);
