@@ -78,28 +78,27 @@ static void load_action(GtkButton *button, gpointer user_data)
     gtk_file_filter_add_mime_type(filter, "image/jpg");
     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
     // file explorer
-    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
+    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)/*  */
     {
         char *filename =
             gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-        // solver launch
-        Point **points;
 
+        Point **points;
         size_t h_points;
         size_t w_points;
+        int e = locate_and_extract_letters_png((const char *)filename, &points,
+                                               &h_points, &w_points);
+        if (e != 0)
+            g_print("invalid file");
+
+        gtk_image_set_from_file(data->current_image, filename);
+
         Grid *grid = grid_rebuild_from_folder_with_model(
             "./extracted/grid", "./assets/ocr/model/" MODEL ".nn");
         Wordlist *wordlist = wordlist_rebuild_from_folder(
             "./extracted/words", "./assets/ocr/model/" MODEL ".nn");
         size_t nb_words = wordlist->count;
         char **words = wordlist_to_wordarray(wordlist);
-        int e = locate_and_extract_letters_png((const char *)filename, &points,
-                                               &h_points, &w_points);
-        if (e)
-        {
-            g_print("invalid file");
-        }
-        gtk_image_set_from_file(data->current_image, filename);
 
         ImageData *img = load_image(filename);
 
@@ -139,8 +138,8 @@ static void load_action(GtkButton *button, gpointer user_data)
         mat_free(m);
         net_free(net);
         g_print("The character is : %c\n", res);
-        int **structure = grid_solve(grid, words, nb_words);
-        highlight_words((const char *)filename, structure, points, nb_words);
+        int **word_pos = grid_solve(grid, words, nb_words);
+        highlight_words((const char *)filename, word_pos, points, nb_words);
         free_points(points, h_points);
         gtk_widget_set_sensitive(GTK_WIDGET(solve_next_btn[0]), TRUE);
         gtk_widget_set_sensitive(GTK_WIDGET(step_next_btn[0]), TRUE);
