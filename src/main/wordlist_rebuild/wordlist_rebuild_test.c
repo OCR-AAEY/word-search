@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include "wordlist_rebuild.h"
+#include <stdio.h>
 
 int main(void)
 {

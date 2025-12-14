@@ -16,8 +16,7 @@ typedef struct Grid
 /// @param folder Path to the folder containing extracted grid cells.
 /// @param model_path Path to the OCR model file.
 /// @return Pointer to a newly allocated Grid on success, NULL on failure.
-Grid *grid_rebuild_from_folder_with_model(const char *folder, const char *model_path);
-
-
+Grid *grid_rebuild_from_folder_with_model(const char *folder,
+                                          const char *model_path);
 
 #endif

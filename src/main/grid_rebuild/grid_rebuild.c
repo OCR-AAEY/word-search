@@ -1,8 +1,8 @@
 #include "grid_rebuild.h"
 
+#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <dirent.h>
 #include <string.h>
 
 #include "image_loader/image_loading.h"
@@ -11,8 +11,6 @@
 #include "pretreatment/pretreatment.h"
 
 #define MAX_PATH 512
-
-
 
 static void build_cell_path(char *out, size_t outsz, const char *folder,
                             size_t r, size_t c)
@@ -35,7 +33,7 @@ static char recognize_letter_from_png(const char *path, Neural_Network *net)
     mat_free(m);
     m = tmp;
 
-    mat_inplace_toggle(m); 
+    mat_inplace_toggle(m);
 
     tmp = mat_strip_margins(m);
     mat_free(m);
@@ -69,8 +67,10 @@ static int detect_grid_size(const char *folder, size_t *rows, size_t *cols)
         int r, c;
         if (sscanf(entry->d_name, "(%d_%d).png", &r, &c) == 2)
         {
-            if (r > max_row) max_row = r;
-            if (c > max_col) max_col = c;
+            if (r > max_row)
+                max_row = r;
+            if (c > max_col)
+                max_col = c;
         }
     }
     closedir(d);
@@ -83,8 +83,8 @@ static int detect_grid_size(const char *folder, size_t *rows, size_t *cols)
     return 0;
 }
 
-
-Grid *grid_rebuild_from_folder_with_model(const char *folder, const char *model_path)
+Grid *grid_rebuild_from_folder_with_model(const char *folder,
+                                          const char *model_path)
 {
     if (!folder || !model_path)
         return NULL;
@@ -131,4 +131,3 @@ Grid *grid_rebuild_from_folder_with_model(const char *folder, const char *model_
     net_free(net);
     return g;
 }
-
