@@ -277,6 +277,7 @@ int draw_boundingboxes(cairo_t *cr, BoundingBox **boxes, size_t nb_boxes)
     return EXIT_SUCCESS;
 }
 
+
 int draw_boundingboxes_on_img(BoundingBox **boxes, size_t nb_boxes,
                               const char *input_filename,
                               const char *output_filename)
@@ -423,3 +424,55 @@ int export_matrix(Matrix *src, const char *filename)
     free_image(img);
     return success ? EXIT_SUCCESS : EXIT_FAILURE;
 }
+
+
+
+int draw_highlighting_line(cairo_t *cr, int xs, int xf, int ys, int yf,
+    float r,float g , float b)
+{
+    if (cr == NULL)
+    {
+        fprintf(stderr,
+                "draw_highlighting_line: Cairo context is NULL, impossible to "
+                "draw\n");
+        return EXIT_FAILURE;
+    }
+    cairo_set_source_rgba(cr, r, g, b, 0.5); //color with 50% opacity
+    cairo_set_line_width(cr, 10);             // Thicker line for highlighting
+    cairo_move_to(cr, xs, ys);
+    cairo_line_to(cr, xf, yf);
+    cairo_stroke(cr);
+    return EXIT_SUCCESS;
+}
+
+int highlight_words(const char *input_filename,int ** coord ,Point** intersections,
+     size_t h_points, size_t w_points,size_t len)
+{
+    cairo_t *cr;
+    cairo_surface_t *surface;
+    surface = cairo_image_surface_create_from_png(input_filename);
+    if (cairo_surface_status(surface) != CAIRO_STATUS_SUCCESS)
+    {
+        fprintf(stderr,
+                "highligh_words: Failed to load the image with cairo\n");
+        cairo_surface_destroy(surface);
+        return EXIT_FAILURE;
+    }
+    cr = cairo_create(surface);
+    
+    for(size_t i=0; i < len; i++) {
+        if(coord[i]!=NULL){
+        int ys = intersections[coord[i][0]][coord[i][1]].y;
+        int xs = intersections[coord[i][0]][coord[i][1]].x; // Start x from the first intersection
+        int yf = intersections[coord[i][2]][coord[i][3]].y;
+        int xf = intersections[coord[i][2]][coord[i][3]].x; // End x at the last intersection
+        draw_highlighting_line(cr, xs, xf, ys, yf, 1.0, 1.0, 0.0); // color
+        }
+    }
+    return EXIT_SUCCESS;
+
+
+
+}
+// coord [ ys , xs , yf , xf ]
+/// intersections [h][w]
