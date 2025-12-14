@@ -168,6 +168,7 @@ int main(void)
 }
 */
 
+/*
 void dataset_images_to_matrices(const char *input_dir_name)
 {
     // The error status variable.
@@ -327,6 +328,7 @@ void dataset_images_to_matrices(const char *input_dir_name)
         closedir(img_letter_dir_stream);
     }
 }
+*/
 
 void save_to_file(char *dirname)
 {
