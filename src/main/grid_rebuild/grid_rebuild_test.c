@@ -11,7 +11,7 @@ int main(void)
     printf("=== GRID REBUILD TEST ===\n");
 
     // Extract letters first (assumes GRID_DIR will be populated)
-    if (locate_and_extract_letters_png(LEVEL_1_IMG_2) != 0)
+    if (locate_and_extract_letters_png(LEVEL_2_IMG_1) != 0)
     {
         fprintf(stderr, "Letter extraction failed\n");
         return 1;
@@ -19,7 +19,7 @@ int main(void)
 
     // Rebuild the grid; rows and columns are detected automatically
     Grid *g = grid_rebuild_from_folder_with_model(GRID_DIR,
-                                                  "assets/ocr/model/grid.nn");
+                                                  "assets/ocr/model/real.nn");
     if (!g)
     {
         fprintf(stderr, "Grid rebuild failed\n");

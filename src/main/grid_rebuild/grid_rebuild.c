@@ -9,6 +9,7 @@
 #include "matrix/matrix.h"
 #include "ocr/neural_network.h"
 #include "pretreatment/pretreatment.h"
+#include "pretreatment/visualization.h"
 
 #define MAX_PATH 512
 
@@ -29,13 +30,14 @@ static char recognize_letter_from_png(const char *path, Neural_Network *net)
     if (!m)
         return '?';
 
-    Matrix *tmp = adaptative_gaussian_thresholding(m, 1.0f, 11, 10, 5);
-    mat_free(m);
-    m = tmp;
+    // Matrix *tmp = adaptative_gaussian_thresholding(m, 1.0f, 3, 1, 1);
+    // export_matrix(tmp, "test.png");
+    // mat_free(m);
+    // m = tmp;
 
     mat_inplace_toggle(m);
 
-    tmp = mat_strip_margins(m);
+    Matrix *tmp = mat_strip_margins(m);
     mat_free(m);
     if (!tmp)
         return '?';
@@ -65,7 +67,7 @@ static int detect_grid_size(const char *folder, size_t *rows, size_t *cols)
     while ((entry = readdir(d)) != NULL)
     {
         int r, c;
-        if (sscanf(entry->d_name, "(%d_%d).png", &r, &c) == 2)
+        if (sscanf(entry->d_name, "(%d_%d).png", &c, &r) == 2)
         {
             if (r > max_row)
                 max_row = r;
