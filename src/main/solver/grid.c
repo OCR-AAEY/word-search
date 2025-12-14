@@ -188,8 +188,8 @@ void grid_print(Grid *grid)
     }
 }
 
-int grid_solve(Grid *grid, char *word, int *start_height, int *start_width,
-               int *end_height, int *end_width)
+int grid_solve_word(Grid *grid, char *word, int *start_height, int *start_width,
+                    int *end_height, int *end_width)
 {
     // Obtaining the sought word's length.
     size_t word_length = 0;
@@ -382,4 +382,27 @@ int grid_solve(Grid *grid, char *word, int *start_height, int *start_width,
 
     free(reversed_word);
     return 0;
+}
+
+int **grid_solve(Grid *grid, char **words, size_t word_len)
+{
+    int **res = malloc(word_len * sizeof(int *));
+    if (res == NULL)
+        errx(EXIT_FAILURE, "malloc failed");
+
+    for (size_t i = 0; i < word_len; ++i)
+    {
+        res[i] = malloc(4 * sizeof(int));
+        if (res[i] == NULL)
+            errx(EXIT_FAILURE, "malloc failed");
+        
+        int e = grid_solve_word(grid, words[i], &res[i][0], &res[i][1], &res[i][2], &res[i][3]);
+        if (e == 0)
+        {
+            free(res[i]);
+            res[i] = NULL;
+        }
+    }
+
+    return res;
 }
