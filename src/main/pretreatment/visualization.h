@@ -137,3 +137,6 @@ int export_matrix(Matrix *src, const char *filename);
 /// @return Pointer to a newly allocated ImageData containing RGB pixels or NULL
 /// on failure.
 ImageData *pixel_matrix_to_image(Matrix *matrix);
+
+int highlight_words(const char *input_filename, int **coord,
+                    Point **intersections, size_t len);
