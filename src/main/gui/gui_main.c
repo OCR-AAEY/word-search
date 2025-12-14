@@ -102,7 +102,8 @@ static void load_action(GtkButton *button, gpointer user_data)
             "./extracted/words", "./assets/ocr/model/" MODEL ".nn");
         printf("Found %d words:\n", wordlist->count);
         for (int i = 0; i < wordlist->count; i++)
-            printf("%s (length %d)\n", wordlist->words[i], wordlist->lengths[i]);
+            printf("%s (length %d)\n", wordlist->words[i],
+                   wordlist->lengths[i]);
         size_t nb_words = wordlist->count;
         char **words = wordlist_to_wordarray(wordlist);
 
