@@ -256,11 +256,31 @@ static int extract_words_and_letters(Matrix *processed_img,
     return EXIT_SUCCESS;
 }
 
-int locate_and_extract_letters_png(const char *input_image)
+int locate_and_extract_letters_png(const char *input_image,
+                                   Point ***out_intersection_points,
+                                   size_t *out_h_points, size_t *out_w_points)
 {
     cleanup_folders();
     setup_folders();
     int status_export;
+
+    if (out_intersection_points == NULL)
+    {
+        fprintf(stderr, "Invalid argument : out_intersection_points is NULL\n");
+        return EXIT_FAILURE;
+    }
+
+    if (out_h_points == NULL)
+    {
+        fprintf(stderr, "Invalid argument : out_h_points is NULL\n");
+        return EXIT_FAILURE;
+    }
+
+    if (out_w_points == NULL)
+    {
+        fprintf(stderr, "Invalid argument : out_w_points is NULL\n");
+        return EXIT_FAILURE;
+    }
 
     Matrix *rotated = NULL;
     Matrix *processed_img = load_and_preprocess_image(input_image, &rotated);
@@ -271,27 +291,27 @@ int locate_and_extract_letters_png(const char *input_image)
         return EXIT_FAILURE;
     }
 
-    size_t h_points = 0, w_points = 0;
-    Point **points = detect_grid_points(rotated, &w_points, &h_points);
+    *out_intersection_points =
+        detect_grid_points(rotated, out_w_points, out_h_points);
     mat_free(rotated);
-    if (points == NULL)
+    if (*out_intersection_points == NULL)
     {
         mat_free(processed_img);
         return EXIT_FAILURE;
     }
 
-    int grid_cells_status =
-        extract_grid_cells(processed_img, points, h_points, w_points);
+    int grid_cells_status = extract_grid_cells(
+        processed_img, *out_intersection_points, *out_h_points, *out_w_points);
     if (grid_cells_status != 0)
     {
         fprintf(stderr, "Failed to export grid cells\n");
         mat_free(processed_img);
-        free_points(points, h_points);
+        free_points(*out_intersection_points, *out_h_points);
         return EXIT_FAILURE;
     }
 
-    BoundingBox *grid_box = get_bounding_box_grid(points, h_points, w_points);
-    free_points(points, h_points);
+    BoundingBox *grid_box = get_bounding_box_grid(*out_intersection_points,
+                                                  *out_h_points, *out_w_points);
 
     if (grid_box == NULL)
     {
