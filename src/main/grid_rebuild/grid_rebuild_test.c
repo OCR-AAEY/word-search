@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#include "location/letters_extraction.h"
 #include "grid_rebuild.h"
+#include "location/letters_extraction.h"
 #include "solver/grid.h"
 #include "utils/utils.h"
 
@@ -25,8 +25,8 @@ int main(void)
         return 1;
     }
 
-    printf("Grid successfully rebuilt (%zu rows x %zu cols):\n",
-           g->height, g->width);
+    printf("Grid successfully rebuilt (%zu rows x %zu cols):\n", g->height,
+           g->width);
 
     // Print and free
     grid_print(g);
