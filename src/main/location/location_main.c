@@ -69,11 +69,17 @@ int main(int argc, char **argv)
         }
     }
 
-    int status = locate_and_extract_letters_png(image_path);
+    Point **intersection_points;
+    size_t h, w;
+
+    int status = locate_and_extract_letters_png(image_path,
+                                                &intersection_points, &h, &w);
     if (status != 0)
     {
         fprintf(stderr, "Failed to locate and extract letters to png\n");
         return EXIT_FAILURE;
     }
+
+    free_points(intersection_points, h);
     return EXIT_SUCCESS;
 }
