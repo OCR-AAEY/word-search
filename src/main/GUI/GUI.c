@@ -97,6 +97,7 @@ static void load_action(GtkButton *button, gpointer user_data)
 
         Grid *grid = grid_rebuild_from_folder_with_model(
             "./extracted/grid", "./assets/ocr/model/" MODEL ".nn");
+        grid_print(grid);
         Wordlist *wordlist = wordlist_rebuild_from_folder(
             "./extracted/words", "./assets/ocr/model/" MODEL ".nn");
         size_t nb_words = wordlist->count;
