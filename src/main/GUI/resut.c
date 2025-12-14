@@ -1,8 +1,9 @@
-#include <gtk/gtk.h>
 #include <cairo.h>
+#include <gtk/gtk.h>
 
 // Callback function for drawing
-gboolean on_draw(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
+gboolean on_draw(GtkWidget *widget, cairo_t *cr, gpointer user_data)
+{
     // Set the drawing color (RGB format, values between 0 and 1)
     cairo_set_source_rgb(cr, 0.0, 0.0, 1.0); // Blue color
 
@@ -12,14 +13,15 @@ gboolean on_draw(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
 
     // Draw a red line
     cairo_set_source_rgb(cr, 1.0, 0.0, 0.0); // Red color
-    cairo_move_to(cr, 50, 50); // Start at (50, 50)
-    cairo_line_to(cr, 350, 350); // End at (350, 350)
-    cairo_stroke(cr); // Draw the line
+    cairo_move_to(cr, 50, 50);               // Start at (50, 50)
+    cairo_line_to(cr, 350, 350);             // End at (350, 350)
+    cairo_stroke(cr);                        // Draw the line
 
     return FALSE; // Returning FALSE allows GTK to handle further drawing
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     GtkWidget *window;
     GtkWidget *drawing_area;
 
@@ -49,4 +51,3 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-
