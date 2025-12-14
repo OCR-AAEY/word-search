@@ -74,12 +74,14 @@ int main(int argc, char **argv)
 
     int status = locate_and_extract_letters_png(image_path,
                                                 &intersection_points, &h, &w);
+
+    free_points(intersection_points, h);
+
     if (status != 0)
     {
         fprintf(stderr, "Failed to locate and extract letters to png\n");
         return EXIT_FAILURE;
     }
 
-    free_points(intersection_points, h);
     return EXIT_SUCCESS;
 }
