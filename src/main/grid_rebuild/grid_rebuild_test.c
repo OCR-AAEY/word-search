@@ -5,6 +5,7 @@
 #include "solver/grid.h"
 #include "utils/utils.h"
 
+#ifndef UNIT_TEST
 int main(void)
 {
     printf("=== GRID REBUILD TEST ===\n");
@@ -34,3 +35,4 @@ int main(void)
 
     return 0;
 }
+#endif
