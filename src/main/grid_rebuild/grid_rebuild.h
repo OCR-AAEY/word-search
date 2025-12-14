@@ -3,29 +3,21 @@
 
 #include <stddef.h>
 
-/*
- * Forward declaration.
- * The real definition is in solver/grid.h
- */
-typedef struct Grid Grid;
+typedef struct Grid
+{
+    size_t height;
+    size_t width;
+    char *content;
+} Grid;
 
-/*
- * Rebuilds the grid by recognizing each cell image with an OCR neural network.
- *
- * folder:
- *   Path to extracted grid cells (ex: "extracted/grid")
- *
- * rows / cols:
- *   Grid dimensions (ex: 17x17)
- *
- * model_path:
- *   Path to the OCR neural network model
- *
- * Returns:
- *   A newly allocated Grid* (must be freed with grid_free),
- *   or NULL on error.
- */
-Grid *grid_rebuild_from_folder_with_model(const char *folder, size_t rows,
-                                          size_t cols, const char *model_path);
+/// @brief Rebuild a grid from the extracted folder using the OCR model.
+///        The function automatically detects the number of rows and columns
+///        from the folder contents.
+/// @param folder Path to the folder containing extracted grid cells.
+/// @param model_path Path to the OCR model file.
+/// @return Pointer to a newly allocated Grid on success, NULL on failure.
+Grid *grid_rebuild_from_folder_with_model(const char *folder, const char *model_path);
 
-#endif /* GRID_REBUILD_H */
+
+
+#endif
