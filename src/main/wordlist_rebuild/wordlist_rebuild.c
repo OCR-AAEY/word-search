@@ -80,7 +80,8 @@ static char read_letter(const char *path, Neural_Network *net)
     return c;
 }
 
-Wordlist *wordlist_rebuild_from_folder(const char *folder, const char *model_path)
+Wordlist *wordlist_rebuild_from_folder(const char *folder,
+                                       const char *model_path)
 {
     if (folder == NULL || model_path == NULL)
     {
