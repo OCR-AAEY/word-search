@@ -470,6 +470,8 @@ int highlight_words(const char *input_filename, int **coord,
             draw_highlighting_line(cr, xs, xf, ys, yf, 1.0, 1.0, 0.0); // color
         }
     }
+    cairo_surface_write_to_png(surface, "extracted/solved.png");   
+
     return EXIT_SUCCESS;
 }
 // coord [ ys , xs , yf , xf ]

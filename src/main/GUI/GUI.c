@@ -88,9 +88,9 @@ static void load_action(GtkButton *button, gpointer user_data)
         size_t h_points;
         size_t w_points;
         Grid *grid = grid_rebuild_from_folder_with_model(
-            "./extracted", "./asset/ocr/model/" MODEL ".nn");
+            "./extracted/grid", "./assets/ocr/model/" MODEL ".nn");
         Wordlist *wordlist = wordlist_rebuild_from_folder(
-            "./extracted", "./asset/ocr/model/" MODEL ".nn");
+            "./extracted/words", "./assets/ocr/model/" MODEL ".nn");
         size_t nb_words = wordlist->count;
         char **words = wordlist_to_wordarray(wordlist);
         int e = locate_and_extract_letters_png((const char *)filename, &points,
