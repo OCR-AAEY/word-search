@@ -48,6 +48,7 @@ char **wordlist_to_wordarray(Wordlist *wordlist)
 
 static void exit_app(GtkButton *b, gpointer win)
 {
+    (void)b;
     gtk_widget_destroy(GTK_WIDGET(win));
 }
 
@@ -481,19 +482,19 @@ int main(int argc, char *argv[])
     GtkWidget *solve_save_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);
     gtk_widget_set_halign(solve_save_box, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(solve_save_box, GTK_ALIGN_CENTER);
-    GtkWidget *solve_save_image =
-        gtk_image_new_from_file("./assets/logo/image.png");
+    // GtkWidget *solve_save_image =
+    // gtk_image_new_from_file("./assets/logo/image.png");
+    GtkWidget *image = gtk_image_new_from_file("./assets/logo/image.png");
+    solve_images[1] = GTK_IMAGE(image);
     GtkWidget *save_btn = gtk_button_new_with_label("Save");
     GtkWidget *quit_btn = gtk_button_new_with_label("Quit");
     gtk_widget_set_size_request(save_btn, 120, 30);
     gtk_widget_set_size_request(quit_btn, 120, 30);
-    gtk_box_pack_start(GTK_BOX(solve_save_box), solve_save_image, FALSE, FALSE,
-                       5);
+    gtk_box_pack_start(GTK_BOX(solve_save_box), image, FALSE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(solve_save_box), save_btn, FALSE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(solve_save_box), quit_btn, FALSE, FALSE, 5);
     gtk_stack_add_named(stack, solve_save_box, "solve_save");
-    g_signal_connect(save_btn, "clicked", G_CALLBACK(save_image_action),
-                     solve_save_image);
+    g_signal_connect(save_btn, "clicked", G_CALLBACK(save_image_action), image);
     g_signal_connect(quit_btn, "clicked", G_CALLBACK(exit_app), window);
 
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);

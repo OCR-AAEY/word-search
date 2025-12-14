@@ -435,7 +435,7 @@ int draw_highlighting_line(cairo_t *cr, int xs, int xf, int ys, int yf, float r,
         return EXIT_FAILURE;
     }
     cairo_set_source_rgba(cr, r, g, b, 0.5); // color with 50% opacity
-    cairo_set_line_width(cr, 10);            // Thicker line for highlighting
+    cairo_set_line_width(cr, 20);            // Thicker line for highlighting
     cairo_move_to(cr, xs, ys);
     cairo_line_to(cr, xf, yf);
     cairo_stroke(cr);
@@ -475,7 +475,8 @@ int highlight_words(const char *input_filename, int **coord,
                       intersections[coord[i][3] + 1][coord[i][2] + 1].x) /
                      2;
             // End x at the last intersection
-            draw_highlighting_line(cr, xs, xf, ys, yf, 1.0, 1.0, 0.0); // color
+            draw_highlighting_line(cr, xs, xf, ys, yf, 0.827, 0.001,
+                                   0.99); // color
         }
     }
     cairo_surface_write_to_png(surface, "extracted/solved.png");
