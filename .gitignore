@@ -16,6 +16,11 @@ extracted/
 /rotation
 /app
 /run_tests
+/decode_image
+/mat_display
+/ocr_train
+/rotate
+/solver
 
 # IDEs
 .idea/
