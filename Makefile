@@ -134,58 +134,58 @@ endef
 # Solver target.
 $(BIN_SOLVER): $(call import,solver) $(call main,solver/solver_main)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-	@echo "$@: \033[32mCompilation succeeded\033[0m"
+	@echo -e "$@: \033[32mCompilation succeeded\033[0m"
 
 # Matrix display target.
 $(BIN_MAT_DISPLAY): $(call import,matrix utils/random) $(call main,matrix/mat_display_main)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-	@echo "$@: \033[32mCompilation succeeded\033[0m"
+	@echo -e "$@: \033[32mCompilation succeeded\033[0m"
 
 # OCR neural network training target.
 $(BIN_OCR): $(call import,ocr matrix utils) $(call main,ocr/ocr_train_main)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-	@echo "$@: \033[32mCompilation succeeded\033[0m"
+	@echo -e "$@: \033[32mCompilation succeeded\033[0m"
 
 # # OCR dataset generation target.
 # $(BIN_OCR_DATASET): $(call import,matrix image_loader utils pretreatment ocr) $(call main,ocr/ocr_dataset_main)
 # 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-# 	@echo "$@: \033[32mCompilation succeeded\033[0m"
+# 	@echo -e "$@: \033[32mCompilation succeeded\033[0m"
 
 # Decode image target.
 $(BIN_DECODE_IMAGE): $(call import,matrix image_loader utils pretreatment ocr) $(call main,ocr/decode_letter_main)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-	@echo "$@: \033[32mCompilation succeeded\033[0m"
+	@echo -e "$@: \033[32mCompilation succeeded\033[0m"
 
 # Auto rotation target.
 $(BIN_AUTO_ROTATE): $(call import,rotation pretreatment image_loader utils matrix) $(call main,rotation/rotate_main)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-	@echo "$@: \033[32mCompilation succeeded\033[0m"
+	@echo -e "$@: \033[32mCompilation succeeded\033[0m"
 
 # # Grid rebuild Target.
 # $(BIN_GRID_REBUILD): $(call import,grid_rebuild image_loader matrix ocr pretreatment utils solver location rotation extract_char) $(call main,grid_rebuild/grid_rebuild_main)
 # 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-# 	@echo "$@: \033[32mCompilation succeeded\033[0m"
+# 	@echo -e "$@: \033[32mCompilation succeeded\033[0m"
 
 # # Wordlist rebuild target
 # $(BIN_WORDLIST_REBUILD): $(call import,wordlist_rebuild image_loader matrix ocr pretreatment utils solver location rotation extract_char) $(call main,wordlist_rebuild/wordlist_rebuild_main)
 # 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-# 	@echo "$@: \033[32mCompilation succeeded\033[0m"
+# 	@echo -e "$@: \033[32mCompilation succeeded\033[0m"
 
 
 # Location target.
 $(BIN_LOCATION): $(filter $(BUILD_MAIN_DIR)/location/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/rotation/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/pretreatment/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/image_loader/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/extract_char/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/utils/%.o,$(OBJ_MAIN)) $(filter $(BUILD_MAIN_DIR)/matrix/%.o,$(OBJ_MAIN)) $(BUILD_MAIN_DIR)/location/location_main.o
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-	@echo "$(BIN_LOCATION): \033[32mCompilation succeeded\033[0m"
+	@echo -e "$(BIN_LOCATION): \033[32mCompilation succeeded\033[0m"
 
 # Main app target.
 $(BIN_APP): $(call import,extract_char location ocr rotation utils image_loader matrix pretreatment solver grid_rebuild wordlist_rebuild) $(call main,gui/gui_main)
 	$(CC) $(CFLAGS) $(XCFLAGS) $^ -o $@ $(LIB_FLAGS)
-	@echo "$@: \033[32mCompilation succeeded\033[0m"
+	@echo -e "$@: \033[32mCompilation succeeded\033[0m"
 
 # Unit tests target.
 $(BIN_TEST): $(OBJ_MAIN_FOR_TEST) $(OBJ_TEST_FOR_TEST)
 	$(CC) $(CFLAGS) $(XCFLAGS) $(TEST_FLAGS) $^ -o $@ $(LIB_FLAGS) $(TEST_LIB_FLAGS)
-	@echo "$@: \033[32mCompilation succeeded\033[0m"
+	@echo -e "$@: \033[32mCompilation succeeded\033[0m"
 
 ##############################
 #        PATTERN RULES       #
@@ -215,17 +215,17 @@ $(BUILD_DIR)/test/%.o: $(TEST_DIR)/%.c
 all: $(BIN_SOLVER) $(BIN_MAT_DISPLAY) $(BIN_OCR) $(BIN_DECODE_IMAGE) $(BIN_AUTO_ROTATE) $(BIN_LOCATION) $(BIN_APP)
 
 run: $(BIN_APP)
-	@echo "Running app..."
+	@echo -e "Running app..."
 	@./$<
 
 test: $(BIN_TEST)
-	@echo "Running unit tests..."
+	@echo -e "Running unit tests..."
 	@./$< --verbose
 
 clean:
-	@echo "Cleaning build files..."
+	@echo -e "Cleaning build files..."
 	@rm -rf $(BUILD_DIR)
-	@echo "Cleaning executables..."
+	@echo -e "Cleaning executables..."
 	@rm -rf $(BIN_SOLVER)
 	@rm -rf $(BIN_MAT_DISPLAY)
 	@rm -rf $(BIN_OCR)
@@ -237,15 +237,15 @@ clean:
 	@rm -rf $(BIN_LOCATION)
 	@rm -rf $(BIN_APP)
 	@rm -rf $(BIN_TEST)
-	@echo "Cleaning test files..."
+	@echo -e "Cleaning test files..."
 	@rm -rf save_and_load_random_test.matrix
 	@rm -rf save_and_load_test.matrix
 	@rm -rf save_and_load_random_test.dataset
-	@echo "Cleaning misc files..."
+	@echo -e "Cleaning misc files..."
 	@rm -rf extracted/
-	@echo "\033[32mClean succeeded\033[0m"
+	@echo -e "\033[32mClean succeeded\033[0m"
 
 format:
-	@echo "Formatting source files..."
+	@echo -e "Formatting source files..."
 	@find . -iname '*.h' -o -iname '*.c' | xargs clang-format -i
-	@echo "\033[32mFormatting succeeded\033[0m"
+	@echo -e "\033[32mFormatting succeeded\033[0m"
