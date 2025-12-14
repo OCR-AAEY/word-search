@@ -1,16 +1,19 @@
-#include "../location/letters_extraction.h"
-#include "../utils/utils.h"
+#include "image_loader/image_loading.h"
+#include "location/letters_extraction.h"
+#include "ocr/neural_network.h"
+#include "pretreatment/pretreatment.h"
+#include "pretreatment/vizualization.h"
+#include "utils/utils.h"
 #include <gtk/gtk.h>
 
 /* ----------GLOBALS------------ */
-const char *step_image_paths[10] = {
+const char *step_image_paths[8] = {
     "assets/logo/image.png",       ROTATED_FILENAME,
     POSTTREATMENT_FILENAME,        HOUGHLINES_VISUALIZATION_FILENAME,
     WORDS_BOUNDING_BOXES_FILENAME, LETTERS_BOUNDING_BOXES_FILENAME,
-    "assets/steps/7.png",          "assets/steps/8.png",
-    "assets/steps/9.png",          "assets/solved.png"};
-GtkImage *step_images[10];
-GtkButton *step_load[10], *step_next_btn[10], *step_back_btn[10];
+    "extracted/grid/(0_0).png",    "extracted/solved.png"};
+GtkImage *step_images[8];
+GtkButton *step_load[8], *step_next_btn[8], *step_back_btn[8];
 GtkButton *solve_load_btn[2], *solve_next_btn[2], *solve_back_btn[2];
 /* ---------- STRUCTS ---------- */
 typedef struct
@@ -58,22 +61,69 @@ static void load_action(GtkButton *button, gpointer user_data)
         char *filename =
             gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
         // solver launch
-        int e = locate_and_extract_letters_png((const char *)filename);
+        Point *** points;
+
+        size_t out_h_points;
+        size_t out_w_points;
+        Grid grid;
+        char ** words;
+        size_t nb_words;
+        int e = locate_and_extract_letters_png((const char *)filename,points
+                                               &out_h_points, &out_w_points);
         if (e)
         {
-            g_print("invalid file\n");
+            g_print("invalid file");
         }
-        /*gtk_image_set_from_file(data->current_image, filename);
-        if (data->next_btn)
-            gtk_widget_set_sensitive(GTK_WIDGET(data->next_btn), TRUE);*/
         gtk_image_set_from_file(data->current_image, filename);
+
+        ImageData *img = load_image(filename);
+
+        Matrix *m, *tmp;
+        m = image_to_grayscale(img);
+        free_image(img);
+
+        tmp = adaptative_gaussian_thresholding(m, 1.0f, 11, 10, 5);
+        mat_free(m);
+        m = tmp;
+
+        mat_inplace_to_one_hot(m);
+
+        mat_inplace_toggle(m);
+
+        tmp = morph_transform(m, 2, Closing);
+        mat_free(m);
+        m = tmp;
+
+        tmp = morph_transform(m, 2, Opening);
+        mat_free(m);
+        m = tmp;
+
+        tmp = mat_strip_margins(m);
+        mat_free(m);
+        m = tmp;
+
+        tmp = mat_scale_to_28(m, 0.0f);
+        mat_free(m);
+        m = tmp;
+
+        mat_inplace_vertical_flatten(m);
+
+        Neural_Network *net = net_load_from_file(
+            "assets/ocr/model/grid.nn");
+        char res = net_decode_letter(net, m, NULL);
+
+        mat_free(m);
+        net_free(net);
+        g_print("The character is : %c\n", res);
+        int ** structure = grid_solve(grid, words,nb_words);
+        highlight_words((const char *)filename, points,structure  ,out_h_points,out_w_points,nb_words);
+        free_points(points, h_points);
         gtk_widget_set_sensitive(GTK_WIDGET(solve_next_btn[0]), TRUE);
         gtk_widget_set_sensitive(GTK_WIDGET(step_next_btn[0]), TRUE);
         /* Reload all step images from disk */
-        for (int i = 1; i < 10; i++)
+        for (int i = 1; i < 8; i++)
         {
             reload_image(step_images[i], step_image_paths[i]);
-
             if (step_next_btn[i])
                 gtk_widget_set_sensitive(GTK_WIDGET(step_next_btn[i]), TRUE);
         }
@@ -186,7 +236,7 @@ GtkWidget *create_step_screen(GtkStack *stack, const char *label_text,
                               const char *image_path, GtkImage **out_image,
                               GtkButton **out_load_btn,
                               GtkButton **out_next_btn,
-                              GtkButton **out_back_btn)
+                              GtkButton **out_back_btn, int step_index)
 {
 
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);
@@ -194,6 +244,7 @@ GtkWidget *create_step_screen(GtkStack *stack, const char *label_text,
     gtk_widget_set_valign(box, GTK_ALIGN_CENTER);
 
     GtkWidget *image = gtk_image_new_from_file(image_path); // unique image
+
     GtkWidget *label = gtk_label_new(label_text);
 
     GtkWidget *next_btn = NULL;
@@ -208,6 +259,12 @@ GtkWidget *create_step_screen(GtkStack *stack, const char *label_text,
     gtk_widget_set_size_request(back_btn, 120, 30);
 
     gtk_box_pack_start(GTK_BOX(box), image, FALSE, FALSE, 5);
+    if (step_index == 6)
+    {
+        GtkWidget *text = gtk_label_new("The character is :");
+        gtk_box_pack_start(GTK_BOX(box), text, FALSE, FALSE, 5);
+    }
+
     gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 5);
 
     GtkWidget *load_btn = NULL;
@@ -329,32 +386,27 @@ int main(int argc, char *argv[])
     create_menu_screen(stack, &steps_btn, &solve_btn);
 
     /* ---------- STEPS ---------- */
-    const char *step_screens[10] = {"step1_loading",
-                                    "step2_rotation",
-                                    "step3_preatreatement",
-                                    "step4_grid_detection",
-                                    "step5_word_detection",
-                                    "step6_letter_detection",
-                                    "step7_character_recognition",
-                                    "step8_rebuilding",
-                                    "step9_solving",
-                                    "step10_final"};
-    const char *step_next[10] = {
+    const char *step_screens[8] = {"step1_loading",
+                                   "step2_rotation",
+                                   "step3_preatreatement",
+                                   "step4_grid_detection",
+                                   "step5_word_detection",
+                                   "step6_letter_detection",
+                                   "step7_character_recognition",
+                                   "step8_solved"};
+    const char *step_next[8] = {
         "step2_rotation",         "step3_preatreatement",
         "step4_grid_detection",   "step5_word_detection",
         "step6_letter_detection", "step7_character_recognition",
-        "step8_rebuilding",       "step9_solving",
-        "step10_final",           ""};
-    const char *step_back[10] = {"menu",
-                                 "step1_loading",
-                                 "step2_rotation",
-                                 "step3_preatreatement",
-                                 "step4_grid_detection",
-                                 "step5_word_detection",
-                                 "step6_letter_detection",
-                                 "step7_character_recognition",
-                                 "step8_rebuilding",
-                                 "step9_solving"};
+        "step8_solved",           ""};
+    const char *step_back[8] = {"menu",
+                                "step1_loading",
+                                "step2_rotation",
+                                "step3_preatreatement",
+                                "step4_grid_detection",
+                                "step5_word_detection",
+                                "step6_letter_detection",
+                                "step7_character_recognition"};
     /*const char *step_image_paths[10] = {
         "assets/logo/image.png",
         "assets/"ROTATED_FILENAME,
@@ -370,15 +422,15 @@ int main(int argc, char *argv[])
     // GtkImage *step_images[10];
     // GtkButton *step_load[10], *step_next_btn[10], *step_back_btn[10];
 
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 8; i++)
     {
         create_step_screen(stack, step_screens[i], step_screens[i],
                            step_next[i], step_back[i], i == 0,
                            step_image_paths[i], &step_images[i], &step_load[i],
-                           &step_next_btn[i], &step_back_btn[i]);
+                           &step_next_btn[i], &step_back_btn[i], i);
 
-        // Step 10: Save & Quit
-        if (i == 9)
+        // Step 8: Save & Quit
+        if (i == 7)
         {
             GtkWidget *save_btn = gtk_button_new_with_label("Save");
             GtkWidget *quit_btn = gtk_button_new_with_label("Quit");
